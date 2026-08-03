@@ -74,7 +74,9 @@ Views.stages = (function () {
       html += '<div class="task-item' + (done ? ' checked' : '') + '">' +
         '<label style="display:flex;gap:9px;flex:1;cursor:pointer;min-width:0">' +
         '<input type="checkbox" data-change="task" data-id="' + t.id + '"' + (done ? ' checked' : '') + '>' +
-        '<span class="task-text">' + UI.esc(t.text) + (dateChip ? '<div class="mt4">' + dateChip + '</div>' : '') + '</span>' +
+        '<span class="task-text">' + UI.esc(t.text) +
+        (t.spaceId ? ' <span class="badge badge-plain tiny" title="来自空间需求">🪟</span>' : '') +
+        (dateChip ? '<div class="mt4">' + dateChip + '</div>' : '') + '</span>' +
         '</label>' +
         '<span class="task-ops">' +
         (t.tip ? '<button data-action="task-tip" data-id="' + t.id + '" data-stage="' + st.id + '" title="小贴士">💡</button>' : '') +

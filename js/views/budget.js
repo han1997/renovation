@@ -76,12 +76,22 @@ Views.budget = (function () {
     cats.forEach(function (c) {
       var sp = spentOf(c.id);
       var cpct = c.planned ? Math.round(sp / c.planned * 100) : (sp > 0 ? 999 : 0);
+      // 空间需求预算提示
+      var related = s.spaces.filter(function (x) { return x.budgetCat === c.id; });
+      var spaceHint = '';
+      if (related.length) {
+        var parts = related.map(function (x) {
+          return UI.esc(x.name) + (x.budgetNote ? '（' + UI.esc(x.budgetNote) + '）' : '');
+        });
+        spaceHint = '<div class="tiny muted mt4">💡 含：' + parts.join('；') + '</div>';
+      }
       html += '<div class="cat-row" data-action="open-cat" data-id="' + c.id + '">' +
         '<div class="cat-head"><span>' + c.emoji + '</span><span class="cat-name">' + UI.esc(c.name) + '</span>' +
         (cpct > 100 ? '<span class="badge badge-danger">超 ' + UI.money(sp - c.planned) + '</span>' : '') +
         '<span class="cat-nums">' + UI.money(sp) + ' / ' + UI.money(c.planned) + '</span>' +
         '<button class="link-btn" data-action="edit-cat" data-id="' + c.id + '" style="padding:0 2px">✏️</button></div>' +
         '<div class="mt4">' + UI.barHTML(cpct, { auto: true }) + '</div>' +
+        spaceHint +
         '</div>';
     });
     html += '<div class="row wrap mt12">' +

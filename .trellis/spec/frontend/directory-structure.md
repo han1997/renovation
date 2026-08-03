@@ -90,6 +90,13 @@ The app has three runtime layers:
 **Convention**: Views are **pure consumers** of `DATA`/`PRICES` — they never mutate
 them. All user mutations go through `Store` (which persists to localStorage).
 
+**派生任务模式（space needs 引入）**: 当一个领域对象（如空间需求）需要在多个
+阶段派生任务时，复用 `customTasks` 并加 `spaceId` 标记来源，**不**新建并行数组。
+同步 helper（`syncSpaceTasks` / `removeSpaceTasks`）负责派生-保留-去重：
+删对象时连带删其**未打卡**派生任务，**已打卡**的保留为普通自定义任务（仅清除
+`spaceId`），避免删对象导致用户进度丢失。这是 state 层"带来源标记的派生数据"
+约定，未来类似联动（如风格选择派生建材购买任务）应沿用。
+
 **Gotcha (caused a full app break once)**: A view reading `DATA.someField` that
 isn't defined in `knowledge.js` throws a `ReferenceError` at **render time** (not
 load time), because views are functions called later. `index.html` referencing a

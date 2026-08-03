@@ -874,6 +874,240 @@ window.DATA = (function () {
    * ============================================================ */
   var acceptIntro = '验收是装修的"考试"，每一项都关系到以后的居住体验和安全。\n建议每完成一个工种就验收一次，别等全部完工再一起验——那时候发现问题返工代价巨大。\n打勾记录进度，验收合格再付下一笔款。';
 
+  /* ============================================================
+   * 十一、常见空间需求清单（spaceNeeds）
+   * 每个预设：{ id, emoji, name, desc,
+   *            stageIds:[stageId],          关联的阶段（用于展示徽章）
+   *            tasks:[{stageId, text}],     派生到对应阶段的任务（与 stageIds 保持一致）
+   *            budgetCat,                  关联的预算分类 id（对应 PRICES.rates）
+   *            budgetNote }                预算影响提示文案
+   * stageIds / tasks.stageId 必须引用 DATA.stages 中真实存在的 id
+   * budgetCat 必须引用 PRICES.rates 中真实存在的 id
+   * ============================================================ */
+  var spaceNeeds = [
+    {
+      id: 'sp-walkcloset', emoji: '🚪', name: '衣帽间',
+      desc: '独立衣帽间，含定制柜 + 梳妆区',
+      stageIds: ['design', 'install'],
+      tasks: [
+        { stageId: 'design', text: '衣帽间定制柜量尺与内部格局设计' },
+        { stageId: 'install', text: '衣帽间定制柜成品安装' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '衣帽间定制柜约 8000–25000 元（视面积与五金档次）'
+    },
+    {
+      id: 'sp-greathall', emoji: '🛋️', name: '大横厅',
+      desc: '客餐厅打通的大开间，需拆改 + 通铺',
+      stageIds: ['demolish', 'tiling'],
+      tasks: [
+        { stageId: 'demolish', text: '确认大横厅拆改方案（非承重墙）' },
+        { stageId: 'tiling', text: '大横厅地面通铺对缝排砖' }
+      ],
+      budgetCat: 'b-construct',
+      budgetNote: '拆改 + 通铺约 3000–12000 元（视拆墙量与地面面积）'
+    },
+    {
+      id: 'sp-dualkitchen', emoji: '🍳', name: '中西双厨',
+      desc: '中式炒菜 + 西式开放厨房，需拆改与水电',
+      stageIds: ['demolish', 'water-electric', 'install'],
+      tasks: [
+        { stageId: 'demolish', text: '中西双厨格局拆改（隔墙/门洞）' },
+        { stageId: 'water-electric', text: '中西厨水电点位（烟机/洗碗机/净水）' },
+        { stageId: 'install', text: '中西厨橱柜定制安装' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '双厨橱柜约 15000–40000 元，含五金台面'
+    },
+    {
+      id: 'sp-gaming', emoji: '🎮', name: '电竞房',
+      desc: '专属电竞空间，电路 + 网线 + 电脑桌',
+      stageIds: ['water-electric', 'install'],
+      tasks: [
+        { stageId: 'water-electric', text: '电竞房电路改造（多路插座 + 网线）' },
+        { stageId: 'install', text: '电竞房电脑桌 / 显示器支架定制' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '电脑桌定制约 2000–8000 元（不含设备）'
+    },
+    {
+      id: 'sp-study', emoji: '📚', name: '书房',
+      desc: '独立书房，含书柜 + 书桌',
+      stageIds: ['install'],
+      tasks: [
+        { stageId: 'install', text: '书房书柜 / 书桌定制安装' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '书柜 + 书桌定制约 3000–12000 元'
+    },
+    {
+      id: 'sp-kids', emoji: '🧸', name: '儿童房',
+      desc: '环保儿童房，含环保漆 + 定制柜',
+      stageIds: ['wall', 'install'],
+      tasks: [
+        { stageId: 'wall', text: '儿童房环保漆涂刷（低 VOC / 儿童漆）' },
+        { stageId: 'install', text: '儿童房衣柜 / 书桌定制安装' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '儿童定制柜约 4000–15000 元，环保漆约 800–2000 元'
+    },
+    {
+      id: 'sp-pet', emoji: '🐾', name: '宠物房',
+      desc: '宠物专属空间，含易洁地面 + 收纳',
+      stageIds: ['tiling', 'install'],
+      tasks: [
+        { stageId: 'tiling', text: '宠物房易洁地面铺贴（防滑瓷砖）' },
+        { stageId: 'install', text: '宠物房收纳 / 护栏定制' }
+      ],
+      budgetCat: 'b-furniture',
+      budgetNote: '宠物相关约 1000–5000 元（不含活体）'
+    },
+    {
+      id: 'sp-utility-balcony', emoji: '🧺', name: '家务阳台',
+      desc: '洗衣晾晒 + 家政收纳阳台',
+      stageIds: ['waterproof', 'tiling', 'install'],
+      tasks: [
+        { stageId: 'waterproof', text: '家务阳台防水涂刷' },
+        { stageId: 'tiling', text: '家务阳台防滑地砖铺贴' },
+        { stageId: 'install', text: '家务阳台家政柜定制安装' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '阳台防水 + 贴砖约 1500–4000 元，家政柜约 2000–6000 元'
+    },
+    {
+      id: 'sp-island', emoji: '🍷', name: '岛台',
+      desc: '厨房 / 餐厅岛台，含水电 + 定制',
+      stageIds: ['water-electric', 'install'],
+      tasks: [
+        { stageId: 'water-electric', text: '岛台水电点位（插座 / 净水）' },
+        { stageId: 'install', text: '岛台定制安装' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '岛台定制约 5000–20000 元（含石材台面）'
+    },
+    {
+      id: 'sp-pantry', emoji: '🥫', name: '步入式 pantry',
+      desc: '步入式储藏室 / 食品柜',
+      stageIds: ['design', 'install'],
+      tasks: [
+        { stageId: 'design', text: 'pantry 量尺与格局设计' },
+        { stageId: 'install', text: 'pantry 定制储物柜安装' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '储物柜定制约 4000–15000 元'
+    },
+    {
+      id: 'sp-entry-storage', emoji: '🚪', name: '玄关收纳系统',
+      desc: '入户玄关柜 + 换鞋凳 + 挂衣系统',
+      stageIds: ['install'],
+      tasks: [
+        { stageId: 'install', text: '玄关收纳系统定制安装' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '玄关柜定制约 2000–8000 元'
+    },
+    {
+      id: 'sp-wetdry-bath', emoji: '🚿', name: '干湿分离卫生间',
+      desc: '淋浴隔断干湿分离，需防水 + 水电',
+      stageIds: ['water-electric', 'waterproof', 'tiling'],
+      tasks: [
+        { stageId: 'water-electric', text: '干湿分离水电点位（淋浴排风 / 壁挂马桶）' },
+        { stageId: 'waterproof', text: '淋浴区防水加强（1.8m + 门槛石外侧）' },
+        { stageId: 'tiling', text: '干湿分离地砖墙砖铺贴' }
+      ],
+      budgetCat: 'b-main',
+      budgetNote: '干湿分离瓷砖 + 隔断约 3000–10000 元'
+    },
+    {
+      id: 'sp-double-basin', emoji: '🪞', name: '双台盆',
+      desc: '卫生间双台盆，需水路 + 定制浴室柜',
+      stageIds: ['water-electric', 'install'],
+      tasks: [
+        { stageId: 'water-electric', text: '双台盆冷热水路改造' },
+        { stageId: 'install', text: '双台盆浴室柜定制安装' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '双台盆浴室柜约 3000–10000 元（不含龙头）'
+    },
+    {
+      id: 'sp-baywindow', emoji: '🪑', name: '飘窗改造',
+      desc: '飘窗敲掉改收纳 / 休闲区',
+      stageIds: ['demolish', 'tiling'],
+      tasks: [
+        { stageId: 'demolish', text: '飘窗拆除 / 改造（确认是否配重）' },
+        { stageId: 'tiling', text: '飘窗台面石材安装' }
+      ],
+      budgetCat: 'b-construct',
+      budgetNote: '飘窗改造约 1500–6000 元（视是否动结构）'
+    },
+    {
+      id: 'sp-tea-balcony', emoji: '🍵', name: '阳台茶室',
+      desc: '阳台改茶室，含地台 + 软装',
+      stageIds: ['tiling', 'soft'],
+      tasks: [
+        { stageId: 'tiling', text: '阳台茶室地台 / 地面铺贴' },
+        { stageId: 'soft', text: '茶室软装布置（茶台 / 蒲团 / 灯具）' }
+      ],
+      budgetCat: 'b-soft',
+      budgetNote: '茶室软装约 2000–8000 元（含茶台）'
+    },
+    {
+      id: 'sp-music', emoji: '🎹', name: '琴房',
+      desc: '钢琴 / 乐器房，需隔音处理',
+      stageIds: ['wall', 'install'],
+      tasks: [
+        { stageId: 'wall', text: '琴房墙面隔音处理（吸音 / 隔音板）' },
+        { stageId: 'install', text: '琴房灯具与电源点位安装' }
+      ],
+      budgetCat: 'b-construct',
+      budgetNote: '隔音施工约 3000–12000 元（视隔音等级）'
+    },
+    {
+      id: 'sp-gym', emoji: '🏋️', name: '健身房',
+      desc: '家庭健身房，含地胶 + 镜面',
+      stageIds: ['wall', 'install'],
+      tasks: [
+        { stageId: 'wall', text: '健身房镜面 / 防撞墙面处理' },
+        { stageId: 'install', text: '健身房地板 / 地胶铺设' }
+      ],
+      budgetCat: 'b-furniture',
+      budgetNote: '健身房硬装约 3000–10000 元（不含器材）'
+    },
+    {
+      id: 'sp-closet-vanity', emoji: '💄', name: '衣帽间 + 梳妆台组合',
+      desc: '衣帽间整合梳妆台，一体化定制',
+      stageIds: ['design', 'install'],
+      tasks: [
+        { stageId: 'design', text: '衣帽间 + 梳妆台一体化量尺设计' },
+        { stageId: 'install', text: '衣帽间 + 梳妆台定制安装' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '一体化定制约 12000–35000 元（含梳妆台）'
+    },
+    {
+      id: 'sp-tatami', emoji: '🍙', name: '榻榻米房间',
+      desc: '榻榻米收纳房，含榻榻米定制',
+      stageIds: ['woodwork', 'install'],
+      tasks: [
+        { stageId: 'woodwork', text: '榻榻米房木作收口' },
+        { stageId: 'install', text: '榻榻米定制安装（含收纳地台）' }
+      ],
+      budgetCat: 'b-custom',
+      budgetNote: '榻榻米定制约 5000–18000 元（视面积与材质）'
+    },
+    {
+      id: 'sp-smart-home', emoji: '🏠', name: '智能家居系统',
+      desc: '全屋智能，弱电布线 + 设备安装',
+      stageIds: ['water-electric', 'install'],
+      tasks: [
+        { stageId: 'water-electric', text: '智能家居弱电布线（网线 / 中控电源）' },
+        { stageId: 'install', text: '智能面板 / 中控设备安装调试' }
+      ],
+      budgetCat: 'b-appliance',
+      budgetNote: '智能系统约 3000–20000 元（视设备数量与品牌）'
+    }
+  ];
+
   return {
     stages: stages,
     totalDurationNote: totalDurationNote,
@@ -886,6 +1120,7 @@ window.DATA = (function () {
     materialTimeline: materialTimeline,
     modes: modes,
     whoBuilds: whoBuilds,
-    glossary: glossary
+    glossary: glossary,
+    spaceNeeds: spaceNeeds
   };
 })();

@@ -30,6 +30,26 @@ Views.more = (function () {
     }
     html += '</div>';
 
+    /* ---- 空间需求 ---- */
+    html += '<div class="card"><div class="card-title">🪟 空间需求' +
+      '<button class="link-btn right" data-action="add-space">＋ 添加</button></div>';
+    if (!s.spaces.length) {
+      html += '<div class="empty small">还没添加空间需求。想要衣帽间、电竞房、中西双厨？<br>在这里登记，会自动加到对应流程阶段。</div>';
+    } else {
+      s.spaces.forEach(function (sp) {
+        var stageBadges = (sp.stageIds || []).map(function (sid) {
+          var st = null; DATA.stages.forEach(function (x) { if (x.id === sid) st = x; });
+          return st ? '<span class="badge badge-plain">' + UI.esc(st.name) + '</span>' : '';
+        }).join(' ');
+        html += '<div class="note-item" data-action="edit-space" data-id="' + sp.id + '">' +
+          '<div class="between"><span class="note-title">' + (sp.emoji || '🪟') + ' ' + UI.esc(sp.name) +
+          (sp.custom ? ' <span class="badge badge-plain">自定义</span>' : '') + '</span>' +
+          '<button class="link-btn tiny" data-action="del-space" data-id="' + sp.id + '" style="padding:0 2px">✕</button></div>' +
+          '<div class="note-preview" style="white-space:normal">' + stageBadges + '</div></div>';
+      });
+    }
+    html += '</div>';
+
     /* ---- 笔记 ---- */
     html += '<div class="card"><div class="card-title">📝 装修笔记' +
       '<button class="link-btn right" data-action="add-note">＋ 新建</button></div>';
@@ -130,6 +150,25 @@ Views.more = (function () {
         }
       });
 
+    } else if (action === 'add-space') {
+      openAddSpaceModal();
+
+    } else if (action === 'edit-space') {
+      var sp = null; s.spaces.forEach(function (x) { if (x.id === id) sp = x; });
+      if (!sp) return;
+      if (sp.custom) openEditCustomSpace(sp);
+      else openViewPresetSpace(sp);
+
+    } else if (action === 'del-space') {
+      var spDel = null; s.spaces.forEach(function (x) { if (x.id === id) spDel = x; });
+      if (!spDel) return;
+      UI.confirmDlg('删除空间需求', '确定删除「' + UI.esc(spDel.name) + '」？<br>已派生的任务会一并删除（已打卡的会保留为普通任务）。', function () {
+        Store.removeSpaceTasks(id);
+        s.spaces = s.spaces.filter(function (x) { return x.id !== id; });
+        Store.save(); App.rerender();
+        UI.toast('已删除');
+      }, '删除');
+
     } else if (action === 'add-note' || action === 'edit-note') {
       var note = null;
       if (action === 'edit-note') s.notes.forEach(function (n) { if (n.id === id) note = n; });
@@ -214,6 +253,148 @@ Views.more = (function () {
       el.value = '';
       if (ok) { UI.toast('导入成功 ✅'); App.go('home'); }
       else UI.toast('❌ ' + err, 3600);
+    });
+  }
+
+  /* ---------- 空间需求弹窗 ---------- */
+  function rateNameOf(catId) {
+    var name = '';
+    if (!catId) return name;
+    PRICES.rates.forEach(function (r) { if (r.id === catId) name = r.emoji + ' ' + r.name; });
+    return name;
+  }
+
+  /* 添加：预设速点 + 自定义表单 */
+  function openAddSpaceModal() {
+    var s = Store.state;
+    var addedPresetIds = {};
+    s.spaces.forEach(function (sp) { if (sp.presetId) addedPresetIds[sp.presetId] = true; });
+    var available = DATA.spaceNeeds.filter(function (n) { return !addedPresetIds[n.id]; });
+
+    var body = '<div class="small muted mb8">点预设可直接添加；预设不够就在下面自定义一个。</div>';
+    if (available.length) {
+      body += '<div class="space-preset-grid">';
+      available.forEach(function (n) {
+        body += '<button class="preset-chip" data-preset="' + n.id + '">' + n.emoji + ' ' + UI.esc(n.name) + '</button>';
+      });
+      body += '</div>';
+    } else {
+      body += '<div class="small muted mb8">预设已全部添加，可在下面自定义。</div>';
+    }
+    body += '<div style="border:0;border-top:1px solid var(--line);margin:12px 0"></div>' +
+      '<div class="small" style="font-weight:600;margin-bottom:8px">＋ 自定义空间需求</div>' +
+      App.spaceFormHTML(null);
+
+    var m = UI.modal({
+      title: '🪟 添加空间需求',
+      body: body,
+      actions: [
+        { label: '取消' },
+        { label: '保存自定义', cls: 'btn-primary', onClick: function (close) {
+          var name = m.el.querySelector('#sp-name').value.trim();
+          var stageIds = App.readSpaceFormStages(m.el);
+          if (!name) { UI.toast('请填写名称'); return; }
+          if (!stageIds.length) { UI.toast('至少选一个关联阶段'); return; }
+          var budgetCat = m.el.querySelector('#sp-budgetcat').value;
+          var budgetNote = m.el.querySelector('#sp-budgetnote').value.trim();
+          var sp = {
+            id: Store.uid('sp'), presetId: null, name: name, emoji: '🪟', desc: '',
+            stageIds: stageIds, tasks: App.buildSpaceTasks(name, stageIds),
+            budgetCat: budgetCat, budgetNote: budgetNote,
+            custom: true, createdAt: UI.today()
+          };
+          s.spaces.push(sp);
+          Store.syncSpaceTasks(sp);
+          Store.save(); close(); App.rerender();
+          UI.toast('已添加，相关任务已加到流程 ✅');
+        }}
+      ]
+    });
+
+    // 预设速点：直接添加并关闭
+    m.el.querySelectorAll('[data-preset]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var pid = btn.dataset.preset;
+        var p = null; DATA.spaceNeeds.forEach(function (x) { if (x.id === pid) p = x; });
+        if (!p) return;
+        var sp = {
+          id: Store.uid('sp'), presetId: p.id, name: p.name, emoji: p.emoji, desc: p.desc || '',
+          stageIds: p.stageIds.slice(),
+          tasks: p.tasks.map(function (tk) { return { stageId: tk.stageId, text: tk.text }; }),
+          budgetCat: p.budgetCat, budgetNote: p.budgetNote || '',
+          custom: false, createdAt: UI.today()
+        };
+        s.spaces.push(sp);
+        Store.syncSpaceTasks(sp);
+        Store.save(); m.close(); App.rerender();
+        UI.toast('已添加「' + p.name + '」 ✅');
+      });
+    });
+  }
+
+  /* 编辑预设空间：只读详情 + 删除 */
+  function openViewPresetSpace(sp) {
+    var stageNames = (sp.stageIds || []).map(function (sid) {
+      var st = null; DATA.stages.forEach(function (x) { if (x.id === sid) st = x; });
+      return st ? st.name : sid;
+    });
+    var body = '<div class="small muted mb8">' + UI.esc(sp.desc || '') + '</div>' +
+      '<table class="tbl">' +
+      '<tr><td class="muted">关联阶段</td><td>' + stageNames.map(function (n) { return '<span class="badge badge-plain">' + UI.esc(n) + '</span>'; }).join(' ') + '</td></tr>' +
+      '<tr><td class="muted">预算分类</td><td>' + UI.esc(rateNameOf(sp.budgetCat) || '—') + '</td></tr>' +
+      '<tr><td class="muted">预算提示</td><td>' + UI.esc(sp.budgetNote || '—') + '</td></tr>' +
+      '</table>';
+    UI.modal({
+      title: (sp.emoji || '🪟') + ' ' + UI.esc(sp.name),
+      body: body,
+      actions: [
+        { label: '关闭' },
+        { label: '删除', cls: 'btn-danger', onClick: function (close) {
+          close();
+          UI.confirmDlg('删除空间需求', '确定删除「' + UI.esc(sp.name) + '」？<br>已派生的任务会一并删除（已打卡的会保留为普通任务）。', function () {
+            Store.removeSpaceTasks(sp.id);
+            Store.state.spaces = Store.state.spaces.filter(function (x) { return x.id !== sp.id; });
+            Store.save(); App.rerender();
+            UI.toast('已删除');
+          }, '删除');
+        }}
+      ]
+    });
+  }
+
+  /* 编辑自定义空间：可改名/改阶段/改预算，保存后重新派生任务 */
+  function openEditCustomSpace(sp) {
+    var m = UI.modal({
+      title: '编辑空间需求',
+      body: App.spaceFormHTML(sp),
+      actions: [
+        { label: '取消' },
+        { label: '删除', cls: 'btn-danger', onClick: function (close) {
+          close();
+          UI.confirmDlg('删除空间需求', '确定删除「' + UI.esc(sp.name) + '」？<br>已派生的任务会一并删除（已打卡的会保留为普通任务）。', function () {
+            Store.removeSpaceTasks(sp.id);
+            Store.state.spaces = Store.state.spaces.filter(function (x) { return x.id !== sp.id; });
+            Store.save(); App.rerender();
+            UI.toast('已删除');
+          }, '删除');
+        }},
+        { label: '保存', cls: 'btn-primary', onClick: function (close) {
+          var name = m.el.querySelector('#sp-name').value.trim();
+          var stageIds = App.readSpaceFormStages(m.el);
+          if (!name) { UI.toast('请填写名称'); return; }
+          if (!stageIds.length) { UI.toast('至少选一个关联阶段'); return; }
+          var budgetCat = m.el.querySelector('#sp-budgetcat').value;
+          var budgetNote = m.el.querySelector('#sp-budgetnote').value.trim();
+          sp.name = name;
+          sp.stageIds = stageIds;
+          sp.tasks = App.buildSpaceTasks(name, stageIds);
+          sp.budgetCat = budgetCat;
+          sp.budgetNote = budgetNote;
+          Store.syncSpaceTasks(sp);
+          Store.save(); close(); App.rerender();
+          UI.toast('已保存，任务已同步 ✅');
+        }}
+      ]
     });
   }
 

@@ -9,12 +9,14 @@ window.Store = (function () {
       profile: null,
       tasksDone: {},      // { taskId: true }
       taskDates: {},      // { taskId: 'YYYY-MM-DD' }
-      customTasks: [],    // [{id, stageId, text, date}]
+      customTasks: [],    // [{id, stageId, text, spaceId?, date?}]
       stageOverride: {},  // { stageId: 'done' }  手动整段完成
       budget: { categories: [], expenses: [] },
       checks: {},         // 验收清单勾选 { itemId: true }
       notes: [],          // [{id, title, text, updatedAt}]
       contacts: [],       // [{id, name, role, phone, note}]
+      // 空间需求：[{id, presetId, name, emoji, desc, stageIds:[], tasks:[{stageId,text}], budgetCat, budgetNote, custom, createdAt}]
+      spaces: [],
       quiz: null          // {styleId, at}
     };
   }
@@ -31,7 +33,7 @@ window.Store = (function () {
       if (!s.budget || typeof s.budget !== 'object') s.budget = { categories: [], expenses: [] };
       if (!Array.isArray(s.budget.categories)) s.budget.categories = [];
       if (!Array.isArray(s.budget.expenses)) s.budget.expenses = [];
-      ['customTasks', 'notes', 'contacts'].forEach(function (key) {
+      ['customTasks', 'notes', 'contacts', 'spaces'].forEach(function (key) {
         if (!Array.isArray(s[key])) s[key] = [];
       });
       ['tasksDone', 'taskDates', 'stageOverride', 'checks'].forEach(function (key) {
@@ -109,6 +111,55 @@ window.Store = (function () {
     persist();
   }
 
+  /* ---------- 空间需求 ↔ 派生任务同步 ----------
+   * customTasks 中带 spaceId 的条目，即为某空间需求派生出的任务。
+   * 已打卡（tasksDone[id] 为真）的派生任务，在被清理时转为普通自定义任务
+   * （仅清除 spaceId 标记，保留任务本身与打卡记录），避免丢失历史进度。
+   */
+
+  // 同步某空间的派生任务：清理旧派生（保留已打卡的为普通任务）后按 space.tasks 重新派生
+  function syncSpaceTasks(space) {
+    var sid = space.id;
+    var kept = [];
+    var preservedKeys = {}; // 已保留的「stageId||text」，避免重新派生时重复
+    state.customTasks.forEach(function (t) {
+      if (t.spaceId === sid) {
+        if (state.tasksDone[t.id]) {
+          var c = {}; for (var k in t) c[k] = t[k];
+          delete c.spaceId;
+          kept.push(c);
+          preservedKeys[c.stageId + '||' + c.text] = true;
+        }
+        // 未打卡的旧派生任务：丢弃（稍后重新派生）
+      } else {
+        kept.push(t);
+      }
+    });
+    state.customTasks = kept;
+    (space.tasks || []).forEach(function (tk) {
+      var key = tk.stageId + '||' + tk.text;
+      if (preservedKeys[key]) { return; } // 该任务已保留为普通任务，不重复
+      state.customTasks.push({ id: uid('ct'), stageId: tk.stageId, text: tk.text, spaceId: sid, date: null });
+    });
+  }
+
+  // 删除某空间的派生任务：未打卡的直接删除，已打卡的转为普通自定义任务
+  function removeSpaceTasks(spaceId) {
+    var kept = [];
+    state.customTasks.forEach(function (t) {
+      if (t.spaceId === spaceId) {
+        if (state.tasksDone[t.id]) {
+          var c = {}; for (var k in t) c[k] = t[k];
+          delete c.spaceId;
+          kept.push(c);
+        }
+      } else {
+        kept.push(t);
+      }
+    });
+    state.customTasks = kept;
+  }
+
   return {
     get state() { return state; },
     get storageOk() { return storageOk; },
@@ -116,6 +167,8 @@ window.Store = (function () {
     uid: uid,
     exportJSON: exportJSON,
     importJSON: importJSON,
-    reset: reset
+    reset: reset,
+    syncSpaceTasks: syncSpaceTasks,
+    removeSpaceTasks: removeSpaceTasks
   };
 })();
