@@ -68,3 +68,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 3: 空间需求规划：个性化空间清单与流程联动
+
+**Date**: 2026-08-04
+**Task**: 空间需求规划：个性化空间清单与流程联动
+**Branch**: `main`
+
+### Summary
+
+新增空间需求规划功能。DATA.spaceNeeds 预置 20 种常见空间需求（衣帽间/大横厅/电竞房/中西双厨/书房/智能家居等），每项含关联阶段+预算分类+预算提示。Store.state.spaces 持久化，新增 syncSpaceTasks/removeSpaceTasks helper（派生-保留-去重：删需求时连带删未打卡派生任务，已打卡的保留为普通自定义任务）。首次设置向导由 3 步扩展为 4 步，新增第 3 步「想要哪些空间？」勾选 + 自定义。我的页新增「空间需求」卡片（增删改）。预算页分类展示「含 XX 约 +X 元」提示（仅提示不改金额）。流程页派生任务带 🪟 徽章。trellis-check 验证 8 项 PRD 验收全绿、6 跨层边界零错、node --check 全 10 文件通过。spec 更新：directory-structure.md 补充「派生任务模式（spaceId 标记 + 删对象保留已打卡）」约定。commit b26a6de，8 文件 +666/-10。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `b26a6de` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
