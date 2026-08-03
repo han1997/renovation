@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "frontend spec 总索引，中文化约定"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "vanilla JS IIFE 全局模式、data→view 只读契约、index.html 加载序约定 — 新增 spaces 字段与 spaceNeeds 数据必须遵循"}
+{"file": ".trellis/spec/project-conventions.md", "reason": "中文/commit 格式/零依赖约定"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "spaces 派生任务复用 customTasks 机制需遵循复用原则；新增 DATA.spaceNeeds 与现有 DATA 字段保持一致模式"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "spaceNeeds 数据从 knowledge.js 流向 app.js 向导、more.js、budget.js、stages.js 多个视图 — 跨层契约需一致"}
+{"file": ".trellis/tasks/08-04-space-planning/prd.md", "reason": "本任务 PRD，含全部决策（入口/联动深度/清单来源/同步策略）"}

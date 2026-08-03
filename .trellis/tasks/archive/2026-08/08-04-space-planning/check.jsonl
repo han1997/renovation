@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "验证中文化约定落地"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "验证 spaces 字段与 spaceNeeds 数据遵循 IIFE 全局模式与 data→view 只读契约"}
+{"file": ".trellis/spec/project-conventions.md", "reason": "验证 commit 格式、中文、零依赖约定"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "验证 spaceNeeds 跨层（knowledge→app向导→more→budget→stages）数据契约一致"}
+{"file": ".trellis/tasks/08-04-space-planning/prd.md", "reason": "对照 8 项验收标准检查完成度"}
