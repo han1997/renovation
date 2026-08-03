@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "需将 'English' 约定改为 '中文'；frontend spec 总索引"}
+{"file": ".trellis/spec/backend/index.md", "reason": "需将 'English' 约定改为 '中文'；backend spec 总索引"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "上一会话已填的 vanilla JS 架构约定，作为规范文档填充参考"}
+{"file": ".trellis/.gitignore", "reason": "Trellis 自带的运行时文件排除规则，根 .gitignore 应沿用"}
+{"file": ".trellis/tasks/08-04-project-infra/prd.md", "reason": "本任务 PRD，含 commit 格式/中文化/更新日志等全部决策"}

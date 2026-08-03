@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.zhihu.com)",
+      "WebFetch(domain:www.bing.com)",
+      "WebFetch(domain:cn.bing.com)",
+      "WebFetch(domain:html.duckduckgo.com)",
+      "WebFetch(domain:zhuanlan.zhihu.com)",
+      "WebFetch(domain:mp.weixin.qq.com)",
+      "WebFetch(domain:lite.duckduckgo.com)",
+      "WebFetch(domain:k.sina.cn)"
+    ]
+  }
+}

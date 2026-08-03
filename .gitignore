@@ -1,0 +1,28 @@
+# 操作系统生成文件
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# 编辑器 / IDE 临时文件
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Python 缓存（Trellis 脚本使用 Python）
+__pycache__/
+*.pyc
+
+# 临时 / 备份文件
+*.tmp
+*.bak
+*.new
+*.log
+
+# 说明：
+# - .trellis/ 运行时文件的忽略规则见 .trellis/.gitignore（git 会自动合并两级规则）
+# - .trellis/ 项目配置（spec / tasks / workspace 日志）应提交，不在此忽略
+# - AI 工具配置 .opencode/ .agents/ .claude/ .cursor/ .codex/ 为项目配置，应提交
+# - 应用代码 css/ js/ index.html server.js *.bat 应提交
