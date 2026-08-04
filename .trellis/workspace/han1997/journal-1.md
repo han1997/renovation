@@ -134,3 +134,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 5: 修复流程页路由参数重放
+
+**Date**: 2026-08-04
+**Task**: 修复流程页路由参数重放
+**Branch**: `main`
+
+### Summary
+
+修复流程页参数导航后旧 param 在 rerender 中重放导致流程定义返回空白或状态被覆盖的问题；统一 nav action 交由 App.go 控制滚动策略，并补充前端路由规范。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8c5cfff` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
