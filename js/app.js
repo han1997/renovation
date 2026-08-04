@@ -49,11 +49,16 @@ window.App = (function () {
   }
 
   /* ---------- 路由 ---------- */
-  function go(tab, param) {
+  function go(tab, param, opts) {
+    opts = opts || {};
+    var sameTab = current.tab === tab;
+    var hasParam = param !== undefined && param !== null && param !== '';
+    var shouldScrollTop = opts.scrollTop === true ||
+      (opts.scrollTop !== false && !opts.preserveScroll && !sameTab && !hasParam);
     current.tab = tab;
     current.param = param === undefined ? null : param;
-    window.scrollTo(0, 0);
     render();
+    if (shouldScrollTop) window.scrollTo(0, 0);
   }
 
   function rerender() {
@@ -95,7 +100,10 @@ window.App = (function () {
       if (!el) return;
       var action = el.dataset.action;
       if (action === 'go-settings') { go('more'); return; }
-      if (action === 'nav') { go(el.dataset.target, el.dataset.param || null); return; }
+      if (action === 'nav') {
+        go(el.dataset.target, el.dataset.param || null, { scrollTop: !el.dataset.param });
+        return;
+      }
       if (action === 'start-wizard') { showWizard(); return; }
       var v = Views[current.tab];
       if (v && v.onAction) v.onAction(action, el, e);

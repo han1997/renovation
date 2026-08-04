@@ -54,6 +54,15 @@ Views.budget = (function () {
 
 视图不要直接给主页面大量绑定 click listener。只有渲染后必须绑定的局部交互才在视图内绑定，例如 `guide.js` 的搜索输入和 quiz modal。
 
+## Routing and Scroll
+
+`App.go(tab, param, opts)` 负责切换视图和滚动策略：
+
+- 底部 tab 切换或无参数跨 tab 导航可以回到顶部。
+- 带 `param` 的页面内目标导航不要先回到顶部，应让目标 view 自己滚动到锚点。
+- 同一 tab 内的交互优先使用 `App.rerender()` 保留当前位置。
+- `data-action="nav"` 默认按是否存在 `data-param` 选择滚动策略；新增导航入口时不要手写 `window.scrollTo(0, 0)`。
+
 ## Modal and Forms
 
 优先使用 `UI.formModal()` 构建标准表单，参考 `budget.js` 的支出表单和 `more.js` 的联系人/笔记表单。
