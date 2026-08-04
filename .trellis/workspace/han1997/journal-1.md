@@ -101,3 +101,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: 填充 Trellis 项目开发规范
+
+**Date**: 2026-08-04
+**Task**: 填充 Trellis 项目开发规范
+**Branch**: `main`
+
+### Summary
+
+基于当前零依赖静态装修助手代码库，填充 backend/frontend Trellis specs，记录 IIFE 全局模块、localStorage 状态、视图事件委托、静态服务器边界和质量检查约定。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `ca9d689` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
