@@ -167,3 +167,37 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 6: 优化流程页阶段展开定位
+
+**Date**: 2026-08-04
+**Task**: 优化流程页阶段展开定位
+**Branch**: `main`
+
+### Summary
+
+优化流程页阶段展开和参数跳转后的阅读焦点，将目标阶段定位到视口上方约 22%；内部任务操作保持原滚动位置，并记录对应前端滚动规范。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `e750d4d` | (see git log) |
+| `c78d0cf` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
