@@ -1,51 +1,28 @@
 # Logging Guidelines
 
-> How logging is done in this project.
+## Current Logging
 
----
+本项目没有日志系统。`server.js` 只在启动时用 `console.log()` 打印：
 
-## Overview
+- 应用已启动提示。
+- 电脑访问地址 `http://localhost:8787`。
+- 每个非内部 IPv4 网卡对应的手机访问地址。
+- 关闭窗口即停止服务的说明。
 
-<!--
-Document your project's logging conventions here.
+参考文件：`server.js`
 
-Questions to answer:
-- What logging library do you use?
-- What are the log levels and when to use each?
-- What should be logged?
-- What should NOT be logged (PII, secrets)?
--->
+## Browser Diagnostics
 
-(To be filled by the team)
+浏览器端只在本地存储失败时使用 `console.warn()`：
 
----
+- `js/storage.js` 读取 localStorage 失败。
+- `js/storage.js` 保存 localStorage 失败。
 
-## Log Levels
+用户可见反馈使用 `UI.toast()`，不是日志。
 
-<!-- When to use each level: debug, info, warn, error -->
+## Rules
 
-(To be filled by the team)
-
----
-
-## Structured Logging
-
-<!-- Log format, required fields -->
-
-(To be filled by the team)
-
----
-
-## What to Log
-
-<!-- Important events to log -->
-
-(To be filled by the team)
-
----
-
-## What NOT to Log
-
-<!-- Sensitive data, PII, secrets -->
-
-(To be filled by the team)
+- 不要引入日志库。
+- 不要记录用户的装修预算、电话、笔记、备份内容等隐私数据。
+- 不要在正常交互路径加入高频 `console.log()`。
+- 启动日志可以继续保持中文提示加 URL，方便非开发用户照着打开手机浏览器。

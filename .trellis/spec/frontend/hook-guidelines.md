@@ -1,51 +1,36 @@
 # Hook Guidelines
 
-> How hooks are used in this project.
+## Current State
 
----
+本项目没有 React、Vue、Svelte 或任何 hooks 系统。不要新增 `use*` hooks、React 组件或框架运行时。
 
-## Overview
+## Where Shared Logic Lives
 
-<!--
-Document your project's hook conventions here.
+可复用逻辑按现有全局模块归位：
 
-Questions to answer:
-- What custom hooks do you have?
-- How do you handle data fetching?
-- What are the naming conventions?
-- How do you share stateful logic?
--->
+- UI 格式化、弹窗、toast、下载：`js/ui.js`
+- 持久化、默认状态、导入导出、派生任务同步：`js/storage.js`
+- 路由、进度计算、首次向导、跨视图 helper：`js/app.js`
+- 静态知识和枚举：`js/data/knowledge.js`
+- 价格、预算估算、档位名称：`js/data/prices.js`
 
-(To be filled by the team)
+## Stateful View Logic
 
----
+少量视图内部 UI 状态保存在 IIFE 闭包变量中，例如：
 
-## Custom Hook Patterns
+- `js/views/budget.js` 的 `sub` 和 `filterCat`。
+- `js/views/guide.js` 的 `sub`、`query`、`topic`、`acceptOpen`。
+- `js/views/stages.js` 的 `expandedId`。
 
-<!-- How to create and structure custom hooks -->
-
-(To be filled by the team)
-
----
+只有不需要跨页面持久保存的 UI 状态才放闭包变量。用户数据必须进入 `Store.state`。
 
 ## Data Fetching
 
-<!-- How data fetching is handled (React Query, SWR, etc.) -->
+没有网络数据获取。所有知识库和价格参考都来自 `js/data/*.js` 的静态数组。新增资料时优先扩展这些数据文件，并同步更新消费者视图。
 
-(To be filled by the team)
+## Anti-Patterns
 
----
-
-## Naming Conventions
-
-<!-- Hook naming rules (use*, etc.) -->
-
-(To be filled by the team)
-
----
-
-## Common Mistakes
-
-<!-- Hook-related mistakes your team has made -->
-
-(To be filled by the team)
+- 不要引入 React 只为使用 hooks。
+- 不要把持久用户数据藏在视图闭包变量中。
+- 不要新增异步 fetch 依赖外部服务，除非 PRD 明确改变离线可用定位。
+- 不要创建新的全局 helper 前不先搜索 `UI`、`Store`、`App` 是否已有相同能力。

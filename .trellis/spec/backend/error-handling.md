@@ -1,51 +1,31 @@
 # Error Handling
 
-> How errors are handled in this project.
+## Static Server Errors
 
----
+`server.js` 当前使用最小错误处理：
 
-## Overview
+- 路径越界返回 `403 Forbidden`。
+- 文件读取失败返回 `404 Not Found`。
+- 成功读取文件时按扩展名返回 MIME 类型，不识别则用 `application/octet-stream`。
 
-<!--
-Document your project's error handling conventions here.
+参考文件：`server.js`
 
-Questions to answer:
-- What error types do you define?
-- How are errors propagated?
-- How are errors logged?
-- How are errors returned to clients?
--->
+## Browser Data Errors
 
-(To be filled by the team)
+主要错误处理在浏览器端：
 
----
+- `js/storage.js` 捕获 `localStorage` 读取和保存异常。
+- JSON 导入失败时通过回调返回错误文案。
+- `js/app.js` 在 `Store.storageOk === false` 时显示 toast，提示隐私模式等无法持久保存的情况。
 
-## Error Types
+## Local Pattern
 
-<!-- Custom error classes/types -->
+对用户可恢复的错误，使用 `UI.toast()` 或 `UI.formModal()` 的校验状态，不要让异常直接打断渲染。
 
-(To be filled by the team)
-
----
-
-## Error Handling Patterns
-
-<!-- Try-catch patterns, error propagation -->
-
-(To be filled by the team)
-
----
-
-## API Error Responses
-
-<!-- Standard error response format -->
-
-(To be filled by the team)
-
----
+对静态文件服务器错误，保持纯文本状态响应即可。不要为当前服务器引入统一 JSON 错误格式，因为项目没有 API 客户端。
 
 ## Common Mistakes
 
-<!-- Error handling mistakes your team has made -->
-
-(To be filled by the team)
+- 视图渲染中直接读取不存在的 `DATA.*` 字段会在 render 时抛错，新增数据消费者前先确认 `js/data/knowledge.js` 或 `js/data/prices.js` 已定义字段。
+- 字符串拼接 HTML 时忘记 `UI.esc()` 会带来注入风险，尤其是用户输入的 note、contact、expense、space name。
+- 修改 `server.js` 路径处理时不能削弱 `filePath.startsWith(ROOT)` 这类目录逃逸防护。

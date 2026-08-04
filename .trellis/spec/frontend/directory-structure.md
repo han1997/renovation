@@ -1,131 +1,100 @@
 # Directory Structure
 
-> How frontend code is organized in this project.
-
----
-
 ## Overview
 
-This is a **zero-build, zero-dependency static web app** (vanilla JS / HTML / CSS).
-No bundler, no package.json, no npm scripts. Open `index.html` directly in a browser.
-Every JS module is an **IIFE that assigns to a `window.*` global** — there is no
-module system (`import`/`export`), no transpilation. Load order in `index.html`
-is the dependency contract.
+这是一个零构建、零依赖的静态 Web App。没有 `package.json`、bundler、npm scripts、模块解析或转译。浏览器直接打开 `index.html` 即可运行；手机局域网访问可用根目录 `server.js`。
 
----
+所有 JS 文件使用 IIFE 挂到 `window.*` 全局对象。`index.html` 中 `<script>` 标签顺序就是依赖契约。
 
 ## Directory Layout
 
-```
+```text
 renovation/
-├── index.html              # Single page; loads all scripts in order (the dependency contract)
-├── server.js               # Optional static server for phone LAN access
-├── phone-server.bat        # Launches server.js for mobile testing
-├── open-app.bat            # Opens index.html directly
-├── css/
-│   └── style.css           # All styles (single stylesheet, mobile-first)
-└── js/
-    ├── data/               # Read-only knowledge bases (IIFE → window global)
-    │   ├── knowledge.js    # window.DATA  — stages, styles, tips, glossary, modes, …
-    │   └── prices.js       # window.PRICES — price rates, budget template, tier/grade
-    ├── storage.js          # window.Store  — localStorage persistence + import/export
-    ├── ui.js               # window.UI     — esc, money, modal, toast, form helpers
-    ├── views/              # window.Views  — render functions, one per tab
-    │   ├── home.js         #   首页仪表盘
-    │   ├── stages.js       #   流程页 (14 阶段时间轴)
-    │   ├── budget.js       #   预算页
-    │   ├── guide.js        #   指南页 (tips/accept/styles/materials/wiki)
-    │   └── more.js         #   我的页
-    └── app.js              # window.App    — router, stage progress, first-run wizard
+├─ index.html              # 单页入口，按顺序加载所有脚本
+├─ server.js               # 可选静态服务器，供手机局域网访问
+├─ open-app.bat            # 直接打开 index.html
+├─ phone-server.bat        # 启动 server.js
+├─ css/
+│  └─ style.css            # 全部样式，移动端优先
+└─ js/
+   ├─ data/
+   │  ├─ knowledge.js      # window.DATA：流程、指南、风格、百科、空间需求
+   │  └─ prices.js         # window.PRICES：价格、预算模板、档位
+   ├─ storage.js           # window.Store：localStorage、导入导出、派生任务同步
+   ├─ ui.js                # window.UI：转义、格式化、modal、toast、表单
+   ├─ views/
+   │  ├─ home.js           # 首页仪表盘
+   │  ├─ stages.js         # 流程时间线和任务打卡
+   │  ├─ budget.js         # 预算和支出
+   │  ├─ guide.js          # 指南、验收、风格、百科
+   │  └─ more.js           # 我的、空间需求、笔记、联系人、数据管理
+   └─ app.js               # window.App：路由、进度、首次向导、全局事件
 ```
 
----
+## Module Pattern
 
-## Module Pattern (IIFE Global)
-
-Every module follows the same shape — an IIFE that builds an object and assigns
-it to a single `window.*` name:
+模块统一使用：
 
 ```js
-// js/data/knowledge.js
-window.DATA = (function () {
-  var stages = [ /* … */ ];
-  function helper() { /* … */ }
-  return { stages: stages, /* … */ };
+window.UI = (function () {
+  function helper() {}
+  return { helper: helper };
 })();
 ```
 
-- **Exports**: exactly one `window.*` global per file (`DATA`, `PRICES`, `Store`, `UI`, `App`).
-- **No `import`/`export`** — cross-module access is via the global name.
-- **`window.Views`** is shared: each view file does `window.Views = window.Views || {}`
-  then registers `Views.home = function (param) { … }`.
+视图统一使用共享 namespace：
 
-### Load Order (CRITICAL)
+```js
+window.Views = window.Views || {};
 
-`index.html` loads scripts in dependency order. This order **is** the dependency
-contract — there is no resolver:
-
-```
-knowledge.js → prices.js → storage.js → ui.js → views/* → app.js
+Views.home = (function () {
+  function render(el) {}
+  return { render: render };
+})();
 ```
 
-- `prices.js` may lazily read `DATA.modes` at *call time* (not load time), so it
-  must load after `knowledge.js` but the read is deferred — order is safe as-is.
-- `views/*` read `DATA`, `PRICES`, `Store`, `UI` while rendering (call time), so
-  they can load before `App` boots. `App.init()` runs last and triggers the first
-  render.
+## Load Order
 
----
+`index.html` 当前加载顺序：
 
-## Data-View Contract (cross-layer)
+```text
+knowledge.js -> prices.js -> storage.js -> ui.js -> views/* -> app.js
+```
 
-The app has three runtime layers:
+规则：
 
-| Layer | Global | Mutability | Role |
-|-------|--------|------------|------|
-| Knowledge | `DATA`, `PRICES` | **read-only** | Static renovation knowledge + price reference |
-| State | `Store.state` | **read-write** | User data in localStorage (profile, tasks, budget, checks) |
-| Views | `Views.*` | pure render | Read `DATA`/`PRICES` + `Store.state`, emit HTML strings |
+- 数据文件必须先于读取它们的视图加载。
+- `app.js` 必须最后加载，因为它调用 `App.init()` 并触发首次渲染。
+- 新增 view 文件后，脚本标签要放在 `app.js` 前。
+- 新增 data 文件后，脚本标签要放在任何消费者前。
 
-**Convention**: Views are **pure consumers** of `DATA`/`PRICES` — they never mutate
-them. All user mutations go through `Store` (which persists to localStorage).
+## Layer Contract
 
-**派生任务模式（space needs 引入）**: 当一个领域对象（如空间需求）需要在多个
-阶段派生任务时，复用 `customTasks` 并加 `spaceId` 标记来源，**不**新建并行数组。
-同步 helper（`syncSpaceTasks` / `removeSpaceTasks`）负责派生-保留-去重：
-删对象时连带删其**未打卡**派生任务，**已打卡**的保留为普通自定义任务（仅清除
-`spaceId`），避免删对象导致用户进度丢失。这是 state 层"带来源标记的派生数据"
-约定，未来类似联动（如风格选择派生建材购买任务）应沿用。
+| Layer | Files | Global | Mutability |
+|-------|-------|--------|------------|
+| Static data | `js/data/*.js` | `DATA`, `PRICES` | 只读 |
+| Persistence | `js/storage.js` | `Store` | 读写 |
+| UI helpers | `js/ui.js` | `UI` | 无业务状态 |
+| Views | `js/views/*.js` | `Views.*` | 渲染和事件 |
+| App shell | `js/app.js` | `App` | 路由和派生计算 |
 
-**Gotcha (caused a full app break once)**: A view reading `DATA.someField` that
-isn't defined in `knowledge.js` throws a `ReferenceError` at **render time** (not
-load time), because views are functions called later. `index.html` referencing a
-missing `js/data/*.js` file breaks the app silently (subsequent scripts still
-load, but any `DATA.*` access throws).
+视图可以读取 `DATA`、`PRICES`、`Store.state`，但不能修改 `DATA` 或 `PRICES`。用户状态变化写入 `Store.state`，然后 `Store.save()`。
 
-### Checklist: adding a new `DATA.*` consumer
-- [ ] The field is defined in `js/data/knowledge.js` (or `prices.js` → `PRICES`).
-- [ ] The field shape matches what the view reads (keys, types, array vs scalar).
-- [ ] Internal ids referenced (e.g. `stage.acceptIds` → `checklists[].id`,
-      `styleQuiz` option `scores` keys → `styles[].id`) resolve to real entries.
-- [ ] `index.html` actually loads the data file before the view that uses it.
+## Naming
 
----
+- JS/CSS 文件使用小写短名，例如 `storage.js`、`budget.js`。
+- 全局对象使用现有名称：`DATA`、`PRICES`、`Store`、`UI`、`Views`、`App`。
+- 持久化 id 必须稳定。任务 id、预算分类 id、风格 id、验收清单 id 已进入用户 localStorage 和备份文件，不能随意重命名。
 
-## Naming Conventions
+## Adding a Feature
 
-- **Files**: lowercase, hyphen-free single words (`storage.js`, `budget.js`).
-- **Globals**: PascalCase single word (`DATA`, `PRICES`, `Store`, `UI`, `App`);
-  `Views` is the shared namespace object for view functions.
-- **Data ids**: short prefixed slugs (`s-demolition`, `cl-water`, `modern`,
-  `half`) — stable across releases (they are persisted in localStorage as
-  `Store.state` keys, so renaming breaks existing user data).
+按功能归位：
 
----
+- 新静态装修知识：改 `js/data/knowledge.js`。
+- 新预算算法或价格档位：改 `js/data/prices.js`。
+- 新持久字段、导入导出、派生任务同步：改 `js/storage.js`。
+- 新通用弹窗/格式化/helper：改 `js/ui.js`。
+- 新页面或页面内功能：改对应 `js/views/*.js`，必要时在 `js/app.js` 接路由。
+- 新视觉样式：改 `css/style.css`。
 
-## Examples
-
-- **Adding a data file**: create `js/data/<name>.js` as `window.<NAME> = (function(){ … })();`,
-  add a `<script>` tag in `index.html` **before** any view/app that reads it.
-- **Adding a view**: create `js/views/<name>.js`, register `Views.<name> = function(param){…}`,
-  add a `<script>` tag before `app.js`, wire a tab in `index.html` + a route in `app.js`.
+不要新增目录或框架，除非 PRD 明确改变项目架构。
