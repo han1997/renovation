@@ -62,6 +62,13 @@ Views.budget = (function () {
 - 带 `param` 的页面内目标导航不要先回到顶部，应让目标 view 自己滚动到锚点。
 - 同一 tab 内的交互优先使用 `App.rerender()` 保留当前位置。
 - `data-action="nav"` 默认按是否存在 `data-param` 选择滚动策略；新增导航入口时不要手写 `window.scrollTo(0, 0)`。
+- `current.param` 是一次性渲染信号：`render()` 读取后应清空，再把本次参数传给 view，避免后续 `App.rerender()` 重放旧锚点并覆盖用户当前展开/滚动状态。
+
+```js
+var param = current.param;
+current.param = null;
+if (v) v.render(viewEl, param);
+```
 
 ## Modal and Forms
 

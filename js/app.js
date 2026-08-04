@@ -73,7 +73,9 @@ window.App = (function () {
     });
     updateTopbar();
     var v = Views[current.tab];
-    if (v) v.render(viewEl, current.param);
+    var param = current.param;
+    current.param = null;
+    if (v) v.render(viewEl, param);
   }
 
   function updateTopbar() {
@@ -101,7 +103,7 @@ window.App = (function () {
       var action = el.dataset.action;
       if (action === 'go-settings') { go('more'); return; }
       if (action === 'nav') {
-        go(el.dataset.target, el.dataset.param || null, { scrollTop: !el.dataset.param });
+        go(el.dataset.target, el.dataset.param || null);
         return;
       }
       if (action === 'start-wizard') { showWizard(); return; }

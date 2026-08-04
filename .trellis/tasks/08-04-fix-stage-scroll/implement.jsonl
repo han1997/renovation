@@ -1,1 +1,4 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `py -3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/frontend/index.md","reason":"Front-end app architecture, IIFE module boundaries, and required pre-coding guidance for vanilla JS changes."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Routing, event delegation, view rendering, and scroll behavior conventions for js/app.js and js/views/stages.js."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Store.state mutation and App.rerender preservation rules relevant to stage interactions."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"No-build verification constraints and manual checks for frontend-only changes."}

@@ -1,1 +1,4 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `py -3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/frontend/index.md","reason":"Verify changes respect the vanilla JS app structure and script/module contracts."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Verify routing, data-action handling, and scroll behavior match project conventions."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Verify stage interactions preserve state and use Store/App rerender patterns correctly."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Verify source review and no-build quality requirements for this frontend task."}
