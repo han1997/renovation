@@ -60,6 +60,7 @@ Views.budget = (function () {
 
 - 底部 tab 切换或无参数跨 tab 导航可以回到顶部。
 - 带 `param` 的页面内目标导航不要先回到顶部，应让目标 view 自己滚动到锚点。
+- 流程页阶段展开和带阶段 `param` 的导航应由 `Views.stages` 聚焦到舒适阅读位置，阶段标题约在视口上方 20%-25%，不要贴顶。
 - 同一 tab 内的交互优先使用 `App.rerender()` 保留当前位置。
 - `data-action="nav"` 默认按是否存在 `data-param` 选择滚动策略；新增导航入口时不要手写 `window.scrollTo(0, 0)`。
 - `current.param` 是一次性渲染信号：`render()` 读取后应清空，再把本次参数传给 view，避免后续 `App.rerender()` 重放旧锚点并覆盖用户当前展开/滚动状态。

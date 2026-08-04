@@ -1,0 +1,4 @@
+{"file":".trellis/spec/frontend/index.md","reason":"Verify changes respect the vanilla JS app structure and global module contracts."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Verify routing, event delegation, stage focus, and scroll behavior match project conventions."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Verify stage expansion and internal interactions preserve Store/App state behavior."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Verify source review and no-build quality requirements for this frontend task."}

@@ -3,9 +3,14 @@ window.Views = window.Views || {};
 
 Views.stages = (function () {
   var expandedId; // 当前展开的阶段（undefined = 尚未初始化）
+  var pendingFocusId = null;
+  var FOCUS_VIEWPORT_RATIO = 0.22;
 
   function render(el, param) {
-    if (param) { expandedId = param; }
+    if (param) {
+      expandedId = param;
+      pendingFocusId = param;
+    }
     if (expandedId === undefined) expandedId = App.currentStage().stage.id;
 
     var ap = App.allProgress();
@@ -26,11 +31,20 @@ Views.stages = (function () {
     });
 
     el.innerHTML = html;
-    // 展开当前项后滚动到可视范围（仅当由参数跳转）
-    if (param) {
-      var target = el.querySelector('[data-stage-anchor="' + param + '"]');
-      if (target) setTimeout(function () { target.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 60);
-    }
+    focusPendingStage(el);
+  }
+
+  function focusPendingStage(el) {
+    if (!pendingFocusId) return;
+    var id = pendingFocusId;
+    pendingFocusId = null;
+    var target = el.querySelector('[data-stage-anchor="' + id + '"]');
+    if (!target) return;
+    setTimeout(function () {
+      var rect = target.getBoundingClientRect();
+      var top = rect.top + window.scrollY - (window.innerHeight * FOCUS_VIEWPORT_RATIO);
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }, 60);
   }
 
   function stageHTML(st, i, cs) {
@@ -157,7 +171,9 @@ Views.stages = (function () {
     var id = el.dataset.id;
 
     if (action === 'toggle-stage') {
-      expandedId = (expandedId === id ? null : id);
+      var willOpen = expandedId !== id;
+      expandedId = willOpen ? id : null;
+      if (willOpen) pendingFocusId = id;
       App.rerender();
 
     } else if (action === 'task-date') {

@@ -1,0 +1,4 @@
+{"file":".trellis/spec/frontend/index.md","reason":"Front-end app architecture, IIFE module boundaries, and pre-coding guidance for vanilla JS changes."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"View rendering, data-action event delegation, App.go/App.rerender routing, and scroll behavior conventions."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Store/App rerender patterns relevant to stage expansion and internal task interactions."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"No-build verification constraints and manual/static checks for frontend-only changes."}
