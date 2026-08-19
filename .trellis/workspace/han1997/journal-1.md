@@ -234,3 +234,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 8: 完善流程页阶段决策辅助
+
+**Date**: 2026-08-19
+**Task**: 完善流程页阶段决策辅助
+**Branch**: `main`
+
+### Summary
+
+为流程页增加当前阶段决策摘要，聚合阶段进度、下一项行动、避坑、采购和验收入口；修复阶段参数回退与重渲染聚焦一致性，并同步 README 与前端契约。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f92f076` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
