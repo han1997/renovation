@@ -172,6 +172,28 @@ button { font-family: inherit; }
 .quick .q-label { font-size: 12px; color: var(--ink); }
 
 /* ---------- 流程时间轴 ---------- */
+.stage-summary { border-top: 3px solid var(--brand); }
+.stage-summary-heading h2 { margin: 3px 0 0; font-size: 20px; overflow-wrap: anywhere; }
+.stage-summary-goal { margin: 12px 0; color: #55524b; line-height: 1.7; font-size: 13.5px; overflow-wrap: anywhere; }
+.stage-summary-status { margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--brand-dark); }
+.stage-summary-action, .stage-summary-link {
+  width: 100%; border: 1px solid var(--line); background: #fffdf9; color: var(--ink);
+  border-radius: 10px; cursor: pointer; text-align: left; display: flex; align-items: center;
+  gap: 9px; padding: 10px; margin-top: 10px; font: inherit; min-width: 0;
+}
+.stage-summary-action strong { display: block; margin-top: 2px; overflow-wrap: anywhere; }
+.stage-summary-action > span:nth-child(2), .stage-summary-link span:first-child { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.stage-summary-action > span:last-child, .stage-summary-link span:last-child { white-space: nowrap; font-size: 12px; }
+.stage-summary-icon { color: var(--brand); font-size: 22px; flex-shrink: 0; }
+.stage-summary-block { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.stage-summary-block .warn-list { margin: 4px 0 0; }
+.stage-summary-link { justify-content: space-between; font-size: 13px; }
+.stage-summary-detail { margin-top: 10px; }
+@media (max-width: 420px) {
+  .stage-summary-heading { align-items: flex-start; gap: 8px; }
+  .stage-summary-action, .stage-summary-link { align-items: flex-start; flex-wrap: wrap; }
+  .stage-summary-action > span:last-child, .stage-summary-link span:last-child { margin-left: 31px; white-space: normal; }
+}
 .phase-label { font-size: 13px; font-weight: 700; color: var(--muted); margin: 18px 4px 8px; letter-spacing: 2px; }
 .phase-label:first-child { margin-top: 4px; }
 .t-item { position: relative; padding-left: 34px; margin-bottom: 10px; }

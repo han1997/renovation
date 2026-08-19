@@ -4,18 +4,27 @@ window.Views = window.Views || {};
 Views.stages = (function () {
   var expandedId; // 当前展开的阶段（undefined = 尚未初始化）
   var pendingFocusId = null;
+  var rerenderStageId = null;
   var FOCUS_VIEWPORT_RATIO = 0.22;
 
   function render(el, param) {
-    if (param) {
-      expandedId = param;
-      pendingFocusId = param;
+    var cs = App.currentStage();
+    var paramStage = findStage(param);
+    var targetStage = paramStage || findStage(rerenderStageId) || cs.stage;
+    rerenderStageId = null;
+    if (paramStage) {
+      expandedId = paramStage.id;
+      pendingFocusId = paramStage.id;
+    } else if (param !== undefined && param !== null && param !== '') {
+      // 显式传入的非法阶段参数回退到当前阶段，避免沿用旧展开状态。
+      expandedId = cs.stage.id;
+      pendingFocusId = null;
     }
-    if (expandedId === undefined) expandedId = App.currentStage().stage.id;
+    if (expandedId === undefined) expandedId = targetStage.id;
 
     var ap = App.allProgress();
-    var cs = App.currentStage();
-    var html = '<div class="card">' +
+    var html = decisionSummaryHTML(targetStage, cs, targetStage.id === cs.stage.id && cs.allDone) +
+      '<div class="card">' +
       '<div class="card-title">🧭 装修全流程<span class="right tiny muted">' + UI.esc(DATA.totalDurationNote) + '</span></div>' +
       UI.barHTML(ap.pct, { cls: 'ok' }) +
       '<div class="between mt8 tiny muted"><span>已完成 ' + ap.done + ' / ' + ap.total + ' 项</span><span>' + ap.pct + '%</span></div>' +
@@ -32,6 +41,72 @@ Views.stages = (function () {
 
     el.innerHTML = html;
     focusPendingStage(el);
+  }
+
+  function findStage(id) {
+    if (!id) return null;
+    for (var i = 0; i < DATA.stages.length; i++) {
+      if (DATA.stages[i].id === id) return DATA.stages[i];
+    }
+    return null;
+  }
+
+  function checklistById(id) {
+    for (var i = 0; i < DATA.checklists.length; i++) {
+      if (DATA.checklists[i].id === id) return DATA.checklists[i];
+    }
+    return null;
+  }
+
+  function decisionSummaryHTML(st, cs, allDone) {
+    var p = App.stageProgress(st);
+    var tasks = App.stageTasks(st);
+    var next = null;
+    for (var i = 0; !p.isDone && i < tasks.length; i++) {
+      if (!Store.state.tasksDone[tasks[i].id]) { next = tasks[i]; break; }
+    }
+    var warnings = (st.warnings || []).slice(0, 2);
+    var checklist = null;
+    (st.acceptIds || []).some(function (id) {
+      checklist = checklistById(id);
+      return !!checklist;
+    });
+    var status = allDone ? '全部流程已完成，欢迎准备入住新家 🎉' :
+      p.isDone ? '本阶段已完成，可以查看阶段详情' :
+        p.total === 0 ? '本阶段暂无待办，可以查看阶段详情' :
+          st.id === cs.stage.id ? '当前阶段，先完成这一项' : '所选阶段，先完成这一项';
+    var html = '<section class="card stage-summary" aria-labelledby="stage-summary-title">' +
+      '<div class="between stage-summary-heading"><div><div class="tiny muted">🧭 ' +
+      (st.id === cs.stage.id ? '当前阶段' : '所选阶段') + '</div>' +
+      '<h2 id="stage-summary-title">' + UI.esc(st.emoji) + ' ' + UI.esc(st.name) + '</h2></div>' +
+      '<span class="badge ' + (p.isDone ? 'badge-ok' : (p.total === 0 ? 'badge-plain' : 'badge-warn')) + '">' +
+      (p.isDone ? '已完成' : (p.total === 0 ? '暂无任务' : '进行中')) + '</span></div>' +
+      '<div class="stage-summary-goal">' + UI.esc(st.goal) + '</div>' +
+      UI.barHTML(p.pct, { cls: p.isDone ? 'ok' : '' }) +
+      '<div class="between mt8 tiny muted"><span>已完成 ' + p.done + ' / ' + p.total + ' 项</span><span>' + p.pct + '%</span></div>' +
+      '<div class="stage-summary-status">' + status + '</div>';
+
+    if (next) {
+      html += '<button class="stage-summary-action" data-action="toggle-stage" data-id="' + UI.esc(st.id) + '" data-force-open="true" data-summary-stage="true">' +
+        '<span class="stage-summary-icon">→</span><span><span class="tiny muted">下一步行动</span><strong>' + UI.esc(next.text) + '</strong></span><span class="muted">查看详情 ›</span></button>';
+    }
+    if (warnings.length) {
+      html += '<div class="stage-summary-block"><div class="tiny muted">⚠️ 关键避坑</div><ul class="warn-list">';
+      warnings.forEach(function (text) { html += '<li>' + UI.esc(text) + '</li>'; });
+      html += '</ul></div>';
+    }
+    if (st.buy && st.buy.length) {
+      html += '<button class="stage-summary-link" data-action="nav" data-target="guide" data-param="materials">' +
+        '<span>🛒 首条采购：' + UI.esc(st.buy[0].item) + '</span><span>查看建材日历 ›</span></button>';
+    }
+    if (checklist) {
+      html += '<button class="stage-summary-link" data-action="nav" data-target="guide" data-param="accept:' + UI.esc(checklist.id) + '">' +
+        '<span>📋 验收入口：' + UI.esc(checklist.name) + '</span><span>打开清单 ›</span></button>';
+    }
+    if (p.isDone || allDone || p.total === 0) {
+      html += '<button class="btn btn-sm btn-ghost stage-summary-detail" data-action="toggle-stage" data-id="' + UI.esc(st.id) + '" data-force-open="true">查看阶段详情</button>';
+    }
+    return html + '</section>';
   }
 
   function focusPendingStage(el) {
@@ -171,9 +246,10 @@ Views.stages = (function () {
     var id = el.dataset.id;
 
     if (action === 'toggle-stage') {
-      var willOpen = expandedId !== id;
+      var willOpen = el.dataset.forceOpen === 'true' || expandedId !== id;
       expandedId = willOpen ? id : null;
       if (willOpen) pendingFocusId = id;
+      if (el.dataset.summaryStage === 'true') rerenderStageId = id;
       App.rerender();
 
     } else if (action === 'task-date') {
