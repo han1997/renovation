@@ -201,3 +201,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 7: 优化首页装修行动辅助
+
+**Date**: 2026-08-19
+**Task**: 优化首页装修行动辅助
+**Branch**: `main`
+
+### Summary
+
+将首页升级为行动中心，按逾期、今天和未来七天组织任务，支持直接完成；补充最严重预算超支与当前阶段采购提醒，并记录前端交互契约。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `42034a9` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
