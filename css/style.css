@@ -206,6 +206,19 @@ button { font-family: inherit; }
 .task-item input[type=checkbox]:checked::after { content: '✓'; color: #fff; font-size: 13px; font-weight: 800; }
 .task-text { flex: 1; font-size: 14px; }
 .task-item.checked .task-text { color: var(--muted); text-decoration: line-through; }
+.action-center { border-top: 3px solid var(--brand); }
+.action-group + .action-group { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 6px; }
+.action-group-title { font-weight: 700; margin: 2px 0 1px; }
+.action-task { cursor: pointer; }
+.action-task .task-text { min-width: 0; overflow-wrap: anywhere; }
+.action-task:hover { background: var(--bg); }
+.risk-bar { background: var(--amber-soft); border: 1px solid #eeddb9; border-radius: 12px; padding: 9px 12px; margin-bottom: 12px; }
+.risk-label { font-weight: 700; margin-bottom: 3px; }
+.risk-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; cursor: pointer; font-size: 12.5px; }
+.risk-item span { min-width: 0; overflow-wrap: anywhere; }
+.risk-item b { white-space: nowrap; }
+.risk-budget b { color: var(--red); }
+.risk-purchase b { color: var(--brand-dark); }
 .task-ops { display: flex; gap: 2px; flex-shrink: 0; }
 .task-ops button { border: none; background: none; cursor: pointer; font-size: 14px; opacity: .55; padding: 2px 4px; }
 .date-chip { font-size: 11px; background: var(--blue-soft); color: var(--blue); border-radius: 6px; padding: 1px 6px; white-space: nowrap; }

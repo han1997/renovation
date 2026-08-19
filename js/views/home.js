@@ -40,6 +40,9 @@ Views.home = (function () {
       '<button class="btn btn-sm btn-ghost" data-action="nav" data-target="stages" data-param="' + cs.stage.id + '">继续打卡 →</button></div>' +
       '</div>';
 
+    /* ---- 行动中心 ---- */
+    html += actionCenter(cs);
+
     /* ---- 预算卡 ---- */
     var spent = 0;
     s.budget.expenses.forEach(function (e) { spent += e.amount || 0; });
@@ -60,8 +63,8 @@ Views.home = (function () {
       '<button class="btn btn-sm" data-action="nav" data-target="budget">查看预算 →</button></div>' +
       '</div>';
 
-    /* ---- 待办提醒卡 ---- */
-    html += remindersCard(cs);
+    /* ---- 轻量风险条 ---- */
+    html += riskBar(cs);
 
     /* ---- 当前阶段避坑 ---- */
     if (!cs.allDone && cs.stage.warnings && cs.stage.warnings.length) {
@@ -76,10 +79,9 @@ Views.home = (function () {
     el.innerHTML = html;
   }
 
-  function remindersCard(cs) {
+  function collectDatedTasks() {
     var s = Store.state;
     var items = [];
-    // 收集所有设置了日期、未完成的任务
     DATA.stages.forEach(function (st) {
       App.stageTasks(st).forEach(function (t) {
         var d = s.taskDates[t.id];
@@ -90,40 +92,93 @@ Views.home = (function () {
       });
     });
     items.sort(function (a, b) { return a.diff - b.diff; });
+    return items;
+  }
 
-    var html = '<div class="card"><div class="card-title">⏰ 待办提醒</div>';
-    if (items.length) {
-      items.slice(0, 6).forEach(function (it) {
-        var chip;
-        if (it.diff < 0) chip = '<span class="date-chip overdue">逾期 ' + (-it.diff) + ' 天</span>';
-        else if (it.diff === 0) chip = '<span class="date-chip overdue">今天</span>';
-        else chip = '<span class="date-chip">' + (it.diff === 1 ? '明天' : UI.dateCN(it.date)) + '</span>';
-        html += '<div class="task-item" data-action="nav" data-target="stages" data-param="' + it.stage.id + '" style="cursor:pointer">' +
-          '<span style="font-size:15px">' + it.stage.emoji + '</span>' +
-          '<span class="task-text">' + UI.esc(it.task.text) + '<div class="tiny muted">' + UI.esc(it.stage.name) + '</div></span>' +
-          chip + '</div>';
+  function hasIncompleteDatedTasks() {
+    var s = Store.state;
+    var found = false;
+    DATA.stages.some(function (st) {
+      return App.stageTasks(st).some(function (t) {
+        if (s.tasksDone[t.id] || !s.taskDates[t.id]) return false;
+        found = true;
+        return true;
       });
-      if (items.length > 6) html += '<div class="tiny muted center mt4">还有 ' + (items.length - 6) + ' 条，去流程页查看</div>';
-    } else {
-      // 没有带日期的待办：推荐当前阶段接下来要做的事
-      var next = [];
-      if (!cs.allDone) {
-        App.stageTasks(cs.stage).forEach(function (t) {
-          if (!s.tasksDone[t.id] && next.length < 3) next.push(t);
-        });
-      }
-      if (next.length) {
-        html += '<div class="tiny muted mb8">最近没有设置日期的待办，当前阶段接下来可以做：</div>';
-        next.forEach(function (t) {
-          html += '<div class="task-item" data-action="nav" data-target="stages" data-param="' + cs.stage.id + '" style="cursor:pointer">' +
-            '<span>👉</span><span class="task-text">' + UI.esc(t.text) + '</span></div>';
-        });
-        html += '<div class="tiny muted mt4">小提示：在流程页给任务点 📅 设置日期，就会在这里提醒你</div>';
-      } else {
-        html += '<div class="empty"><span class="e-icon">🎉</span>暂无待办，休息一下吧</div>';
-      }
+    });
+    return found;
+  }
+
+  function actionItemHTML(it, showDate) {
+    var s = Store.state;
+    var date = '';
+    if (showDate && it.date) {
+      var label = it.diff < 0 ? '逾期 ' + (-it.diff) + ' 天' : (it.diff === 0 ? '今天' : (it.diff === 1 ? '明天' : UI.dateCN(it.date)));
+      date = '<span class="date-chip' + (it.diff <= 0 ? ' overdue' : '') + '">' + label + '</span>';
     }
-    html += '</div>';
+    return '<div class="task-item action-task" data-action="nav" data-target="stages" data-param="' + UI.esc(it.stage.id) + '">' +
+      '<label style="display:flex;align-items:flex-start;cursor:pointer;padding-top:2px">' +
+      '<input type="checkbox" data-change="task" data-id="' + UI.esc(it.task.id) + '"' + (s.tasksDone[it.task.id] ? ' checked' : '') + '>' +
+      '</label>' +
+      '<span class="task-text" data-action="nav" data-target="stages" data-param="' + UI.esc(it.stage.id) + '">' + UI.esc(it.task.text) + '<div class="tiny muted">' + it.stage.emoji + ' ' + UI.esc(it.stage.name) + '</div></span>' + date + '</div>';
+  }
+
+  function actionGroup(title, items) {
+    if (!items.length) return '';
+    var html = '<div class="action-group"><div class="tiny muted action-group-title">' + title + '</div>';
+    items.forEach(function (it) { html += actionItemHTML(it, true); });
+    return html + '</div>';
+  }
+
+  function actionCenter(cs) {
+    var s = Store.state;
+    var items = collectDatedTasks();
+    var html = '<div class="card action-center"><div class="between"><div class="card-title" style="margin-bottom:0">🎯 今天要做什么</div>' +
+      '<span class="tiny muted">勾选即完成</span></div>';
+    if (items.length) {
+      var overdue = items.filter(function (it) { return it.diff < 0; });
+      var today = items.filter(function (it) { return it.diff === 0; });
+      var upcoming = items.filter(function (it) { return it.diff > 0; });
+      var shownCount = Math.min(overdue.length, 3) + Math.min(today.length, 3) + Math.min(upcoming.length, 3);
+      html += actionGroup('逾期', overdue.slice(0, 3));
+      html += actionGroup('今天', today.slice(0, 3));
+      html += actionGroup('未来 7 天', upcoming.slice(0, 3));
+      if (items.length > shownCount) html += '<div class="tiny muted center mt4">还有 ' + (items.length - shownCount) + ' 项近期任务，去流程页查看</div>';
+    } else if (!cs.allDone && !hasIncompleteDatedTasks()) {
+      var next = [];
+      App.stageTasks(cs.stage).forEach(function (t) {
+        if (!s.tasksDone[t.id] && next.length < 3) next.push({ stage: cs.stage, task: t });
+      });
+      if (next.length) {
+        html += '<div class="small muted mt8">当前阶段还没有安排日期，先从下面三项开始：</div>';
+        next.forEach(function (it) { html += actionItemHTML(it, false); });
+        html += '<div class="tiny muted mt4">可进入流程页给任务设置日期，首页会按紧急程度提醒</div>';
+      } else {
+        html += '<div class="empty"><span class="e-icon">🎉</span>当前阶段暂无未完成任务</div>';
+      }
+    } else if (!cs.allDone) {
+      html += '<div class="empty"><span class="e-icon">📅</span>未来 7 天暂无安排，先去流程页查看后续计划</div>';
+    } else {
+      html += '<div class="empty"><span class="e-icon">🎉</span>所有任务都完成了，休息一下吧</div>';
+    }
+    return html + '</div>';
+  }
+
+  function riskBar(cs) {
+    var s = Store.state;
+    var worst = null;
+    s.budget.categories.forEach(function (c) {
+      var spent = 0;
+      s.budget.expenses.forEach(function (e) { if (e.catId === c.id) spent += e.amount || 0; });
+      var over = spent - (c.planned || 0);
+      if (over > 0 && (!worst || over > worst.over)) worst = { category: c, over: over };
+    });
+    var html = '';
+    if (worst || (!cs.allDone && cs.stage.buy && cs.stage.buy.length)) {
+      html = '<div class="risk-bar"><div class="tiny muted risk-label">需要留意</div>';
+      if (worst) html += '<div class="risk-item risk-budget" data-action="nav" data-target="budget"><span>💸 预算超支：' + UI.esc(worst.category.name) + '</span><b>' + UI.money(worst.over) + '</b></div>';
+      if (!cs.allDone && cs.stage.buy && cs.stage.buy.length) html += '<div class="risk-item risk-purchase" data-action="nav" data-target="guide" data-param="materials"><span>🛒 当前阶段采购：' + UI.esc(cs.stage.buy[0].item) + '</span><b>查看日历 →</b></div>';
+      html += '</div>';
+    }
     return html;
   }
 
@@ -142,5 +197,14 @@ Views.home = (function () {
     }
   }
 
-  return { render: render, onAction: onAction };
+  function onChange(kind, el) {
+    if (kind !== 'task') return;
+    var id = el.dataset.id;
+    if (el.checked) Store.state.tasksDone[id] = true;
+    else delete Store.state.tasksDone[id];
+    Store.save();
+    App.rerender();
+  }
+
+  return { render: render, onAction: onAction, onChange: onChange };
 })();

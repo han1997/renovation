@@ -100,6 +100,7 @@ window.App = (function () {
       if (tabBtn) { go(tabBtn.dataset.tab); return; }
       var el = e.target.closest('[data-action]');
       if (!el) return;
+      if (e.target.closest('input[type="checkbox"], label')) return;
       var action = el.dataset.action;
       if (action === 'go-settings') { go('more'); return; }
       if (action === 'nav') {
