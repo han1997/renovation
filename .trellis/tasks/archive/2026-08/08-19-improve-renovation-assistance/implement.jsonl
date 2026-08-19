@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/project-conventions.md", "reason": "项目全局语言、提交、README 与变更约定"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "vanilla JS 前端模块边界与加载约定"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "字符串渲染、事件代理和样式复用规范"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Store 状态、localStorage 与派生任务同步规范"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "无构建项目的验证清单"}
