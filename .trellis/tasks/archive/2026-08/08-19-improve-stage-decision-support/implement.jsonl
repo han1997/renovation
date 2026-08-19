@@ -1,0 +1,6 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `py -3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/project-conventions.md", "reason": "项目全局语言、README 和提交约定"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "前端模块边界与加载约定"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "字符串渲染、事件代理、路由聚焦与阶段摘要规范"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "阶段任务与进度派生状态规范"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "无构建项目验证清单"}
