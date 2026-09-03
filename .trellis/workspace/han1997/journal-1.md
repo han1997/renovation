@@ -267,3 +267,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 9: 整合 shadow-review 审查技能到 trellis 检查流程
+
+**Date**: 2026-09-03
+**Task**: 整合 shadow-review 审查技能到 trellis 检查流程
+**Branch**: `main`
+
+### Summary
+
+将 pi-shadow-mind 审查思想移植为 shadow-review 技能（架构/落地核对/完成度三维、只读立场），改 inject-subagent-context.js 的 getCheckContext 对每次 trellis-check 派发自动注入；implement/research 分支不受影响，trellis-check 烟测验证通过。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8b28d16` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

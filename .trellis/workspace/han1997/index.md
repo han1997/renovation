@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 8
-- **Last Active**: 2026-08-19
+- **Total Sessions**: 9
+- **Last Active**: 2026-09-03
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~269 | Active |
+| `journal-1.md` | ~302 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 9 | 2026-09-03 | 整合 shadow-review 审查技能到 trellis 检查流程 | `8b28d16` | `main` |
 | 8 | 2026-08-19 | 完善流程页阶段决策辅助 | `f92f076` | `main` |
 | 7 | 2026-08-19 | 优化首页装修行动辅助 | `42034a9` | `main` |
 | 6 | 2026-08-04 | 优化流程页阶段展开定位 | `e750d4d`, `c78d0cf` | `main` |

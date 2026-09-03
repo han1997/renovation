@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Web SPA 行为契约，check 阶段用作功能等价回归基线"}
+{"file": "research/android-scaffold.md", "reason": "构建 / lint / test / APK 产物验收清单与命令"}
+{"file": "research/room-schema.md", "reason": "Room schema 与 DAO 关键聚合检查点（首页三段分组 / 阶段完成度 / 分类超支 / CSV 扁平视图）"}
+{"file": "research/web-json-shapes.md", "reason": "assets/knowledge.json / prices.json 字段完备性对照（应覆盖 12+4 字段）"}
+{"file": "research/material-you.md", "reason": "Material You 接入点检查（动态分支 + 静态回退 + 与 Web 米色品牌色一致性）"}

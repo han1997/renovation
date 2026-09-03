@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Web SPA 模块契约（Store/Views/App/DATA/PRICES），Android 端行为对齐的依据"}
+{"file": "research/android-scaffold.md", "reason": "Gradle/Kotlin/Compose 版本与单 module 工程结构、签名、构建/调试命令"}
+{"file": "research/room-schema.md", "reason": "Web Store.state 12 字段反推 12 张 Room 表 + 9 组 DAO + 4 个关键聚合 SQL"}
+{"file": "research/web-json-shapes.md", "reason": "DATA/PRICES 12+4 字段结构与 Android 端 assets/knowledge.json / prices.json 骨架"}
+{"file": "research/material-you.md", "reason": "Compose Material 3 动态取色 + Android 7-11 静态回退色板 + 主题色板建议"}
