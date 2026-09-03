@@ -73,6 +73,15 @@ function getCheckContext(ctx, taskDir) {
     parts.push(`=== ${taskDir}/prd.md (Requirements) ===\n${prd}`)
   }
 
+  // Always attach the shadow-review skill so every check dispatch carries the
+  // independent second-opinion review dimensions (architecture review /
+  // project grounding / completion review). Deliberately independent of
+  // check.jsonl entries; silently skipped if the skill file is absent.
+  const shadowReviewSkill = ctx.readProjectFile(".opencode/skills/shadow-review/SKILL.md")
+  if (shadowReviewSkill) {
+    parts.push(`=== .opencode/skills/shadow-review/SKILL.md ===\n${shadowReviewSkill}`)
+  }
+
   return parts.join("\n\n")
 }
 
