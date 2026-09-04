@@ -11,7 +11,8 @@
 | DAO 聚合 | `app/src/test/.../data/db/` | Robolectric + in-memory Room | 首页三段分组 / 阶段完成度 / 分类超支 / CSV 扁平视图 |
 | Repository 导入导出 | `app/src/test/.../data/repo/` | Robolectric + in-memory Room | JSON 导出 / 导入原子性 |
 | 纯函数 | `app/src/test/.../ui/budget/` | JUnit | `buildCsv` CSV 拼装 |
-| ViewModel | `app/src/test/.../ui/*/` | MockK + Turbine | 首次设置 / 首页 / 预算逻辑 |
+| ViewModel | `app/src/test/.../ui/*/` | MockK + Turbine（读 Flow）/ 真实 in-memory Room（写操作，见下） | 首次设置 / 首页 / 预算 / 我的 |
+| DB Migration | `app/src/test/.../data/db/MigrationTest.kt` | Robolectric + 手工建 v1 库（见下） | v1→v2 迁移不丢数据 |
 | Compose UI | `app/src/androidTest/` | compose-ui-test | 关键交互流 |
 
 ## 约定
@@ -19,6 +20,48 @@
 - Room 单测用 `Room.inMemoryDatabaseBuilder` + `allowMainThreadQueries()`。
 - ViewModel 测试注入 `mockk<AppContainer>(relaxed = true)` + `mockk<RenovationApp>`，stub `container.budgetRepo` 等 Flow 返回值。
 - 纯函数测试不依赖 Android 运行时。
+
+### ViewModel 写操作测试：禁用 MockK suspend 验证（Common Mistake）
+
+**Symptom**：`coVerify { repo.xxx(any()) }` 报 "was not called"，无任何异常输出；同样的 `viewModelScope.launch { 普通代码 }` 却能立即执行。修改桩、换 dispatcher（`StandardTestDispatcher` / `UnconfinedTestDispatcher`）均无效。
+
+**Cause**：MockK 的 suspend 桩在 `viewModelScope.launch` 协程内被调用时调用记录丢失（MockK 1.13.13 + coroutines 1.10.2 + lifecycle 2.10.0 组合实测）。读 Flow（`every { repo.observeAll() } returns flowOf(...)`）不受影响，只有 **suspend 桩的 coVerify** 会坏。
+
+**Fix**：测 ViewModel 写操作（`viewModelScope.launch` 委托 repo 的方法）时，不走 MockK suspend 桩，改用**真实 in-memory Room 链路**：真实 `DefaultAppContainer` + 接口委托覆盖 `todayProvider` 为固定值，操作后查库断言：
+
+```kotlin
+val real = DefaultAppContainer(db, mockk<KnowledgeCache>(relaxed = true))
+val container = object : AppContainer by real {
+    override val todayProvider: () -> String = { "2026-09-04" }
+}
+val app = mockk<RenovationApp>(relaxed = true)
+every { app.container } returns container
+```
+
+**同步约定**：Room executor 绑到 testScheduler，消除挂起 DAO 与测试线程的竞态：
+
+```kotlin
+val dispatcher = StandardTestDispatcher(testScheduler)
+Dispatchers.setMain(dispatcher)
+val db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+    .allowMainThreadQueries()
+    .setQueryExecutor(dispatcher.asExecutor())      // kotlinx.coroutines.asExecutor
+    .setTransactionExecutor(dispatcher.asExecutor())
+    .build()
+// 每次 vm 写操作后 advanceUntilIdle() 再断言
+```
+
+参考实现：`app/src/test/.../ui/more/MoreViewModelTest.kt`。
+
+### DB Migration 测试：禁用 MigrationTestHelper（Gotcha）
+
+> **Warning**：AGP 9（9.3.2 实测）**没有 `mergeDebugUnitTestAssets` 任务**，test source set 的 assets（含 `sourceSets["test"].assets` 注册的目录）不会进 `apk-for-local-test.ap_`，`MigrationTestHelper` 永远报 "Cannot find the schema file"。**不要**尝试用 assets 路线。
+
+替代方案：手工建 v1 库——从 `app/schemas/.../1.json` 读取 `entities[].createSql`（替换 `${TABLE_NAME}` 占位符）+ `indices[].createSql` + `setupQueries`（建 `room_master_table` 并写入 v1 identityHash），用 `FrameworkSQLiteOpenHelperFactory` + `SupportSQLiteOpenHelper.Callback(1)` 落真实 DB 文件，再 `Room.databaseBuilder(...).addMigrations(MIGRATION_1_2).build()` 打开（Room 自动跑迁移并校验 schema）。参考实现：`app/src/test/.../data/db/MigrationTest.kt`。
+
+### PowerShell 编辑含中文的文件（Gotcha）
+
+> **Warning**：不要用 PowerShell `-replace` / `Set-Content` 批量修改含中文字符串的代码文件——多字节字符会被按行截断产生乱码（UTF-8 序列断裂），且报错位置与真实损坏位置不符。用 Edit/Write 工具。
 
 ## 验证清单
 

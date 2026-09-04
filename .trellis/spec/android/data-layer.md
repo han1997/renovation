@@ -5,11 +5,11 @@
 数据分两类：
 
 - **只读知识数据**：`assets/knowledge.json` + `assets/prices.json`，启动时一次性读入内存缓存；
-- **用户数据**：Room（SQLite）15 张表，由 DAO / Repository 读写。
+- **用户数据**：Room（SQLite）16 张表，由 DAO / Repository 读写。
 
-## Room 表（v1）
+## Room 表（v2）
 
-`AppDatabase`（`data/db/AppDatabase.kt`）`version = 1`，`exportSchema = true`（schema 落 `app/schemas`），`fallbackToDestructiveMigration()`（v1 仅此，v2+ 必须写 Migration）。
+`AppDatabase`（`data/db/AppDatabase.kt`）`version = 2`，`exportSchema = true`（schema 落 `app/schemas`），`fallbackToDestructiveMigration()` 已移除，v1→v2 起全部走显式 `Migration`（`MIGRATION_1_2` 新增 `quick_note` 表；schema 1.json / 2.json 均已导出）。
 
 | 表 | 实体 | 说明 |
 |----|------|------|
@@ -28,6 +28,7 @@
 | `checklist_item_check` | `ChecklistItemCheckEntity` | 验收条目勾选 |
 | `note` | `NoteEntity` | 笔记 |
 | `contact` | `ContactEntity` | 联系人 |
+| `quick_note` | `QuickNoteEntity` | 随手记（type: wish 带 category / memo 带 stage_id，is_done 可勾选） |
 
 ## 关键聚合（DAO）
 
