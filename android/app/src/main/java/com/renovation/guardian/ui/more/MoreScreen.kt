@@ -17,11 +17,13 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,14 +42,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.renovation.guardian.data.db.ContactEntity
 import com.renovation.guardian.data.db.HouseProfileEntity
 import com.renovation.guardian.data.db.NoteEntity
+import com.renovation.guardian.data.db.QuickNoteEntity
+import com.renovation.guardian.data.db.StageEntity
 import com.renovation.guardian.ui.components.DatePickerField
 import com.renovation.guardian.ui.components.LabeledText
 import com.renovation.guardian.ui.components.MoneyText
@@ -65,6 +71,8 @@ fun MoreScreen() {
     val profile by vm.profile.collectAsState(initial = null)
     val contacts by vm.contacts.collectAsState(initial = emptyList())
     val notes by vm.notes.collectAsState(initial = emptyList())
+    val quickNotes by vm.quickNotes.collectAsState(initial = emptyList())
+    val stages by vm.stages.collectAsState(initial = emptyList())
     val spaces by vm.spaces.collectAsState(initial = emptyList())
     val exportActions = LocalExportActions.current
     val snackbar = remember { SnackbarHostState() }
@@ -74,6 +82,7 @@ fun MoreScreen() {
     var showStylePick by remember { mutableStateOf(false) }
     var showContact by remember { mutableStateOf<ContactEntity?>(null) }
     var showNote by remember { mutableStateOf<NoteEntity?>(null) }
+    var showQuickNote by remember { mutableStateOf<QuickNoteEntity?>(null) }
     var showSpaceAdd by remember { mutableStateOf(false) }
     var showReset by remember { mutableStateOf(false) }
 
@@ -148,6 +157,89 @@ fun MoreScreen() {
                 }
             }
 
+            // ── 随手记：快速捕捉购物愿望 / 阶段备忘，按类型整理分组展示 ──
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SectionTitle("随手记", modifier = Modifier.weight(1f))
+                    IconButton(onClick = { showQuickNote = QuickNoteEntity("", "", QuickNoteEntity.TYPE_WISH, null, null, false, DateUtil.today(), DateUtil.today()) }) {
+                        Icon(Icons.Filled.Add, contentDescription = "新增随手记")
+                    }
+                }
+            }
+            if (quickNotes.isEmpty()) {
+                item {
+                    SectionCard {
+                        Text(
+                            "暂无随手记，用 + 记下想买的东西和施工注意点",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            } else {
+                val wishGroups = quickNotes.filter { it.type == QuickNoteEntity.TYPE_WISH }.groupBy { it.category ?: QuickNoteEntity.CATEGORY_DAILY }
+                val memoGroups = quickNotes.filter { it.type == QuickNoteEntity.TYPE_MEMO }.groupBy { it.stageId ?: "" }
+                // ── 购物愿望组：按品类（家具 / 家电 / 生活用品）分组 ──
+                if (wishGroups.isNotEmpty()) {
+                    item {
+                        Text(
+                            "购物愿望",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
+                    wishGroups.forEach { (cat, list) ->
+                        item(key = "wish-group-$cat") {
+                            Text(
+                                quickNoteCategoryLabel(cat),
+                                style = MaterialTheme.typography.titleSmall,
+                                modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+                            )
+                        }
+                        items(list, key = { it.id }) { q ->
+                            QuickNoteCard(
+                                note = q,
+                                groupLabel = quickNoteCategoryLabel(cat),
+                                onToggleDone = { vm.setQuickNoteDone(q.id, !q.isDone) },
+                                onEdit = { showQuickNote = q },
+                                onDelete = { vm.deleteQuickNote(q.id) },
+                            )
+                        }
+                    }
+                }
+                // ── 阶段备忘组：按 14 阶段分组，组标题显示阶段名 ──
+                if (memoGroups.isNotEmpty()) {
+                    item {
+                        Text(
+                            "阶段备忘",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
+                    memoGroups.forEach { (stageId, list) ->
+                        val stageName = stages.firstOrNull { it.id == stageId }?.name ?: "未关联阶段"
+                        item(key = "memo-group-$stageId") {
+                            Text(
+                                stageName,
+                                style = MaterialTheme.typography.titleSmall,
+                                modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+                            )
+                        }
+                        items(list, key = { it.id }) { q ->
+                            QuickNoteCard(
+                                note = q,
+                                groupLabel = stageName,
+                                onToggleDone = { vm.setQuickNoteDone(q.id, !q.isDone) },
+                                onEdit = { showQuickNote = q },
+                                onDelete = { vm.deleteQuickNote(q.id) },
+                            )
+                        }
+                    }
+                }
+            }
+
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SectionTitle("空间需求", modifier = Modifier.weight(1f))
@@ -214,6 +306,16 @@ fun MoreScreen() {
         NoteDialog(initial = n, onDismiss = { showNote = null }) { title, body ->
             vm.upsertNote(title, body, if (n.id.isBlank()) null else n.id)
             showNote = null
+        }
+    }
+    showQuickNote?.let { q ->
+        QuickNoteDialog(
+            initial = q,
+            stages = stages,
+            onDismiss = { showQuickNote = null },
+        ) { content, type, category, stageId ->
+            vm.upsertQuickNote(content, type, category, stageId, if (q.id.isBlank()) null else q.id)
+            showQuickNote = null
         }
     }
     if (showSpaceAdd) {
@@ -395,6 +497,144 @@ private fun SpaceAddDialog(
                             Text(p.desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
+                }
+            }
+        },
+    )
+}
+
+/** 品类常量 → 中文标签（wish 分组标题用）。 */
+private fun quickNoteCategoryLabel(category: String): String = when (category) {
+    QuickNoteEntity.CATEGORY_FURNITURE -> "家具"
+    QuickNoteEntity.CATEGORY_APPLIANCE -> "家电"
+    QuickNoteEntity.CATEGORY_DAILY -> "生活用品"
+    else -> "其他"
+}
+
+/**
+ * 随手记单条卡片：勾选完成 + 内容 + 编辑 / 删除。
+ * 已完成项视觉弱化（alpha 降低 + 删除线），排序上已由 DAO 置底。
+ */
+@Composable
+private fun QuickNoteCard(
+    note: QuickNoteEntity,
+    groupLabel: String,
+    onToggleDone: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    SectionCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = note.isDone, onCheckedChange = { onToggleDone() })
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 4.dp)
+                    .clickable { onEdit() }
+                    .alpha(if (note.isDone) 0.5f else 1f),
+            ) {
+                Text(
+                    note.content,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textDecoration = if (note.isDone) TextDecoration.LineThrough else null,
+                )
+                Text(
+                    groupLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(onClick = onEdit) { Icon(Icons.Filled.Edit, contentDescription = "编辑", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+            IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error) }
+        }
+    }
+}
+
+/**
+ * 随手记新增 / 编辑弹窗：
+ * - 内容一句话输入；
+ * - 类型二选一（FilterChip：购物愿望 / 阶段备忘）；
+ * - wish 联动品类三选一（家具 / 家电 / 生活用品）；
+ * - memo 联动 14 阶段下拉。
+ */
+@Composable
+private fun QuickNoteDialog(
+    initial: QuickNoteEntity,
+    stages: List<StageEntity>,
+    onDismiss: () -> Unit,
+    onSave: (content: String, type: String, category: String?, stageId: String?) -> Unit,
+) {
+    var content by remember { mutableStateOf(initial.content) }
+    var type by remember { mutableStateOf(initial.type) }
+    var category by remember { mutableStateOf(initial.category ?: QuickNoteEntity.CATEGORY_FURNITURE) }
+    var stageId by remember { mutableStateOf(initial.stageId ?: stages.firstOrNull()?.id ?: "") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onSave(
+                        content.trim(),
+                        type,
+                        if (type == QuickNoteEntity.TYPE_WISH) category else null,
+                        if (type == QuickNoteEntity.TYPE_MEMO) stageId.ifBlank { null } else null,
+                    )
+                },
+                enabled = content.isNotBlank(),
+            ) { Text("保存") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        title = { Text(if (initial.id.isBlank()) "新增随手记" else "编辑随手记") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = content,
+                    onValueChange = { content = it },
+                    label = { Text("内容") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                )
+                // 类型二选一
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = type == QuickNoteEntity.TYPE_WISH,
+                        onClick = { type = QuickNoteEntity.TYPE_WISH },
+                        label = { Text("购物愿望") },
+                    )
+                    FilterChip(
+                        selected = type == QuickNoteEntity.TYPE_MEMO,
+                        onClick = { type = QuickNoteEntity.TYPE_MEMO },
+                        label = { Text("阶段备忘") },
+                    )
+                }
+                if (type == QuickNoteEntity.TYPE_WISH) {
+                    // 品类三选一
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = category == QuickNoteEntity.CATEGORY_FURNITURE,
+                            onClick = { category = QuickNoteEntity.CATEGORY_FURNITURE },
+                            label = { Text("家具") },
+                        )
+                        FilterChip(
+                            selected = category == QuickNoteEntity.CATEGORY_APPLIANCE,
+                            onClick = { category = QuickNoteEntity.CATEGORY_APPLIANCE },
+                            label = { Text("家电") },
+                        )
+                        FilterChip(
+                            selected = category == QuickNoteEntity.CATEGORY_DAILY,
+                            onClick = { category = QuickNoteEntity.CATEGORY_DAILY },
+                            label = { Text("生活用品") },
+                        )
+                    }
+                } else {
+                    // 阶段下拉（14 阶段）
+                    LabeledDropdown(
+                        label = "关联阶段",
+                        options = stages.map { it.id to it.name },
+                        selectedId = stageId.ifBlank { null },
+                        onSelected = { stageId = it },
+                    )
                 }
             }
         },

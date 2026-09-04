@@ -21,6 +21,7 @@ interface AppContainer {
     val checklistRepo: ChecklistRepository
     val noteRepo: NoteRepository
     val contactRepo: ContactRepository
+    val quickNoteRepo: QuickNoteRepository
     val importExportRepo: ImportExportRepository
     val todayProvider: () -> String
 
@@ -42,6 +43,7 @@ class DefaultAppContainer(
     override val checklistRepo: ChecklistRepository by lazy { ChecklistRepository(db) }
     override val noteRepo: NoteRepository by lazy { NoteRepository(db) }
     override val contactRepo: ContactRepository by lazy { ContactRepository(db) }
+    override val quickNoteRepo: QuickNoteRepository by lazy { QuickNoteRepository(db) }
     override val importExportRepo: ImportExportRepository by lazy { ImportExportRepository(db) }
 
     override val todayProvider: () -> String = ::today
@@ -57,6 +59,7 @@ class DefaultAppContainer(
             db.checklistDao().clearChecks()
             db.noteDao().clearAll()
             db.contactDao().clearAll()
+            db.quickNoteDao().clearAll()
             db.spaceNeedDao().clearAll()
         }
     }

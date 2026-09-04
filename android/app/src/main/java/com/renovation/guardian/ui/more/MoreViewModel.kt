@@ -14,7 +14,11 @@ class MoreViewModel(application: Application) : AppViewModel(application) {
     val profile: Flow<com.renovation.guardian.data.db.HouseProfileEntity?> = container.houseProfileRepo.observe()
     val contacts = container.contactRepo.observeAll()
     val notes = container.noteRepo.observeAll()
+    val quickNotes = container.quickNoteRepo.observeAll()
     val spaces = container.spaceNeedRepo.observeAll()
+
+    /** 14 阶段目录（随手记「阶段备忘」关联用）。 */
+    val stages = container.stageRepo.observeAll()
 
     val tiers = container.knowledge.prices?.tiers ?: emptyList()
     val modes = container.knowledge.knowledge?.modes ?: emptyList()
@@ -48,6 +52,22 @@ class MoreViewModel(application: Application) : AppViewModel(application) {
 
     fun deleteNote(id: String) {
         viewModelScope.launch { container.noteRepo.delete(id) }
+    }
+
+    /** 新增 / 编辑随手记（type: wish|memo；category 仅 wish；stageId 仅 memo）。 */
+    fun upsertQuickNote(content: String, type: String, category: String?, stageId: String?, existingId: String?) {
+        viewModelScope.launch {
+            container.quickNoteRepo.upsert(content, type, category, stageId, existingId, today)
+        }
+    }
+
+    /** 勾选 / 取消随手记完成。 */
+    fun setQuickNoteDone(id: String, done: Boolean) {
+        viewModelScope.launch { container.quickNoteRepo.setDone(id, done, today) }
+    }
+
+    fun deleteQuickNote(id: String) {
+        viewModelScope.launch { container.quickNoteRepo.delete(id) }
     }
 
     fun addSpaceFromPreset(presetId: String) {

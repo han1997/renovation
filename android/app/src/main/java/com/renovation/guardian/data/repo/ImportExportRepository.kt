@@ -8,6 +8,7 @@ import com.renovation.guardian.data.db.ContactEntity
 import com.renovation.guardian.data.db.ExpenseEntity
 import com.renovation.guardian.data.db.HouseProfileEntity
 import com.renovation.guardian.data.db.NoteEntity
+import com.renovation.guardian.data.db.QuickNoteEntity
 import com.renovation.guardian.data.db.SpaceNeedEntity
 import com.renovation.guardian.data.db.SpaceNeedStageEntity
 import com.renovation.guardian.data.db.SpaceExportTuple
@@ -47,6 +48,7 @@ class ImportExportRepository(private val db: AppDatabase) {
         val checks = db.checklistDao().exportChecks()
         val contacts = db.contactDao().exportAll()
         val notes = db.noteDao().exportAll()
+        val quickNotes = db.quickNoteDao().exportAll()
         val spaces = db.spaceNeedDao().exportSpaces()
 
         val payload = ExportPayload(
@@ -63,6 +65,7 @@ class ImportExportRepository(private val db: AppDatabase) {
                 checks = checks.associate { it.itemId to it.done },
                 notes = notes.map { it.toExport() },
                 contacts = contacts.map { it.toExport() },
+                quickNotes = quickNotes.map { it.toExport() },
                 spaces = spaces.map { it.toSpaceExport() },
             )
         return json.encodeToString(ExportPayload.serializer(), payload)
@@ -96,6 +99,7 @@ class ImportExportRepository(private val db: AppDatabase) {
         db.checklistDao().clearChecks()
         db.noteDao().clearAll()
         db.contactDao().clearAll()
+        db.quickNoteDao().clearAll()
         db.spaceNeedDao().clearAll()
 
         // Reinsert
@@ -129,6 +133,9 @@ class ImportExportRepository(private val db: AppDatabase) {
         p.contacts.forEach { c ->
             db.contactDao().upsert(c.toEntity())
         }
+        p.quickNotes.forEach { q ->
+            db.quickNoteDao().upsert(q.toEntity())
+        }
         p.spaces.forEach { s ->
             val space = s.toSpaceEntity()
             db.spaceNeedDao().upsert(space)
@@ -156,6 +163,7 @@ private data class ExportPayload(
     val checks: Map<String, Boolean> = emptyMap(),
     val notes: List<NoteExport> = emptyList(),
     val contacts: List<ContactExport> = emptyList(),
+    val quickNotes: List<QuickNoteExport> = emptyList(),
     val spaces: List<SpaceExport> = emptyList(),
 )
 
@@ -306,6 +314,41 @@ private data class ContactExport(val id: String, val name: String, val role: Str
 }
 
 private fun ContactEntity.toExport() = ContactExport(id, name, role, phone, note)
+
+/** 随手记导出/导入模型；旧备份缺 `quickNotes` 字段时取默认空列表，导入跳过。 */
+@Serializable
+private data class QuickNoteExport(
+    val id: String,
+    val content: String,
+    val type: String,
+    val category: String? = null,
+    val stageId: String? = null,
+    val isDone: Boolean = false,
+    val createdAt: String,
+    val updatedAt: String,
+) {
+    fun toEntity() = QuickNoteEntity(
+        id = id,
+        content = content,
+        type = type,
+        category = category,
+        stageId = stageId,
+        isDone = isDone,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+    )
+}
+
+private fun QuickNoteEntity.toExport() = QuickNoteExport(
+    id = id,
+    content = content,
+    type = type,
+    category = category,
+    stageId = stageId,
+    isDone = isDone,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+)
 
 @Serializable
 private data class SpaceExport(
