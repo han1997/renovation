@@ -35,7 +35,7 @@ class MoreViewModel(application: Application) : AppViewModel(application) {
     }
 
     fun upsertContact(name: String, role: String?, phone: String?, note: String?, existingId: String?) {
-        viewModelScope.launch { container.contactRepo.upsert(name, role, phone, note, existingId) }
+        viewModelScope.launch { container.contactRepo.upsert(name, role, phone, note, existingId, today) }
     }
 
     fun deleteContact(id: String) {

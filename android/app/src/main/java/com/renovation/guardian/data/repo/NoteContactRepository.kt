@@ -28,7 +28,7 @@ class NoteRepository(private val db: AppDatabase) {
 class ContactRepository(private val db: AppDatabase) {
     fun observeAll(): Flow<List<ContactEntity>> = db.contactDao().observeAll()
     suspend fun getById(id: String): ContactEntity? = db.contactDao().getById(id)
-    suspend fun upsert(name: String, role: String?, phone: String?, note: String?, existingId: String?) {
+    suspend fun upsert(name: String, role: String?, phone: String?, note: String?, existingId: String?, today: String) {
         val id = existingId ?: IdGen.new("ct")
         db.contactDao().upsert(
             ContactEntity(
@@ -37,7 +37,7 @@ class ContactRepository(private val db: AppDatabase) {
                 role = role?.takeIf { it.isNotBlank() },
                 phone = phone?.takeIf { it.isNotBlank() },
                 note = note?.takeIf { it.isNotBlank() },
-                createdAt = existingId?.let { db.contactDao().getById(it)?.createdAt } ?: java.time.LocalDate.now().toString(),
+                createdAt = existingId?.let { db.contactDao().getById(it)?.createdAt } ?: today,
             ),
         )
     }
