@@ -300,3 +300,37 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 10: Android 版装修管家移植（Kotlin + Compose 原生重写）
+
+**Date**: 2026-09-04
+**Task**: Android 版装修管家移植（Kotlin + Compose 原生重写）
+**Branch**: `main`
+
+### Summary
+
+以原生 Kotlin + Jetpack Compose 重写装修管家为 Android App：Room 数据层（金额 INTEGER cents）、5 Tab + 首次设置向导、Material You 动态取色（低版本静态色板回退）、SAF 导入导出 JSON/CSV、知识数据打包 assets；minSdk 24 兼容修复（移除 java.time）；15 个单元测试全绿、lint 通过、debug APK 构建成功；建立 .trellis/spec/android/ 7 篇规范文档。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `19522d5` | (see git log) |
+| `4cf19ea` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
