@@ -136,4 +136,88 @@ class ImportExportRepositoryTest {
         val result = repo.importJson("{ not valid json")
         assertFalse(result.success)
     }
+
+    @Test
+    fun exportJson_containsQuickNotes() = runTest {
+        db.quickNoteDao().upsert(
+            com.renovation.guardian.data.db.QuickNoteEntity(
+                id = "qn1",
+                content = "买冰箱",
+                type = com.renovation.guardian.data.db.QuickNoteEntity.TYPE_WISH,
+                category = com.renovation.guardian.data.db.QuickNoteEntity.CATEGORY_APPLIANCE,
+                stageId = null,
+                isDone = false,
+                createdAt = "2026-09-01",
+                updatedAt = "2026-09-01",
+            ),
+        )
+
+        val json = repo.exportJson()
+
+        assertTrue("导出应包含 quickNotes 字段", json.contains("\"quickNotes\""))
+        assertTrue("导出应包含随手记内容", json.contains("买冰箱"))
+    }
+
+    @Test
+    fun importJson_quickNotesRoundTrip_preservesData() = runTest {
+        db.quickNoteDao().upsert(
+            com.renovation.guardian.data.db.QuickNoteEntity(
+                id = "qn1",
+                content = "贴砖前确认坡度",
+                type = com.renovation.guardian.data.db.QuickNoteEntity.TYPE_MEMO,
+                category = null,
+                stageId = "tiling",
+                isDone = true,
+                createdAt = "2026-09-01",
+                updatedAt = "2026-09-02",
+            ),
+        )
+        val exported = repo.exportJson()
+
+        val target = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            AppDatabase::class.java,
+        ).allowMainThreadQueries().build()
+        try {
+            val result = ImportExportRepository(target).importJson(exported)
+            assertTrue(result.success)
+
+            val restored = target.quickNoteDao().exportAll()
+            assertEquals(1, restored.size)
+            assertEquals("qn1", restored[0].id)
+            assertEquals("贴砖前确认坡度", restored[0].content)
+            assertEquals(com.renovation.guardian.data.db.QuickNoteEntity.TYPE_MEMO, restored[0].type)
+            assertEquals("tiling", restored[0].stageId)
+            assertTrue(restored[0].isDone)
+        } finally {
+            target.close()
+        }
+    }
+
+    @Test
+    fun importJson_legacyBackupWithoutQuickNotes_succeeds() = runTest {
+        // 旧版本备份：无 quickNotes 字段，导入应成功且随手记为空
+        val legacy = """
+            {
+              "schema_version": 1,
+              "ver": 1,
+              "profile": null,
+              "tasksDone": {},
+              "taskDates": {},
+              "customTasks": [],
+              "stageOverride": {},
+              "budgetCategories": [],
+              "expenses": [],
+              "checks": {},
+              "notes": [],
+              "contacts": [],
+              "spaces": []
+            }
+        """.trimIndent()
+
+        val result = repo.importJson(legacy)
+
+        assertTrue("旧备份导入应成功：${result.error}", result.success)
+        assertTrue(db.quickNoteDao().exportAll().isEmpty())
+    }
 }
