@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 自动备份规则：本地 SQLite 默认排除，避免备份包膨胀 -->
+<full-backup-content>
+    <exclude domain="database" />
+    <exclude domain="sharedpref" />
+</full-backup-content>

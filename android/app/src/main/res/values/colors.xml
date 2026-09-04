@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_clay">#CF6B45</color>
+    <color name="brand_clay_dark">#B85A37</color>
+    <color name="brand_soft">#F9EBE4</color>
+    <color name="bg_cream">#F6F3EE</color>
+    <color name="ink">#33312C</color>
+    <color name="muted">#8B8479</color>
+    <color name="line">#ECE7DE</color>
+    <color name="green">#4F9D69</color>
+    <color name="red">#D15746</color>
+    <color name="amber">#C98F2B</color>
+    <color name="blue">#5B84C4</color>
+</resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">装修管家</string>
+
+    <!-- Tabs -->
+    <string name="tab_home">首页</string>
+    <string name="tab_stages">流程</string>
+    <string name="tab_budget">预算</string>
+    <string name="tab_guide">指南</string>
+    <string name="tab_more">我的</string>
+
+    <!-- Onboarding -->
+    <string name="wizard_step_label">第 %1$d 步 / 共 %2$d 步</string>
+    <string name="wizard_next">下一步</string>
+    <string name="wizard_back">上一步</string>
+    <string name="wizard_finish">生成我的装修计划 ✨</string>
+    <string name="wizard_skip">先跳过，用默认设置逛逛 →</string>
+
+    <!-- Topbar / empty states -->
+    <string name="topbar_default_subtitle">新房装修全流程助手</string>
+    <string name="empty_no_profile">先花 1 分钟告诉我你家的情况吧。</string>
+    <string name="cta_start_wizard">开始设置 →</string>
+
+    <!-- Common -->
+    <string name="action_save">保存</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_delete">删除</string>
+    <string name="action_confirm">确认</string>
+</resources>

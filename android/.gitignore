@@ -1,0 +1,29 @@
+# Android Gradle / Kotlin / SDK
+.gradle/
+**/build/
+.kotlin/
+.idea/
+*.iml
+local.properties
+captures/
+.cxx/
+
+# Keystores / credentials
+keystore/*.keystore
+keystore/*.jks
+keystore/*.keystore.example
+**/*.jks
+!keystore/*.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# Logs / temp
+*.log
+*.tmp
+*.bak
