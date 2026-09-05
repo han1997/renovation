@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
@@ -21,6 +20,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -129,7 +129,7 @@ private fun StageCard(
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stage.emoji, style = MaterialTheme.typography.titleLarge)
-                Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
+                Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
                     Text(stage.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Text(stage.phase, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -141,9 +141,9 @@ private fun StageCard(
             }
             LinearProgressIndicator(
                 progress = { (pct / 100f).coerceIn(0f, 1f) },
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             )
-            Text(stage.duration, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
+            Text(stage.duration, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 6.dp))
         }
     }
 }
@@ -156,98 +156,134 @@ private fun StageDetailContent(
 ) {
     var newTask by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.padding(top = 8.dp)) {
-        Text("目标", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(detail.stage.goal, style = MaterialTheme.typography.bodyMedium)
-        SpacerH()
+    Column {
+        SectionCard {
+            DetailSectionTitle("🎯 目标")
+            Text(detail.stage.goal, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
+        }
 
         if (detail.warnings.isNotEmpty()) {
-            LabeledList("⚠️ 避坑要点", detail.warnings, MaterialTheme.colorScheme.error)
-        }
-        if (detail.buy.isNotEmpty()) {
-            Text("🛒 需购材料", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            detail.buy.forEach {
-                Text("· ${it.item}${it.note?.let { n -> "（${n}）" } ?: ""}", style = MaterialTheme.typography.bodyMedium)
+            SectionCard(modifier = Modifier.padding(top = 12.dp)) {
+                DetailSectionTitle("⚠️ 避坑要点")
+                Column(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    detail.warnings.forEach {
+                        Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                    }
+                }
             }
-            SpacerH()
         }
 
-        Text("✅ 任务清单", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-        detail.templates.forEach { t ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = t.done, onCheckedChange = { vm.toggleTemplate(t.id, it) })
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(t.text, style = MaterialTheme.typography.bodyLarge)
-                    t.tip?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        if (detail.buy.isNotEmpty()) {
+            SectionCard(modifier = Modifier.padding(top = 12.dp)) {
+                DetailSectionTitle("🛒 需购材料")
+                Column(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    detail.buy.forEach {
+                        Row(verticalAlignment = Alignment.Top) {
+                            Text(
+                                it.item,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            it.note?.let { n ->
+                                Text(
+                                    "（$n）",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 4.dp),
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
-        detail.customTasks.forEach { c ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = c.done, onCheckedChange = { vm.toggleCustom(c.id, it) })
-                Text(c.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                IconButton(onClick = { onRequestDeleteCustom(c) }) {
-                    Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error)
+
+        SectionCard(modifier = Modifier.padding(top = 12.dp)) {
+            DetailSectionTitle("✅ 任务清单")
+            Column(modifier = Modifier.padding(top = 4.dp)) {
+                detail.templates.forEachIndexed { index, t ->
+                    if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = t.done, onCheckedChange = { vm.toggleTemplate(t.id, it) })
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(t.text, style = MaterialTheme.typography.bodyLarge)
+                            t.tip?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                        }
+                    }
+                }
+                if (detail.templates.isNotEmpty() && detail.customTasks.isNotEmpty()) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                }
+                detail.customTasks.forEachIndexed { index, c ->
+                    if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = c.done, onCheckedChange = { vm.toggleCustom(c.id, it) })
+                        Text(c.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                        IconButton(onClick = { onRequestDeleteCustom(c) }) {
+                            Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error)
+                        }
+                    }
                 }
             }
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            OutlinedTextField(
-                value = newTask,
-                onValueChange = { newTask = it },
-                label = { Text("添加自定义任务") },
-                modifier = Modifier.weight(1f),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(
-                    onDone = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            ) {
+                OutlinedTextField(
+                    value = newTask,
+                    onValueChange = { newTask = it },
+                    label = { Text("添加自定义任务") },
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            if (newTask.isNotBlank()) {
+                                vm.addCustom(detail.stage.id, newTask)
+                                newTask = ""
+                            }
+                        },
+                    ),
+                )
+                IconButton(
+                    onClick = {
                         if (newTask.isNotBlank()) {
                             vm.addCustom(detail.stage.id, newTask)
                             newTask = ""
                         }
                     },
-                ),
-            )
-            IconButton(
-                onClick = {
-                    if (newTask.isNotBlank()) {
-                        vm.addCustom(detail.stage.id, newTask)
-                        newTask = ""
-                    }
-                },
-                enabled = newTask.isNotBlank(),
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "添加")
-            }
-        }
-        SpacerH()
-
-        detail.checklists.forEach { cl ->
-            Text("${cl.emoji} ${cl.name}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            if (cl.items.isEmpty()) {
-                Text("（暂无条目）", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            cl.items.forEach { item ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = item.done, onCheckedChange = { vm.toggleChecklistItem(item.id, it) })
-                    Text(item.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                    enabled = newTask.isNotBlank(),
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "添加")
                 }
             }
-            SpacerH()
+        }
+
+        detail.checklists.forEach { cl ->
+            SectionCard(modifier = Modifier.padding(top = 12.dp)) {
+                DetailSectionTitle("${cl.emoji} ${cl.name}")
+                if (cl.items.isEmpty()) {
+                    Text(
+                        "（暂无条目）",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+                Column(modifier = Modifier.padding(top = 4.dp)) {
+                    cl.items.forEachIndexed { index, item ->
+                        if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(checked = item.done, onCheckedChange = { vm.toggleChecklistItem(item.id, it) })
+                            Text(item.text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun LabeledList(title: String, items: List<String>, color: androidx.compose.ui.graphics.Color) {
-    Text(title, style = MaterialTheme.typography.labelMedium, color = color)
-    items.forEach { Text("· $it", style = MaterialTheme.typography.bodyMedium) }
-    SpacerH()
-}
-
-@Composable
-private fun SpacerH() {
-    androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
+private fun DetailSectionTitle(text: String) {
+    Text(text, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
 }
