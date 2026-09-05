@@ -52,7 +52,7 @@
 
 - `assets/knowledge.json`：镜像 Web `window.DATA`（`version` + `stages` / `checklists` / `tips` / `styles` / `styleQuiz` / `materialTimeline` / `modes` / `whoBuilds` / `glossary` / `spaceNeeds` 等）。结构见 `data/knowledge/KnowledgeJson.kt`。
 - `assets/prices.json`：镜像 Web `window.PRICES`（`version` + `reserveRatio` / `tiers` / `grades` / `rates` / `reference`）。结构见 `data/knowledge/PricesJson.kt`。
-- 两端（Web / Android）**独立维护，不同步**；改动知识数据需同步检查两端文案一致性（对齐快照不在本任务范围）。
+- **Android 知识数据独立维护**；Web 版自 2026-09-05 起已封存，后续知识更新仅修改 Android 的 assets 与相关模型，不再要求同步 Web 数据或检查双端文案一致性。
 - `reference.items[].price` 是自由文本（如 "30–80元/㎡"），非数字，Android 端仅展示或做区间解析，不参与计算。
 
 ## 启动装载与种子

@@ -1,6 +1,6 @@
 # Android 开发规范
 
-> 本目录定义装修管家 **Android 版**（原生 Kotlin + Jetpack Compose）的开发规范。工程位于仓库根 `android/` 子目录，与 Web 版（零构建 vanilla JS）长期双线维护、功能对齐。
+> 本目录定义装修管家 **Android 版**（原生 Kotlin + Jetpack Compose）的开发规范。工程位于仓库根 `android/` 子目录，是项目唯一持续开发的应用端。自 2026-09-05 起 Web 版已封存，仅保留历史代码；后续不再双线维护或要求功能对齐。
 >
 > 本文档回应已完成的移植任务 `.trellis/tasks/08-28-android-port`，内容全部基于 `android/` 现有代码事实，不含虚构。
 

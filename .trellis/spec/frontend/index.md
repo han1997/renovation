@@ -1,6 +1,8 @@
-# Frontend Development Guidelines
+# Frontend Development Guidelines（Web 历史参考）
 
-> 本项目是零构建、零依赖的 vanilla JS / HTML / CSS 单页应用。前端规范必须匹配当前源码事实。
+> **维护状态（2026-09-05）：Web 版已封存，不再新增功能或进行常规维护。** 本目录仅供历史源码参考，后续开发以 [Android 规范](../android/index.md) 为准。
+>
+> 已封存的 Web 版是零构建、零依赖的 vanilla JS / HTML / CSS 单页应用。以下规范记录其现有源码约定。
 
 ## Overview
 

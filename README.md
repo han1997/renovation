@@ -1,79 +1,105 @@
-# 装修管家 · 新房装修全流程助手
+# 装修管家 · Android 装修全流程助手
 
-一个陪你从收房走到入住的装修助手：流程打卡、预算记账、避坑提醒、验收清单，全部离线可用，零依赖零构建，双击即用。
+一个陪你从收房走到入住的装修助手：流程打卡、预算记账、避坑提醒、验收清单，核心功能离线可用。
 
-## 功能概览
+> **项目状态（2026-09-05）：网页版已封存，后续仅专注 Android App 开发。**
+>
+> 新功能、体验优化和问题修复均围绕 `android/` 原生应用推进，不再双线维护或要求 Web / Android 功能对齐。网页版源码原位保留，仅供历史参考和存量数据备份，不再新增功能或进行常规维护。
 
-- **首次设置向导**：三步问卷（面积 / 城市 / 开工日期 → 装修方式 → 档次与总预算），自动生成专属流程与预算分类
-- **首页行动中心**：一眼看清当前阶段与整体进度，按逾期 / 今天 / 未来 7 天安排任务并支持直接完成，同时提示最需要关注的预算异常与当前阶段采购事项
-- **流程页**：进入后先展示当前阶段决策摘要（完成度、下一项行动、关键避坑、采购与验收入口），再查看 14 阶段时间轴（验房收房 → 量房设计 → 主体拆改 → 水电改造 → 防水工程 → 瓦工贴砖 → 木工工程 → 墙面油漆 → 成品安装 → 开荒保洁 → 家具家电进场 → 软装布置 → 通风除醛 → 入住验收）；每阶段含可勾选任务清单、避坑要点、需购材料、验收清单入口
-- **预算页**：按分类管理预算与实际支出，超支提醒，支持导出支出明细 CSV（Excel / WPS 可直接打开）
-- **指南页**：避坑指南（按主题分类的高危 / 重要 / 提示要点）、验收清单（逐项核对）、风格（七种主流风格 + 风格小测试）、建材购买日历（按工期节点提醒何时下单）、百科（装修方式 / 找谁装 / 名词解释）
-- **我的页**：房屋信息、联系人通讯录、随手笔记、JSON 备份导入导出、支出 CSV 导出、数据重置
+## 维护范围
 
-## 使用方法
+| 端 | 状态 | 说明 |
+|---|---|---|
+| **Android App** | **持续开发，唯一后续开发端** | 工程位于 [`android/`](android/)，原生 Kotlin + Jetpack Compose |
+| 网页版 | **已封存** | 根目录 `index.html`、`js/`、`css/` 及相关启动脚本保留，不再作为开发主线 |
 
-### 本地使用
+## 功能概览（Android）
 
-双击 `index.html` 在浏览器中直接打开，无需安装任何环境。或双击 `open-app.bat` 调用默认浏览器打开。
+- **首次设置向导**：填写房屋信息、装修方式与预算，生成装修计划
+- **首页**：查看装修进度、待办任务与预算概况
+- **流程**：按装修阶段管理任务、查看避坑要点与验收清单
+- **预算**：管理分类预算和实际支出，查看超支情况，导出支出 CSV
+- **指南**：查阅装修知识、避坑指南、验收清单等离线资料
+- **我的**：管理房屋信息、联系人和笔记，导入 / 导出 JSON 备份
 
-### 手机局域网访问
+## 使用方法（Android）
 
-1. 双击 `phone-server.bat`，启动内置静态服务器（需本机已安装 Node.js）
-2. 命令行窗口会打印局域网地址（形如 `http://192.168.x.x:8787`）
-3. 手机连接同一 Wi-Fi，用浏览器打开该地址即可
+### 构建与安装
 
-关闭命令行窗口即停止服务。数据保存在各自设备的浏览器中。
+- 运行设备：Android 7.0 及以上（minSdk 24）
+- 开发环境：Android Studio、与工程兼容的 Gradle JDK，以及 Android SDK（当前 compileSdk 37；版本以 [`android/gradle/libs.versions.toml`](android/gradle/libs.versions.toml) 为准）
+- 用 Android Studio 打开 `android/` 目录，完成 Gradle 同步后，可直接构建并运行到真机或模拟器
+
+也可在仓库根目录打开 PowerShell，执行：
+
+```powershell
+cd android
+.\gradlew.bat :app:assembleDebug
+```
+
+调试 APK 输出到 `android/app/build/outputs/apk/debug/app-debug.apk`（相对仓库根目录），安装到 Android 设备即可使用。Linux / macOS 下使用 `./gradlew` 替代 `.\gradlew.bat`。
+
+完整的构建、调试、测试与签名说明见 [Android 开发说明](android/README.md)。当前 release 构建暂用 debug 签名，仅用于本地自测；正式分发前需配置独立的 release 签名。
 
 ### 数据说明
 
-- 所有数据保存在浏览器本地（localStorage），不上传服务器，完全离线可用
-- 支持导出 / 导入 JSON 备份文件，方便换设备或存档
-- 支持导出支出明细为 CSV，可用 Excel / WPS 打开
-- 隐私模式（无痕窗口）下浏览器无法持久保存，应用会给出提示
+- 用户数据保存在设备本地的 Room（SQLite）数据库，无后端、无登录、无云同步
+- 装修知识和价格参考随 App 内置，离线可用，不强依赖 Google Play / GMS
+- 支持 Android 端 JSON 备份 / 恢复，以及支出明细 CSV 导出；卸载应用或换机前请先备份
+- Web 浏览器数据与 Android 数据相互独立，**当前不支持将 Web JSON 备份自动迁移到 Android**；首次使用 Android 版仍需完成设置向导，旧版数据请单独留档
 
-## 技术说明
+## 技术说明（Android）
 
-- 零依赖、零构建的纯静态 Web 应用（vanilla JS / HTML / CSS）
-- 无 npm、无打包工具、无后端，双击即用
-- 每个 JS 模块为 IIFE 并挂到 `window.*` 全局，加载顺序即依赖关系（见 `index.html` 中的 `<script>` 标签顺序）
-- 移动端优先的单栏布局，桌面端居中适配
+- 原生 Kotlin + Jetpack Compose + Material 3
+- Navigation Compose 管理五个 Tab 与首次设置向导
+- Room 管理用户数据，`assets/*.json` 保存只读知识数据
+- Gradle Wrapper 构建；依赖和 SDK 版本统一以 [`android/gradle/libs.versions.toml`](android/gradle/libs.versions.toml) 为准
+- Android 知识数据独立维护，后续变更不再要求同步到已封存的网页版
 
 ## 项目结构
 
-```
+```text
 renovation/
-├── index.html              # 单页入口，按顺序加载所有脚本
-├── server.js               # 手机访问用的零依赖静态服务器
-├── open-app.bat            # 直接打开 index.html
-├── phone-server.bat        # 启动 server.js 供手机访问
-├── css/
-│   └── style.css           # 全部样式（移动端优先）
-└── js/
-    ├── data/               # 只读知识库
-    │   ├── knowledge.js    #   DATA   装修全流程 / 避坑 / 验收 / 风格 / 建材 / 百科
-    │   └── prices.js       #   PRICES 价格参考 / 预算模板 / 档次城市
-    ├── storage.js          # Store   本地存储与导入导出
-    ├── ui.js               # UI      通用界面工具
-    ├── views/              # Views   各页面渲染
-    │   ├── home.js         #   首页
-    │   ├── stages.js       #   流程页
-    │   ├── budget.js       #   预算页
-    │   ├── guide.js        #   指南页
-    │   └── more.js         #   我的页
-    └── app.js              # App     路由 / 进度 / 首次设置向导
+├── android/                  # 唯一持续开发的 Android App 工程
+│   ├── README.md             # Android 构建、调试、测试与签名说明
+│   ├── app/
+│   │   ├── src/main/         # Kotlin / Compose 源码、资源与内置知识数据
+│   │   ├── src/test/         # JVM 单元测试
+│   │   └── src/androidTest/  # 设备 / Compose UI 测试
+│   ├── gradle/               # Gradle Wrapper 配置与版本目录
+│   └── gradlew.bat           # Windows 构建入口
+├── .trellis/                 # 开发规范、任务与会话记录
+├── index.html                # 以下为已封存的网页版文件
+├── css/                      # 历史 Web 样式
+├── js/                       # 历史 Web 逻辑与知识数据
+├── server.js                 # 历史局域网静态服务器
+├── open-app.bat              # 历史浏览器启动入口
+└── phone-server.bat          # 历史局域网访问启动脚本
 ```
 
 ## 开发说明
 
-本项目使用 Trellis 任务流管理开发进度：开发规范见 `.trellis/spec/`，任务记录见 `.trellis/tasks/`，配合 AI 协作完成迭代。新增功能前请先阅读 `.trellis/spec/frontend/directory-structure.md` 了解模块约定。
+本项目使用 Trellis 任务流管理开发进度：开发规范见 `.trellis/spec/`，任务记录见 `.trellis/tasks/`，配合 AI 协作完成迭代。
+
+- 后续需求默认只面向 Android App，优先阅读 [Android 开发规范](.trellis/spec/android/index.md) 与 [Android 目录结构](.trellis/spec/android/directory-structure.md)
+- Android 的使用与工程细节见 [`android/README.md`](android/README.md)
+- `.trellis/spec/frontend/` 与 `.trellis/spec/backend/` 保留为已封存网页版及静态服务器的历史说明，不再作为新功能开发入口
+
+## 网页版（已封存，仅供历史参考）
+
+以下方式仅用于查看旧版或导出存量数据，不代表恢复网页版开发，也不是 Android App 的运行方式。
+
+- **本地查看**：双击 `index.html`，或运行 `open-app.bat`，用浏览器打开旧版
+- **手机局域网查看**：安装 Node.js 后运行 `phone-server.bat`，手机连接同一 Wi-Fi，并在浏览器打开终端打印的局域网地址（如 `http://192.168.x.x:8787`）；关闭终端即停止服务
+- **历史技术栈**：vanilla JS / HTML / CSS，零依赖、零构建的静态 Web 应用；`server.js` 仅提供静态文件，不存储用户数据
+- **历史数据**：保存在各设备、各浏览器的 localStorage 中，可用旧版导出 JSON 备份或 CSV 支出明细；清理浏览器数据前请先备份，不要使用无痕窗口长期保存数据
 
 ## 更新日志
 
 本项目不维护单独的 CHANGELOG 文件，更新记录以 git 提交历史为准：
 
-```
+```bash
 git log --oneline
 ```
 
-提交信息采用「中文类型前缀 + 中文描述」格式，类型包括 `新增` / `修复` / `文档` / `重构` / `配置` / `性能` / `测试`。示例：`新增: 首次设置向导`、`修复: 预算超支计算`、`文档: 补充 README 使用说明`。详见 `.trellis/spec/project-conventions.md`。
+提交信息采用「中文类型前缀 + 中文描述」格式，类型包括 `新增` / `修复` / `文档` / `重构` / `配置` / `性能` / `测试`。示例：`新增: 首次设置向导`、`修复: 预算超支计算`、`文档: 明确网页版封存与 Android 开发方向`。详见 [项目开发约定](.trellis/spec/project-conventions.md)。

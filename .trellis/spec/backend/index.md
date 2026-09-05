@@ -1,10 +1,12 @@
-# Backend Development Guidelines
+# Backend Development Guidelines（Web 历史参考）
 
-> 本项目没有业务后端。这里的 backend 规范只覆盖根目录 `server.js` 这个可选的 Node.js 静态文件服务器。
+> **维护状态（2026-09-05）：Web 版及其静态服务器已封存，不再新增功能或进行常规维护。** 本目录仅供历史源码参考，后续开发以 [Android 规范](../android/index.md) 为准。
+>
+> 本项目没有业务后端。这里的 backend 规范只覆盖根目录 `server.js` 这个供历史 Web 版使用的可选 Node.js 静态文件服务器。
 
 ## Overview
 
-应用主体是可直接打开的静态 Web App：`index.html`、`css/style.css`、`js/**/*.js`。`server.js` 只用于局域网手机访问，使用 Node 内置模块 `http` / `fs` / `path` / `os`，没有 Express、数据库、登录、接口或服务端业务状态。
+已封存的 Web 版主体是可直接打开的静态 Web App：`index.html`、`css/style.css`、`js/**/*.js`。`server.js` 只用于局域网手机访问，使用 Node 内置模块 `http` / `fs` / `path` / `os`，没有 Express、数据库、登录、接口或服务端业务状态。
 
 ## Guidelines Index
 
@@ -18,11 +20,11 @@
 
 ## Cross-Layer Rule
 
-不要把业务逻辑迁移到 `server.js`。用户数据仍保存在浏览器 `localStorage` 中，导入导出由 `js/storage.js` 处理。`server.js` 只负责把仓库内静态文件安全地返回给浏览器。
+不要把业务逻辑迁移到 `server.js`。历史 Web 版用户数据保存在浏览器 `localStorage` 中，导入导出由 `js/storage.js` 处理。`server.js` 只负责把仓库内静态文件安全地返回给浏览器。
 
 ## Verification
 
-后端相关改动至少运行：
+如需验证历史静态服务器，可运行：
 
 ```bash
 node server.js
