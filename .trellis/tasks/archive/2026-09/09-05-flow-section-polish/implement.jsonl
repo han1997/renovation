@@ -1,0 +1,4 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/android/index.md", "reason": "Android 工程总规范与编码注意"}
+{"file": ".trellis/spec/android/ui-theme.md", "reason": "UI 分层、列表密度约定、SectionCard/UX 约定——本次排版改动核心规范"}
+{"file": ".trellis/spec/android/quality-guidelines.md", "reason": "验证清单与 DoD"}
