@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -54,6 +57,7 @@ import com.renovation.guardian.data.db.HouseProfileEntity
 import com.renovation.guardian.data.db.NoteEntity
 import com.renovation.guardian.data.db.QuickNoteEntity
 import com.renovation.guardian.data.db.StageEntity
+import com.renovation.guardian.ui.components.ConfirmDeleteDialog
 import com.renovation.guardian.ui.components.DatePickerField
 import com.renovation.guardian.ui.components.LabeledText
 import com.renovation.guardian.ui.components.MoneyText
@@ -85,6 +89,12 @@ fun MoreScreen() {
     var showQuickNote by remember { mutableStateOf<QuickNoteEntity?>(null) }
     var showSpaceAdd by remember { mutableStateOf(false) }
     var showReset by remember { mutableStateOf(false) }
+
+    // 待确认删除的对象（统一走 ConfirmDeleteDialog）
+    var deleteContactTarget by remember { mutableStateOf<ContactEntity?>(null) }
+    var deleteNoteTarget by remember { mutableStateOf<NoteEntity?>(null) }
+    var deleteQuickNoteId by remember { mutableStateOf<String?>(null) }
+    var deleteSpaceTarget by remember { mutableStateOf<com.renovation.guardian.data.db.SpaceNeedWithStages?>(null) }
 
     val tierName = { id: String? -> vm.tiers.firstOrNull { it.id == id }?.name ?: id ?: "—" }
     val modeName = { id: String? -> vm.modes.firstOrNull { it.id == id }?.name ?: id ?: "—" }
@@ -126,6 +136,16 @@ fun MoreScreen() {
                     }
                 }
             }
+            if (contacts.isEmpty()) {
+                item {
+                    Text(
+                        "把工长、设计师、监工的电话存在这里，方便随时联系",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
+                }
+            }
             items(contacts, key = { it.id }) { c ->
                 SectionCard {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -135,7 +155,7 @@ fun MoreScreen() {
                             c.phone?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                         }
                         IconButton(onClick = { showContact = c }) { Icon(Icons.Filled.Edit, contentDescription = "编辑", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-                        IconButton(onClick = { vm.deleteContact(c.id) }) { Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error) }
+                        IconButton(onClick = { deleteContactTarget = c }) { Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error) }
                     }
                 }
             }
@@ -148,11 +168,27 @@ fun MoreScreen() {
                     }
                 }
             }
+            if (notes.isEmpty()) {
+                item {
+                    Text(
+                        "记下合同编号、保修期、验房要点，随时翻看",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
+                }
+            }
             items(notes, key = { it.id }) { n ->
                 SectionCard(onClick = { showNote = n }) {
-                    Column {
-                        Text(n.title.ifBlank { "(无标题)" }, style = MaterialTheme.typography.bodyLarge)
-                        Text(n.body.take(40), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(n.title.ifBlank { "(无标题)" }, style = MaterialTheme.typography.bodyLarge)
+                            Text(n.body.take(40), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        // 笔记此前无法删除（deleteNote 死代码），补删除入口 + 确认
+                        IconButton(onClick = { deleteNoteTarget = n }) {
+                            Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error)
+                        }
                     }
                 }
             }
@@ -203,7 +239,7 @@ fun MoreScreen() {
                                 groupLabel = quickNoteCategoryLabel(cat),
                                 onToggleDone = { vm.setQuickNoteDone(q.id, !q.isDone) },
                                 onEdit = { showQuickNote = q },
-                                onDelete = { vm.deleteQuickNote(q.id) },
+                                onDelete = { deleteQuickNoteId = q.id },
                             )
                         }
                     }
@@ -233,7 +269,7 @@ fun MoreScreen() {
                                 groupLabel = stageName,
                                 onToggleDone = { vm.setQuickNoteDone(q.id, !q.isDone) },
                                 onEdit = { showQuickNote = q },
-                                onDelete = { vm.deleteQuickNote(q.id) },
+                                onDelete = { deleteQuickNoteId = q.id },
                             )
                         }
                     }
@@ -248,6 +284,16 @@ fun MoreScreen() {
                     }
                 }
             }
+            if (spaces.isEmpty()) {
+                item {
+                    Text(
+                        "写下需要改造的空间（如主卧、厨房），自动生成对应阶段的任务",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
+                }
+            }
             items(spaces, key = { it.id }) { s ->
                 SectionCard {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -256,7 +302,7 @@ fun MoreScreen() {
                             Text(s.name, style = MaterialTheme.typography.bodyLarge)
                             s.description?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                         }
-                        IconButton(onClick = { vm.deleteSpace(s.id) }) { Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error) }
+                        IconButton(onClick = { deleteSpaceTarget = s }) { Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error) }
                     }
                 }
             }
@@ -267,19 +313,23 @@ fun MoreScreen() {
                         Text("数据备份与重置", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             androidx.compose.material3.Button(onClick = {
-                                scope.launch { exportActions.exportJson("renovation-backup.json", vm.exportJsonString()) }
+                                scope.launch {
+                                    val json = vm.exportJsonString()
+                                    exportActions.exportJson("renovation-backup.json", json)
+                                    snackbar.showSnackbar("已开始导出备份")
+                                }
                             }) { Icon(Icons.Filled.Upload, null); Text(" 导出") }
                             androidx.compose.material3.Button(onClick = {
                                 exportActions.importJson { text ->
                                     scope.launch {
                                         val res = vm.importJson(text)
-                                        snackbar.showSnackbar(if (res.success) "导入成功" else (res.error ?: "导入失败"))
+                                        snackbar.showSnackbar(if (res.success) "导入成功" else ("导入失败：${res.error ?: "文件格式不正确"}"))
                                     }
                                 }
                             }) { Icon(Icons.Filled.Download, null); Text(" 导入") }
                         }
                         androidx.compose.material3.TextButton(onClick = { showReset = true }) {
-                            Text("清除全部数据", color = MaterialTheme.colorScheme.error)
+                            Text("清空全部数据", color = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
@@ -294,18 +344,20 @@ fun MoreScreen() {
         }
     }
     if (showStylePick) {
-        StylePickDialog(styles = vm.styles, current = profile?.styleId, onPick = { vm.updateStyle(it); showStylePick = false }, onDismiss = { showStylePick = false })
+        StylePickDialog(styles = vm.styles, current = profile?.styleId, onPick = { vm.updateStyle(it); showStylePick = false; scope.launch { snackbar.showSnackbar("已保存") } }, onDismiss = { showStylePick = false })
     }
     showContact?.let { c ->
         ContactDialog(initial = c, onDismiss = { showContact = null }) { name, role, phone, note ->
             vm.upsertContact(name, role, phone, note, if (c.id.isBlank()) null else c.id)
             showContact = null
+            scope.launch { snackbar.showSnackbar("已保存") }
         }
     }
     showNote?.let { n ->
         NoteDialog(initial = n, onDismiss = { showNote = null }) { title, body ->
             vm.upsertNote(title, body, if (n.id.isBlank()) null else n.id)
             showNote = null
+            scope.launch { snackbar.showSnackbar("已保存") }
         }
     }
     showQuickNote?.let { q ->
@@ -316,18 +368,58 @@ fun MoreScreen() {
         ) { content, type, category, stageId ->
             vm.upsertQuickNote(content, type, category, stageId, if (q.id.isBlank()) null else q.id)
             showQuickNote = null
+            scope.launch { snackbar.showSnackbar("已保存") }
         }
     }
     if (showSpaceAdd) {
-        SpaceAddDialog(presets = vm.spacePresets, onPick = { vm.addSpaceFromPreset(it); showSpaceAdd = false }, onDismiss = { showSpaceAdd = false })
+        SpaceAddDialog(presets = vm.spacePresets, onPick = { vm.addSpaceFromPreset(it); showSpaceAdd = false; scope.launch { snackbar.showSnackbar("已保存") } }, onDismiss = { showSpaceAdd = false })
     }
     if (showReset) {
         AlertDialog(
             onDismissRequest = { showReset = false },
-            title = { Text("清除全部数据") },
-            text = { Text("将删除所有任务、预算、联系人、笔记与备份，且不可恢复。确定继续？") },
-            confirmButton = { TextButton(onClick = { vm.resetAll(); showReset = false }) { Text("清除", color = MaterialTheme.colorScheme.error) } },
+            title = { Text("清空全部数据") },
+            text = { Text("将删除所有任务、预算、联系人、笔记与备份，且不可恢复。建议先导出备份。确定继续？") },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.resetAll()
+                    showReset = false
+                    scope.launch { snackbar.showSnackbar("已清空全部数据") }
+                }) { Text("清除", color = MaterialTheme.colorScheme.error) }
+            },
             dismissButton = { TextButton(onClick = { showReset = false }) { Text("取消") } },
+        )
+    }
+
+    // ── 统一的删除确认对话框 ──
+    deleteContactTarget?.let { c ->
+        ConfirmDeleteDialog(
+            title = "删除联系人",
+            text = "确定删除「${c.name}」？删除后不可恢复。",
+            onConfirm = { vm.deleteContact(c.id); deleteContactTarget = null },
+            onDismiss = { deleteContactTarget = null },
+        )
+    }
+    deleteNoteTarget?.let { n ->
+        ConfirmDeleteDialog(
+            title = "删除笔记",
+            text = "确定删除「${n.title.ifBlank { "(无标题)" }}」？删除后不可恢复。",
+            onConfirm = { vm.deleteNote(n.id); deleteNoteTarget = null },
+            onDismiss = { deleteNoteTarget = null },
+        )
+    }
+    deleteQuickNoteId?.let { id ->
+        ConfirmDeleteDialog(
+            title = "删除随手记",
+            onConfirm = { vm.deleteQuickNote(id); deleteQuickNoteId = null },
+            onDismiss = { deleteQuickNoteId = null },
+        )
+    }
+    deleteSpaceTarget?.let { s ->
+        ConfirmDeleteDialog(
+            title = "删除空间需求",
+            text = "确定删除「${s.name}」？其派生的未完成任务会一并移除。",
+            onConfirm = { vm.deleteSpace(s.id); deleteSpaceTarget = null },
+            onDismiss = { deleteSpaceTarget = null },
         )
     }
 }
@@ -365,7 +457,7 @@ private fun HouseEditDialog(profile: HouseProfileEntity, vm: MoreViewModel, onDi
     var mode by remember { mutableStateOf(profile.modeId) }
     var grade by remember { mutableStateOf(profile.gradeId) }
     var startDate by remember { mutableStateOf(profile.startDate) }
-    var total by remember { mutableStateOf((profile.totalBudgetCents / 100.0).toString()) }
+    var total by remember { mutableStateOf(java.lang.String.format(java.util.Locale.ROOT, "%.2f", profile.totalBudgetCents / 100.0)) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -379,7 +471,10 @@ private fun HouseEditDialog(profile: HouseProfileEntity, vm: MoreViewModel, onDi
         dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
         title = { Text("编辑房屋信息") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()).imePadding(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 OutlinedTextField(value = area, onValueChange = { area = it }, label = { Text("面积（㎡）") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
                 LabeledDropdown("城市能级", vm.tiers.map { it.id to it.name }, tier) { tier = it }
                 LabeledDropdown("装修方式", vm.modes.map { it.id to it.name }, mode) { mode = it }
@@ -403,7 +498,7 @@ private fun StylePickDialog(
         confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } },
         title = { Text("选择风格") },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 styles.forEach { s ->
                     Row(
                         modifier = Modifier.fillMaxWidth().clickable { onPick(s.id) }.padding(8.dp),
@@ -437,14 +532,35 @@ private fun ContactDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = { onSave(name, role.ifBlank { null }, phone.ifBlank { null }, note.ifBlank { null }) }) { Text("保存") } },
+        confirmButton = {
+            TextButton(
+                onClick = { onSave(name.trim(), role.ifBlank { null }, phone.ifBlank { null }, note.ifBlank { null }) },
+                enabled = name.isNotBlank(),
+            ) { Text("保存") }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
         title = { Text(if (initial.id.isBlank()) "新增联系人" else "编辑联系人") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("姓名") }, modifier = Modifier.fillMaxWidth())
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()).imePadding(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("姓名") },
+                    isError = name.isBlank(),
+                    supportingText = { if (name.isBlank()) Text("请填写姓名") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 OutlinedTextField(value = role, onValueChange = { role = it }, label = { Text("角色（工长/设计师…）") }, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("电话") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text("电话") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 OutlinedTextField(value = note, onValueChange = { note = it }, label = { Text("备注") }, modifier = Modifier.fillMaxWidth())
             }
         },
@@ -462,11 +578,19 @@ private fun NoteDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = { onSave(title, body) }) { Text("保存") } },
+        confirmButton = {
+            TextButton(
+                onClick = { onSave(title.trim(), body) },
+                enabled = title.isNotBlank() || body.isNotBlank(),
+            ) { Text("保存") }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
         title = { Text(if (initial.id.isBlank()) "新增笔记" else "编辑笔记") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()).imePadding(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("标题") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = body, onValueChange = { body = it }, label = { Text("内容") }, modifier = Modifier.fillMaxWidth(), minLines = 3)
             }
@@ -485,7 +609,7 @@ private fun SpaceAddDialog(
         confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } },
         title = { Text("添加空间需求") },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 presets.forEach { p ->
                     Row(
                         modifier = Modifier.fillMaxWidth().clickable { onPick(p.id) }.padding(8.dp),
@@ -587,7 +711,10 @@ private fun QuickNoteDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
         title = { Text(if (initial.id.isBlank()) "新增随手记" else "编辑随手记") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()).imePadding(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },

@@ -53,8 +53,15 @@ fun HomeScreen() {
                 SectionCard {
                     Column {
                         Text("当前阶段", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        // totalTasks == 0 说明种子还没写入（或写入失败），此时不能误报「全部完成 🎉」，
+                        // 给中性占位文案，等 Flow 刷新后自动变为正常展示。
+                        val headline = when {
+                            ui.totalTasks > 0 && ui.currentStageName != null -> "${ui.currentStageEmoji ?: ""} ${ui.currentStageName}"
+                            ui.totalTasks > 0 -> "全部完成 🎉"
+                            else -> "正在准备你的装修计划…"
+                        }
                         Text(
-                            text = if (ui.currentStageName != null) "${ui.currentStageEmoji ?: ""} ${ui.currentStageName}" else "全部完成 🎉",
+                            text = headline,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -68,7 +75,11 @@ fun HomeScreen() {
                             )
                             Text(" ${ui.overallPct}%", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(start = 8.dp))
                         }
-                        Text("已完成 ${ui.doneTasks} / ${ui.totalTasks} 项任务", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            text = if (ui.totalTasks > 0) "已完成 ${ui.doneTasks} / ${ui.totalTasks} 项任务" else "任务数据加载中，稍等片刻…",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
@@ -105,9 +116,23 @@ fun HomeScreen() {
                 }
             }
 
-            actionGroup("逾期", overdue, vm) { MaterialTheme.colorScheme.error }
-            actionGroup("今天", today, vm) { MaterialTheme.colorScheme.primary }
-            actionGroup("未来 7 天", upcoming, vm) { MaterialTheme.colorScheme.onSurfaceVariant }
+            // 三组任务全空时给一条聚合引导，避免三行「暂无任务」堆叠
+            val hasAnyTask = overdue.isNotEmpty() || today.isNotEmpty() || upcoming.isNotEmpty()
+            if (hasAnyTask) {
+                actionGroup("逾期", overdue, vm) { MaterialTheme.colorScheme.error }
+                actionGroup("今天", today, vm) { MaterialTheme.colorScheme.primary }
+                actionGroup("未来 7 天", upcoming, vm) { MaterialTheme.colorScheme.onSurfaceVariant }
+            } else {
+                item {
+                    SectionCard {
+                        Text(
+                            "近 7 天暂无安排，去流程页看看接下来的任务吧",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         }
     }
 }
