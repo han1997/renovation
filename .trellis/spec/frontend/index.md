@@ -28,6 +28,15 @@
 
 当前仓库中的中文文案在终端输出里呈现为乱码形态。编辑时只改必要位置，避免对大段中文文案、README、知识库数据做无关全量重写。新增规范文档使用 UTF-8 中文。
 
+## Frontend Modification Skill
+
+前端页面、布局、视觉样式、组件和交互的新增或修改，默认先使用项目级 [frontend-design](../../../.agents/skills/frontend-design/SKILL.md)；用户明确指定其他技能时，以用户要求为准。
+
+- 技能来源：[Anthropic 官方 skills 仓库](https://github.com/anthropics/skills/tree/main/skills/frontend-design)。安装内容及许可证保留在 `.agents/skills/frontend-design/`。
+- 技能用于设计方向、排版、色彩、布局和视觉质量；工程实现仍遵守本目录规范及 Trellis 开发、检查流程。
+- 保持项目零构建、零依赖的 vanilla JS / HTML / CSS 架构，不因技能中的通用框架示例引入 React、Vue 或构建工具。
+- 局部修改优先复用现有组件、样式和交互，保留已有功能与视觉一致性；未经用户要求不扩大为全站重设计。
+
 ## Before Coding
 
 前端改动前至少阅读：

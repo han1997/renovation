@@ -19,3 +19,7 @@ If you're using Codex or another agent-capable tool, additional project-scoped h
 Managed by Trellis. Edits outside this block are preserved; edits inside may be overwritten by a future `trellis update`.
 
 <!-- TRELLIS:END -->
+
+## Frontend Modification Skill
+
+For frontend page, layout, styling, component, or interaction changes, use the project-local [frontend-design](.agents/skills/frontend-design/SKILL.md) as the default design skill unless the user explicitly requests another skill. Read it before implementation and follow the project constraints in [.trellis/spec/frontend/index.md](.trellis/spec/frontend/index.md). This skill supplements, rather than replaces, the Trellis workflow.
