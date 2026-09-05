@@ -61,6 +61,10 @@
 2. `KnowledgeSeeder`（`data/knowledge/KnowledgeSeeder.kt`）负责把「目录数据」（阶段 / 模板任务 / 验收清单）写入 Room，属只读种子，不清除。
 3. 用户数据不清除种子；`AppContainer.clearAllData()` 只清除用户表，保留只读种子表。
 
+> **Warning（回归防护）**：`seedIfEmpty` **必须在 `RenovationApp.onCreate` 启动链路被调用**（应用级 `CoroutineScope(SupervisorJob() + Dispatchers.Default)` 异步执行，不用 GlobalScope）。该函数静默幂等（种子表 count>0 即跳过），但若无人调用，`stage` / `task_template` / `checklist` 三张种子表永远为空，流程页完全空白且**无任何报错**——移植 / 重构启动链路时极易遗漏（曾实际发生，见任务 `09-05-fix-stage-seed`）。
+>
+> **检查点**：`grep seedIfEmpty` 全工程应 ≥2 处命中——定义处 + `RenovationApp.onCreate` 启动调用；少于 2 处即回归。单测防护见 `app/src/test/.../data/knowledge/KnowledgeSeederTest.kt`（真实 assets + in-memory Room 验证种子非空与幂等）。
+
 ## 导入 / 导出
 
 - `ImportExportRepository`（`data/repo/ImportExportRepository.kt`）：
