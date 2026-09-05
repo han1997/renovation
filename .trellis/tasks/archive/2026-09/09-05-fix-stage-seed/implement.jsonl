@@ -1,0 +1,5 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `py -3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/android/index.md", "reason": "Android 规范总索引"}
+{"file": ".trellis/spec/android/data-layer.md", "reason": "Room 表/DAO 约定与启动装载种子章节——本次修复核心"}
+{"file": ".trellis/spec/android/directory-structure.md", "reason": "Application/容器装配落位"}
+{"file": ".trellis/spec/android/quality-guidelines.md", "reason": "测试分层与验证清单"}
