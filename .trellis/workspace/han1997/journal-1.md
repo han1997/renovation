@@ -572,3 +572,36 @@ Android 流程页（StagesScreen）展开详情由单卡连排改为分区块 Se
 ### Next Steps
 
 - None - task complete
+
+
+## Session 18: 创建 .gitignore 并推送到远程仓库
+
+**Date**: 2026-09-05
+**Task**: 创建 .gitignore 并推送到远程仓库
+**Branch**: `main`
+
+### Summary
+
+补充根 .gitignore（node_modules、.env、密钥文件、包管理日志），添加 origin 并推送 main 到 git@github.com:han1997/renovation.git
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `7019a56` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
