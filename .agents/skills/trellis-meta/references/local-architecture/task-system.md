@@ -77,13 +77,13 @@ Rules:
 ## Common Commands
 
 ```bash
-py -3 ./.trellis/scripts/task.py create "<title>" --slug <slug>
-py -3 ./.trellis/scripts/task.py start <task>
-py -3 ./.trellis/scripts/task.py current --source
-py -3 ./.trellis/scripts/task.py add-context <task> implement <file> <reason>
-py -3 ./.trellis/scripts/task.py validate <task>
-py -3 ./.trellis/scripts/task.py finish
-py -3 ./.trellis/scripts/task.py archive <task>
+python ./.trellis/scripts/task.py create "<title>" --slug <slug>
+python ./.trellis/scripts/task.py start <task>
+python ./.trellis/scripts/task.py current --source
+python ./.trellis/scripts/task.py add-context <task> implement <file> <reason>
+python ./.trellis/scripts/task.py validate <task>
+python ./.trellis/scripts/task.py finish
+python ./.trellis/scripts/task.py archive <task>
 ```
 
 When modifying the task system, the AI should prefer script commands to maintain structure. Edit JSON/Markdown directly only when scripts do not cover the need.

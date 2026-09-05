@@ -28,7 +28,7 @@ You are already the `trellis-check` sub-agent that the main session dispatched. 
 Look for the `<!-- trellis-hook-injected -->` marker in your input above.
 
 - **If the marker is present**: prd / spec / research files have already been auto-loaded for you above. Proceed with the check work directly.
-- **If the marker is absent**: hook injection didn't fire (Windows + Claude Code, `--continue` resume, fork distribution, hooks disabled, etc.). Find the active task path from your dispatch prompt's first line `Active task: <path>` (or run `py -3 ./.trellis/scripts/task.py current --source` as a fallback), then Read `<task-path>/prd.md` and the spec files listed in `<task-path>/check.jsonl` yourself before doing the work.
+- **If the marker is absent**: hook injection didn't fire (Windows + Claude Code, `--continue` resume, fork distribution, hooks disabled, etc.). Find the active task path from your dispatch prompt's first line `Active task: <path>` (or run `python ./.trellis/scripts/task.py current --source` as a fallback), then Read `<task-path>/prd.md` and the spec files listed in `<task-path>/check.jsonl` yourself before doing the work.
 
 ## Context
 
