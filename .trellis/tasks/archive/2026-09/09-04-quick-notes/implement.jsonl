@@ -1,0 +1,7 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `py -3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/android/index.md", "reason": "Android 规范总索引：技术栈、分层、编码注意事项"}
+{"file": ".trellis/spec/android/data-layer.md", "reason": "Room 表/DAO 约定、金额 cents、种子写入——新增 quick_note 表必须遵循"}
+{"file": ".trellis/spec/android/directory-structure.md", "reason": "包结构与分层边界——新 Entity/DAO/Repository/ViewModel 的落位"}
+{"file": ".trellis/spec/android/ui-theme.md", "reason": "Compose 界面分层与主题约定——我的页新区块 UI 遵循"}
+{"file": ".trellis/spec/android/type-money.md", "reason": "日期/id 约定——quick_note 的时间与 id 字段遵循"}
+{"file": ".trellis/spec/android/quality-guidelines.md", "reason": "测试分层与验证清单——DAO/ViewModel 单测要求"}
