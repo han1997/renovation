@@ -605,3 +605,36 @@ Android 流程页（StagesScreen）展开详情由单卡连排改为分区块 Se
 ### Next Steps
 
 - None - task complete
+
+
+## Session 19: 封存网页版并聚焦 Android 开发
+
+**Date**: 2026-09-05
+**Task**: 封存网页版并聚焦 Android 开发
+**Branch**: `main`
+
+### Summary
+
+更新根 README 与 Android README，明确网页版封存、后续仅开发 Android App；保留 Web 历史源码和备份入口，说明 Web 备份不自动迁移到 Android。同步 Android 数据维护规则及 Web 历史规范。6 份文档、29 个本地链接与 git diff --check 校验通过，未修改应用代码，未执行 Android 构建。任务已归档，未推送远程。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `20d89f0` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
