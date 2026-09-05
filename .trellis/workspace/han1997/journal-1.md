@@ -539,3 +539,36 @@ Android 流程页（StagesScreen）展开详情由单卡连排改为分区块 Se
 ### Next Steps
 
 - None - task complete
+
+
+## Session 17: 安装 frontend-design 前端修改技能
+
+**Date**: 2026-09-05
+**Task**: 安装 frontend-design 前端修改技能
+**Branch**: `main`
+
+### Summary
+
+安装 Anthropic 官方 frontend-design 项目技能并保留许可证；在 AGENTS.md 和前端规范中设为默认前端修改技能，同时保留零构建架构；完成上游文件一致性、文档链接和 git diff --check 校验；提交并归档任务，未改动业务代码。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `e2a97d0` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

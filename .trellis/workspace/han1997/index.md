@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 16
+- **Total Sessions**: 17
 - **Last Active**: 2026-09-05
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~541 | Active |
+| `journal-1.md` | ~574 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 17 | 2026-09-05 | 安装 frontend-design 前端修改技能 | `e2a97d0` | `main` |
 | 16 | 2026-09-05 | 流程页 UI 优化 + 任务清单增删改查 | `0698f66` | `main` |
 | 15 | 2026-09-05 | 流程页详情分卡排版优化 | `03b0db5`, `4a065d5` | `main` |
 | 14 | 2026-09-05 | 随手记紧凑展示优化 | `832e0f9`, `ba4f766`, `789f9d8` | `main` |
