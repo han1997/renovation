@@ -8,6 +8,7 @@ import com.renovation.guardian.data.db.TaskCompletionEntity
 import com.renovation.guardian.data.db.TaskEntity
 import com.renovation.guardian.data.db.TaskTemplateEntity
 import com.renovation.guardian.util.IdGen
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 
 class TaskRepository(private val db: AppDatabase) {
@@ -75,6 +76,57 @@ class TaskRepository(private val db: AppDatabase) {
 
     suspend fun deleteCustom(taskId: String) {
         db.taskDao().deleteTask(taskId)
+    }
+
+    /** 编辑任务文案 / 备注：模板任务改 task_template，自定义任务改 task。 */
+    suspend fun updateTaskText(taskId: String, text: String, note: String?, isTemplate: Boolean) {
+        if (text.isBlank()) return
+        if (isTemplate) {
+            val existing = db.taskTemplateDao().getById(taskId) ?: return
+            db.taskTemplateDao().seedAll(listOf(existing.copy(text = text, tip = note)))
+        } else {
+            val existing = db.taskDao().getById(taskId) ?: return
+            db.taskDao().upsert(existing.copy(text = text, tip = note))
+        }
+    }
+
+    /** 删除任务：模板任务与自定义任务都允许。 */
+    suspend fun deleteTask(taskId: String, isTemplate: Boolean) {
+        if (isTemplate) {
+            db.taskTemplateDao().deleteById(taskId)
+            db.taskDao().deleteCompletion(taskId)
+        } else {
+            db.taskDao().deleteTask(taskId)
+        }
+    }
+
+    /** 新增任务到指定阶段（统一写入模板表，保证进度统计与首页聚合一致）。 */
+    suspend fun addTaskToStage(stageId: String, text: String) {
+        if (text.isBlank()) return
+        val nextIndex = (db.taskTemplateDao().maxOrderIndex(stageId) ?: -1) + 1
+        db.taskTemplateDao().seedAll(
+            listOf(
+                TaskTemplateEntity(
+                    id = IdGen.new("ct"),
+                    stageId = stageId,
+                    orderIndex = nextIndex,
+                    text = text,
+                    tip = null,
+                ),
+            ),
+        )
+    }
+
+    /**
+     * 恢复指定阶段的默认任务清单：清掉该阶段全部模板任务后按 assets 重写，
+     * 用户的勾选记录保留（按模板 id 匹配，仍然有效）。自定义任务（task 表）不受影响。
+     */
+    suspend fun restoreDefaultTasks(stageId: String, templates: List<TaskTemplateEntity>) {
+        db.withTransaction {
+            val stageTemplates = db.taskTemplateDao().listByStage(stageId)
+            stageTemplates.forEach { db.taskTemplateDao().deleteById(it.id) }
+            db.taskTemplateDao().seedAll(templates)
+        }
     }
 
     suspend fun setStageOverride(stageId: String, done: Boolean, today: String) {

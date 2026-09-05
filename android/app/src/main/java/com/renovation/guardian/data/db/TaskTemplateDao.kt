@@ -21,6 +21,15 @@ interface TaskTemplateDao {
     @Query("SELECT * FROM task_template ORDER BY stage_id, order_index ASC")
     suspend fun listAll(): List<TaskTemplateEntity>
 
+    @Query("SELECT * FROM task_template WHERE id = :id LIMIT 1")
+    suspend fun getById(id: String): TaskTemplateEntity?
+
+    @Query("SELECT MAX(order_index) FROM task_template WHERE stage_id = :stageId")
+    suspend fun maxOrderIndex(stageId: String): Int?
+
+    @Query("DELETE FROM task_template WHERE id = :id")
+    suspend fun deleteById(id: String)
+
     @Query("DELETE FROM task_template")
     suspend fun clear()
 

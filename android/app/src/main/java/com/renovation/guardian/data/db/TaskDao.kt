@@ -53,6 +53,9 @@ interface TaskDao {
     @Query("DELETE FROM task WHERE id = :id")
     suspend fun deleteTask(id: String)
 
+    @Query("DELETE FROM task_completion WHERE template_id = :templateId")
+    suspend fun deleteCompletion(templateId: String)
+
     @Query("DELETE FROM task WHERE space_id = :spaceId AND done = 0")
     suspend fun deleteUndoneDerivedForSpace(spaceId: String)
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.renovation.guardian.data.db.ChecklistItemRow
 import com.renovation.guardian.data.db.StageEntity
 import com.renovation.guardian.data.db.TaskEntity
+import com.renovation.guardian.data.db.TaskTemplateEntity
 import com.renovation.guardian.data.knowledge.BuyItemJson
 import com.renovation.guardian.ui.AppViewModel
 import kotlinx.coroutines.flow.Flow
@@ -92,12 +93,46 @@ class StagesViewModel(application: Application) : AppViewModel(application) {
 
     fun addCustom(stageId: String, text: String) {
         if (text.isBlank()) return
-        viewModelScope.launch { container.taskRepo.addCustom(stageId, text, null, today) }
+        viewModelScope.launch { container.taskRepo.addTaskToStage(stageId, text) }
     }
 
     fun deleteCustom(taskId: String) {
         viewModelScope.launch { container.taskRepo.deleteCustom(taskId) }
     }
+
+    fun deleteTemplate(templateId: String) {
+        viewModelScope.launch { container.taskRepo.deleteTask(templateId, isTemplate = true) }
+    }
+
+    fun updateTemplateText(templateId: String, text: String, note: String?) {
+        viewModelScope.launch { container.taskRepo.updateTaskText(templateId, text, note, isTemplate = true) }
+    }
+
+    fun updateCustom(taskId: String, text: String, note: String?) {
+        viewModelScope.launch { container.taskRepo.updateTaskText(taskId, text, note, isTemplate = false) }
+    }
+
+    /** 恢复指定阶段的默认任务清单（从 assets/knowledge.json 重新写入）。 */
+    fun restoreDefaultTasks(stageId: String) {
+        viewModelScope.launch {
+            val knowledge = container.knowledge.knowledge ?: return@launch
+            val stage = knowledge.stages.firstOrNull { it.id == stageId } ?: return@launch
+            val templates = stage.tasks.mapIndexed { idx, t ->
+                TaskTemplateEntity(
+                    id = t.id,
+                    stageId = stageId,
+                    orderIndex = idx,
+                    text = t.text,
+                    tip = t.tip,
+                )
+            }
+            container.taskRepo.restoreDefaultTasks(stageId, templates)
+        }
+    }
+
+    /** 默认清单的任务数（用于判断「恢复默认清单」入口是否可用）。 */
+    fun defaultTemplateCount(stageId: String): Int =
+        container.knowledge.knowledge?.stages?.firstOrNull { it.id == stageId }?.tasks?.size ?: 0
 
     fun toggleChecklistItem(itemId: String, done: Boolean) {
         viewModelScope.launch { container.checklistRepo.setChecked(itemId, done, today) }
