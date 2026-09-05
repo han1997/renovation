@@ -334,3 +334,38 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 11: 随手记功能收尾：修复两类单测失败并完成提交归档
+
+**Date**: 2026-09-05
+**Task**: 随手记功能收尾：修复两类单测失败并完成提交归档
+**Branch**: `main`
+
+### Summary
+
+接手 in_progress 的 quick-notes 任务：trellis-check 子代理陷入单测调试泥潭，主会话以探针实验实锤两个根因——(1) MockK suspend 桩在 viewModelScope.launch 内丢失调用记录，MoreViewModelTest 改为 Robolectric + 真实 in-memory Room（Room executor 绑 testScheduler + 接口委托覆盖 todayProvider）；(2) AGP 9.3.2 无 mergeDebugUnitTestAssets，MigrationTestHelper 拿不到 schema，改为从 1.json 手工建 v1 库再让 Room 跑 MIGRATION_1_2。29 单测 + lintDebug 全绿。沉淀 3 条 spec（AGP9 unit test assets 限制、MockK suspend 桩失效、v2 表清单），分 3 个提交落库并归档任务。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `fa92d5a` | (see git log) |
+| `66b2c54` | (see git log) |
+| `eee223c` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

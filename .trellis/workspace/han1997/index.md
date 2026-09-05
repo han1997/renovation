@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 10
-- **Last Active**: 2026-09-04
+- **Total Sessions**: 11
+- **Last Active**: 2026-09-05
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~336 | Active |
+| `journal-1.md` | ~371 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 11 | 2026-09-05 | 随手记功能收尾：修复两类单测失败并完成提交归档 | `fa92d5a`, `66b2c54`, `eee223c` | `main` |
 | 10 | 2026-09-04 | Android 版装修管家移植（Kotlin + Compose 原生重写） | `19522d5`, `4cf19ea` | `main` |
 | 9 | 2026-09-03 | 整合 shadow-review 审查技能到 trellis 检查流程 | `8b28d16` | `main` |
 | 8 | 2026-08-19 | 完善流程页阶段决策辅助 | `f92f076` | `main` |
