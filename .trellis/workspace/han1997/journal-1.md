@@ -506,3 +506,36 @@ Android 流程页（StagesScreen）展开详情由单卡连排改为分区块 Se
 ### Next Steps
 
 - None - task complete
+
+
+## Session 16: 流程页 UI 优化 + 任务清单增删改查
+
+**Date**: 2026-09-05
+**Task**: 流程页 UI 优化 + 任务清单增删改查
+**Branch**: `main`
+
+### Summary
+
+流程页二次 UI 优化：阶段卡头部（emoji 柔色底块、phase·duration 副行）、详情区分卡+标题标签化留白。任务清单补齐增删改查：编辑内容/备注、删除模板任务、恢复默认清单入口；新增 task_template 增删改与 task_completion 级联清理。编译/lint/单测通过。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0698f66` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
