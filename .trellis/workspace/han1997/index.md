@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 14
+- **Total Sessions**: 15
 - **Last Active**: 2026-09-05
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~474 | Active |
+| `journal-1.md` | ~508 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 15 | 2026-09-05 | 流程页详情分卡排版优化 | `03b0db5`, `4a065d5` | `main` |
 | 14 | 2026-09-05 | 随手记紧凑展示优化 | `832e0f9`, `ba4f766`, `789f9d8` | `main` |
 | 13 | 2026-09-05 | UX 全面体检 + Top6 体验修复 | `49d36d0`, `c0ef8d8` | `main` |
 | 12 | 2026-09-05 | 修复流程页空白：种子写入接入启动链路 | `48fc86b`, `4a4afd4` | `main` |

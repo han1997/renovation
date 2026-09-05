@@ -472,3 +472,37 @@ trellis-research 对 Android 版做 8 维度 UX 体检（40+ 条发现，含文�
 ### Next Steps
 
 - None - task complete
+
+
+## Session 15: 流程页详情分卡排版优化
+
+**Date**: 2026-09-05
+**Task**: 流程页详情分卡排版优化
+**Branch**: `main`
+
+### Summary
+
+Android 流程页（StagesScreen）展开详情由单卡连排改为分区块 SectionCard（目标/避坑/需购/任务清单/验收组各一卡），条目行用 HorizontalDivider 分隔、间距拉开，阶段卡头部间距微调；行为零变更，编译/lint/单测通过。spec 新增详情区分卡排版约定。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `03b0db5` | (see git log) |
+| `4a065d5` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
