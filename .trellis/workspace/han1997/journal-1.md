@@ -437,3 +437,38 @@ trellis-research 对 Android 版做 8 维度 UX 体检（40+ 条发现，含文�
 ### Next Steps
 
 - None - task complete
+
+
+## Session 14: 随手记紧凑展示优化
+
+**Date**: 2026-09-05
+**Task**: 随手记紧凑展示优化
+**Branch**: `main`
+
+### Summary
+
+随手记改为同组合并一张卡片+紧凑单行（maxLines=1 截断），去掉冗余副标题与行尾图标，交互改为点击编辑/长按删除（ConfirmDeleteDialog 链路不变）。编译/单测/lint 全绿。spec 新增列表展示密度约定与 combinedClickable @OptIn 惯例。另提交 trellis update 模板刷新遗留。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `832e0f9` | (see git log) |
+| `ba4f766` | (see git log) |
+| `789f9d8` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
