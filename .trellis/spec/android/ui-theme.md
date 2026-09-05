@@ -50,6 +50,17 @@ String.format(Locale.ROOT, "%.2f", cents / 100.0)
 
 规则：**给人看**的金额展示用 `MoneyUtil.format/formatFull`；**要回解析**（对话框预填、CSV）的数字字符串一律 `Locale.ROOT`。位置：`BudgetScreen.kt`、`MoreScreen.kt` 金额编辑预填处。
 
+## 列表展示密度约定（任务 09-05-quick-notes-display 沉淀）
+
+- **同类条目合并一张卡片**：重复性的小条目（如随手记、清单项）禁止每条独占一张 `SectionCard`——改为「组标题 Text + 单张卡片内 Column 平铺紧凑行」，行间用 `HorizontalDivider(colorScheme.surfaceVariant)` 分隔。每条独占卡片信息密度过低、垂直空间浪费。
+- **紧凑行内不放操作图标**：行尾编辑/删除 IconButton 会撑高行且拥挤。约定：点击行 → 编辑，长按行 → 删除（删除仍走 `ConfirmDeleteDialog` 确认链路）。长按入口可发现性低是有意接受的取舍。
+- **长文本单行截断**：列表行内文本 `maxLines = 1` + `TextOverflow.Ellipsis`，全文进编辑弹窗查看，保证行高统一。
+- **LazyColumn 行合并进卡片的代价**：行从独立 `items(list, key)` 移入单卡 `Column` 后，单项变更会重组整卡——小列表可接受；大列表（几十条以上）不要用此模式。
+
+### combinedClickable 需要 @OptIn（首个使用范例）
+
+`androidx.compose.foundation.combinedClickable`（点击 + 长按）属于 Experimental Foundation API。本仓库惯例：**在每个使用它的 Composable 上单独标注 `@OptIn(ExperimentalFoundationApi::class)`**，不在文件级或模块级全局开启。参考实现：`MoreScreen.kt` 的 `QuickNoteRow`。
+
 ## Theme（Material You）
 
 - 入口：`ui/theme/Theme.kt` 的 `AppTheme(darkTheme = isSystemInDarkTheme(), dynamicColor = ...)`。
