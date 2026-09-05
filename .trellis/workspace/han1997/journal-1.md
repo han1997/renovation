@@ -369,3 +369,37 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 12: 修复流程页空白：种子写入接入启动链路
+
+**Date**: 2026-09-05
+**Task**: 修复流程页空白：种子写入接入启动链路
+**Branch**: `main`
+
+### Summary
+
+定位流程页空白根因：KnowledgeSeeder.seedIfEmpty 全工程无调用方，stage/task_template/checklist 三张种子表永远为空。在 RenovationApp.onCreate 用应用级 CoroutineScope 异步接入种子写入（try/catch 防崩启动），新增 KnowledgeSeederTest（真实 assets 落库 14 阶段/98 模板任务/7 验收清单 + 幂等验证），spec 沉淀回归防护检查点（grep seedIfEmpty ≥2 处命中）。31 单测 + lint 全绿。附带提交 Gradle 构建环境配置。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `48fc86b` | (see git log) |
+| `4a4afd4` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
