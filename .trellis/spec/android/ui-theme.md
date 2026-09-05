@@ -61,6 +61,14 @@ String.format(Locale.ROOT, "%.2f", cents / 100.0)
 
 `androidx.compose.foundation.combinedClickable`（点击 + 长按）属于 Experimental Foundation API。本仓库惯例：**在每个使用它的 Composable 上单独标注 `@OptIn(ExperimentalFoundationApi::class)`**，不在文件级或模块级全局开启。参考实现：`MoreScreen.kt` 的 `QuickNoteRow`。
 
+## 详情区「分卡 + 分隔行」排版约定（任务 09-05-flow-section-polish 沉淀）
+
+- **展开详情拆区块卡**：可展开列表（如流程页阶段详情）的详情内容禁止连排在无卡片的 Column 里——按逻辑分区（目标 / 要点 / 材料清单 / 任务清单 / 验收组）各拆一张 `SectionCard`，卡间 `Modifier.padding(top = 12.dp)`。裸排内容会与上方主卡视觉黏连、段落拥挤。
+- **区块卡内标题**：`titleSmall` + `FontWeight.SemiBold`（emoji 前缀），标题与内容间距 ≥ 8dp。
+- **卡内条目行分隔**：多行 Checkbox / 文本行用 `HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)` 分隔（首行前、末行后不加）；说明性文本组（避坑要点等无操作行）用 `Arrangement.spacedBy(8.dp)` 即可，不加分隔线。
+- **只压间距不改行为**：纯排版调整不触碰勾选/增删/确认弹窗链路与 ViewModel API；颜色一律 MaterialTheme 语义色，禁硬编码。
+- 参考实现：`StagesScreen.kt` 的 `StageDetailContent`（每区块一张 SectionCard）+ `DetailSectionTitle`。
+
 ## Theme（Material You）
 
 - 入口：`ui/theme/Theme.kt` 的 `AppTheme(darkTheme = isSystemInDarkTheme(), dynamicColor = ...)`。
