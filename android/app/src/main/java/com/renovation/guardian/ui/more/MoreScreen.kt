@@ -1,6 +1,8 @@
 package com.renovation.guardian.ui.more
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +29,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +52,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -215,7 +219,7 @@ fun MoreScreen() {
             } else {
                 val wishGroups = quickNotes.filter { it.type == QuickNoteEntity.TYPE_WISH }.groupBy { it.category ?: QuickNoteEntity.CATEGORY_DAILY }
                 val memoGroups = quickNotes.filter { it.type == QuickNoteEntity.TYPE_MEMO }.groupBy { it.stageId ?: "" }
-                // ── 购物愿望组：按品类（家具 / 家电 / 生活用品）分组 ──
+                // ── 购物愿望组：按品类（家具 / 家电 / 生活用品）分组，同组合并一卡 ──
                 if (wishGroups.isNotEmpty()) {
                     item {
                         Text(
@@ -232,19 +236,25 @@ fun MoreScreen() {
                                 style = MaterialTheme.typography.titleSmall,
                                 modifier = Modifier.padding(start = 4.dp, top = 4.dp),
                             )
-                        }
-                        items(list, key = { it.id }) { q ->
-                            QuickNoteCard(
-                                note = q,
-                                groupLabel = quickNoteCategoryLabel(cat),
-                                onToggleDone = { vm.setQuickNoteDone(q.id, !q.isDone) },
-                                onEdit = { showQuickNote = q },
-                                onDelete = { deleteQuickNoteId = q.id },
-                            )
+                            SectionCard {
+                                Column {
+                                    list.forEachIndexed { index, q ->
+                                        if (index > 0) {
+                                            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                                        }
+                                        QuickNoteRow(
+                                            note = q,
+                                            onToggleDone = { vm.setQuickNoteDone(q.id, !q.isDone) },
+                                            onEdit = { showQuickNote = q },
+                                            onDelete = { deleteQuickNoteId = q.id },
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-                // ── 阶段备忘组：按 14 阶段分组，组标题显示阶段名 ──
+                // ── 阶段备忘组：按 14 阶段分组，组标题显示阶段名，同组合并一卡 ──
                 if (memoGroups.isNotEmpty()) {
                     item {
                         Text(
@@ -262,15 +272,21 @@ fun MoreScreen() {
                                 style = MaterialTheme.typography.titleSmall,
                                 modifier = Modifier.padding(start = 4.dp, top = 4.dp),
                             )
-                        }
-                        items(list, key = { it.id }) { q ->
-                            QuickNoteCard(
-                                note = q,
-                                groupLabel = stageName,
-                                onToggleDone = { vm.setQuickNoteDone(q.id, !q.isDone) },
-                                onEdit = { showQuickNote = q },
-                                onDelete = { deleteQuickNoteId = q.id },
-                            )
+                            SectionCard {
+                                Column {
+                                    list.forEachIndexed { index, q ->
+                                        if (index > 0) {
+                                            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                                        }
+                                        QuickNoteRow(
+                                            note = q,
+                                            onToggleDone = { vm.setQuickNoteDone(q.id, !q.isDone) },
+                                            onEdit = { showQuickNote = q },
+                                            onDelete = { deleteQuickNoteId = q.id },
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -636,41 +652,35 @@ private fun quickNoteCategoryLabel(category: String): String = when (category) {
 }
 
 /**
- * 随手记单条卡片：勾选完成 + 内容 + 编辑 / 删除。
- * 已完成项视觉弱化（alpha 降低 + 删除线），排序上已由 DAO 置底。
+ * 随手记单行（同组多行合并进一张卡片，行间用 HorizontalDivider 分隔）：
+ * - 勾选完成由 Checkbox 承担；
+ * - 点击行内容 → 编辑弹窗，长按行 → 删除确认；
+ * - 单行截断（maxLines = 1 + Ellipsis），全文进编辑弹窗查看；
+ * - 已完成项视觉弱化（alpha 降低 + 删除线），排序上已由 DAO 置底。
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun QuickNoteCard(
+private fun QuickNoteRow(
     note: QuickNoteEntity,
-    groupLabel: String,
     onToggleDone: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    SectionCard {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = note.isDone, onCheckedChange = { onToggleDone() })
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 4.dp)
-                    .clickable { onEdit() }
-                    .alpha(if (note.isDone) 0.5f else 1f),
-            ) {
-                Text(
-                    note.content,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textDecoration = if (note.isDone) TextDecoration.LineThrough else null,
-                )
-                Text(
-                    groupLabel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            IconButton(onClick = onEdit) { Icon(Icons.Filled.Edit, contentDescription = "编辑", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-            IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error) }
-        }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(checked = note.isDone, onCheckedChange = { onToggleDone() })
+        Text(
+            note.content,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            textDecoration = if (note.isDone) TextDecoration.LineThrough else null,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 4.dp)
+                .combinedClickable(onClick = onEdit, onLongClick = onDelete)
+                .alpha(if (note.isDone) 0.5f else 1f),
+        )
     }
 }
 
