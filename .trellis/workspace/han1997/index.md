@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 12
+- **Total Sessions**: 13
 - **Last Active**: 2026-09-05
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~405 | Active |
+| `journal-1.md` | ~439 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 13 | 2026-09-05 | UX 全面体检 + Top6 体验修复 | `49d36d0`, `c0ef8d8` | `main` |
 | 12 | 2026-09-05 | 修复流程页空白：种子写入接入启动链路 | `48fc86b`, `4a4afd4` | `main` |
 | 11 | 2026-09-05 | 随手记功能收尾：修复两类单测失败并完成提交归档 | `fa92d5a`, `66b2c54`, `eee223c` | `main` |
 | 10 | 2026-09-04 | Android 版装修管家移植（Kotlin + Compose 原生重写） | `19522d5`, `4cf19ea` | `main` |

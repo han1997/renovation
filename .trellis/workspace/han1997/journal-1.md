@@ -403,3 +403,37 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 13: UX 全面体检 + Top6 体验修复
+
+**Date**: 2026-09-05
+**Task**: UX 全面体检 + Top6 体验修复
+**Branch**: `main`
+
+### Summary
+
+trellis-research 对 Android 版做 8 维度 UX 体检（40+ 条发现，含文件:行号与修法，持久化至任务 research/ux-audit.md）。brainstorm 收敛 MVP=Top6 并实现：笔记删除（原 deleteNote 死代码接通）、预算表单校验（isError+禁用保存）、5 处删除统一 ConfirmDeleteDialog、首启流程页加载占位 + 首页不再误报完成、6 个对话框 imePadding 防键盘遮挡、Snackbar 反馈全接通。顺带修 4 个低成本项（Flow remember、FAB 遮挡、空态引导、回车提交）。check 抓到 Locale 敏感格式化回归并修复（金额预填必须 Locale.ROOT）。31 单测 + lint + assembleDebug 全绿；spec 沉淀交互反馈约定与 Locale.ROOT 规则。Top 7-10（热区/rememberSaveable/预算重算等）留后续。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `49d36d0` | (see git log) |
+| `c0ef8d8` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
