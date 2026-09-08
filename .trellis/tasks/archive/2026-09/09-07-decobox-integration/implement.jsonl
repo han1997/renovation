@@ -1,0 +1,10 @@
+{"file": ".trellis/spec/android/index.md", "reason": "Android 开发规范总索引：技术栈、分层、编码注意（中文乱码防护）"}
+{"file": ".trellis/spec/android/directory-structure.md", "reason": "包结构与分层边界：新增 ui/quote、ui/planner 必须遵循的依赖方向与命名"}
+{"file": ".trellis/spec/android/data-layer.md", "reason": "Room 表约定、金额 cents 约定、assets 知识数据模式、Migration 显式迁移要求"}
+{"file": ".trellis/spec/android/type-money.md", "reason": "MoneyUtil 金额换算、JSON 类型安全、日期/id 约定（计算引擎与持久化必须遵守）"}
+{"file": ".trellis/spec/android/ui-theme.md", "reason": "Compose 界面分层、平台能力放 Screen 层（导出/分享走 rememberLauncherForActivityResult）"}
+{"file": ".trellis/spec/android/quality-guidelines.md", "reason": "测试分层、ViewModel 写操作测试模式（真实 in-memory Room）、PowerShell 中文编辑禁令、验证清单"}
+{"file": ".trellis/tasks/09-07-decobox-integration/research/decobox-data-model.md", "reason": "网站数据模型与全部计算公式（面积估算/管理费/采购方式/局改/清单格式）——计算引擎实现依据"}
+{"file": ".trellis/tasks/09-07-decobox-integration/research/decobox-materials-sample.md", "reason": "assets/decobox_catalog.json 的结构与样本（材料/门/洁具矩阵/附加项/局改）"}
+{"file": ".trellis/tasks/09-07-decobox-integration/research/decobox-requirements-catalog.md", "reason": "需求规划目录结构（10 空间/218 类型/751 项/重要度/交互规则）"}
+{"file": ".trellis/tasks/09-07-decobox-integration/research/android-long-image-export.md", "reason": "长图导出方案结论：Canvas+StaticLayout、MediaStore 保存、FileProvider 三件套"}

@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/android/index.md", "reason": "检查基线：技术栈与分层总规范"}
+{"file": ".trellis/spec/android/data-layer.md", "reason": "核对 Room v3 迁移、cents 金额、assets 模式、seedIfEmpty 回归防护"}
+{"file": ".trellis/spec/android/quality-guidelines.md", "reason": "验证清单（testDebugUnitTest/lintDebug/assembleDebug）、Migration 测试模式、PowerShell 中文禁令"}
+{"file": ".trellis/spec/android/type-money.md", "reason": "核对金额换算与 JSON 类型安全"}
+{"file": ".trellis/tasks/09-07-decobox-integration/research/decobox-data-model.md", "reason": "对照计算公式核对引擎实现正确性（管理费/自购剔除/局改/面积估算）"}
+{"file": ".trellis/tasks/09-07-decobox-integration/prd.md", "reason": "验收标准清单（三模式/导出/写入预算/迁移）"}
