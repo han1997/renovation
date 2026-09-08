@@ -17,7 +17,7 @@ interface AppContainer {
     val stageRepo: StageRepository
     val taskRepo: TaskRepository
     val budgetRepo: BudgetRepository
-    val spaceNeedRepo: SpaceNeedRepository
+    val quotePlanRepo: QuotePlanRepository
     val checklistRepo: ChecklistRepository
     val noteRepo: NoteRepository
     val contactRepo: ContactRepository
@@ -39,7 +39,7 @@ class DefaultAppContainer(
     override val stageRepo: StageRepository by lazy { StageRepository(db) }
     override val taskRepo: TaskRepository by lazy { TaskRepository(db) }
     override val budgetRepo: BudgetRepository by lazy { BudgetRepository(db) }
-    override val spaceNeedRepo: SpaceNeedRepository by lazy { SpaceNeedRepository(db, taskRepo) }
+    override val quotePlanRepo: QuotePlanRepository by lazy { QuotePlanRepository(db) }
     override val checklistRepo: ChecklistRepository by lazy { ChecklistRepository(db) }
     override val noteRepo: NoteRepository by lazy { NoteRepository(db) }
     override val contactRepo: ContactRepository by lazy { ContactRepository(db) }
@@ -60,7 +60,8 @@ class DefaultAppContainer(
             db.noteDao().clearAll()
             db.contactDao().clearAll()
             db.quickNoteDao().clearAll()
-            db.spaceNeedDao().clearAll()
+            db.quotePlanDao().clearAll()
+            db.plannerStateDao().clearAll()
         }
     }
 

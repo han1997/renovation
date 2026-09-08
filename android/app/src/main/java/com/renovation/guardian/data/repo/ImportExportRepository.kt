@@ -9,13 +9,9 @@ import com.renovation.guardian.data.db.ExpenseEntity
 import com.renovation.guardian.data.db.HouseProfileEntity
 import com.renovation.guardian.data.db.NoteEntity
 import com.renovation.guardian.data.db.QuickNoteEntity
-import com.renovation.guardian.data.db.SpaceNeedEntity
-import com.renovation.guardian.data.db.SpaceNeedStageEntity
-import com.renovation.guardian.data.db.SpaceExportTuple
 import com.renovation.guardian.data.db.StageOverrideEntity
 import com.renovation.guardian.data.db.TaskCompletionEntity
 import com.renovation.guardian.data.db.TaskEntity
-import com.renovation.guardian.data.db.exportSpaces
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import androidx.room.withTransaction
@@ -49,7 +45,6 @@ class ImportExportRepository(private val db: AppDatabase) {
         val contacts = db.contactDao().exportAll()
         val notes = db.noteDao().exportAll()
         val quickNotes = db.quickNoteDao().exportAll()
-        val spaces = db.spaceNeedDao().exportSpaces()
 
         val payload = ExportPayload(
                 schemaVersion = 1,
@@ -66,7 +61,6 @@ class ImportExportRepository(private val db: AppDatabase) {
                 notes = notes.map { it.toExport() },
                 contacts = contacts.map { it.toExport() },
                 quickNotes = quickNotes.map { it.toExport() },
-                spaces = spaces.map { it.toSpaceExport() },
             )
         return json.encodeToString(ExportPayload.serializer(), payload)
     }
@@ -100,7 +94,6 @@ class ImportExportRepository(private val db: AppDatabase) {
         db.noteDao().clearAll()
         db.contactDao().clearAll()
         db.quickNoteDao().clearAll()
-        db.spaceNeedDao().clearAll()
 
         // Reinsert
         p.tasksDone.forEach { (templateId, done) ->
@@ -136,14 +129,6 @@ class ImportExportRepository(private val db: AppDatabase) {
         p.quickNotes.forEach { q ->
             db.quickNoteDao().upsert(q.toEntity())
         }
-        p.spaces.forEach { s ->
-            val space = s.toSpaceEntity()
-            db.spaceNeedDao().upsert(space)
-            val stageIds = s.stageIds
-            stageIds.forEachIndexed { idx, sid ->
-                db.spaceNeedDao().upsertStages(listOf(SpaceNeedStageEntity(space.id, sid, idx)))
-            }
-        }
     }
 }
 
@@ -164,7 +149,6 @@ private data class ExportPayload(
     val notes: List<NoteExport> = emptyList(),
     val contacts: List<ContactExport> = emptyList(),
     val quickNotes: List<QuickNoteExport> = emptyList(),
-    val spaces: List<SpaceExport> = emptyList(),
 )
 
 @Serializable
@@ -348,43 +332,4 @@ private fun QuickNoteEntity.toExport() = QuickNoteExport(
     isDone = isDone,
     createdAt = createdAt,
     updatedAt = updatedAt,
-)
-
-@Serializable
-private data class SpaceExport(
-    val id: String,
-    val presetId: String? = null,
-    val name: String,
-    val emoji: String,
-    val desc: String? = null,
-    val stageIds: List<String> = emptyList(),
-    val budgetCat: String? = null,
-    val budgetNote: String? = null,
-    val custom: Boolean = false,
-    val createdAt: String,
-) {
-    fun toSpaceEntity() = SpaceNeedEntity(
-        id = id,
-        presetId = presetId,
-        name = name,
-        emoji = emoji,
-        description = desc,
-        budgetCategoryId = budgetCat,
-        budgetNote = budgetNote,
-        isCustom = custom,
-        createdAt = createdAt,
-    )
-}
-
-private fun SpaceExportTuple.toSpaceExport() = SpaceExport(
-    id = space.id,
-    presetId = space.presetId,
-    name = space.name,
-    emoji = space.emoji,
-    desc = space.description,
-    stageIds = stageIds,
-    budgetCat = space.budgetCategoryId,
-    budgetNote = space.budgetNote,
-    custom = space.isCustom,
-    createdAt = space.createdAt,
 )

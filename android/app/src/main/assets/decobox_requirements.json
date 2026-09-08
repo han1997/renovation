@@ -1,0 +1,4246 @@
+{
+  "version": "2026-09-07",
+  "source": "decobox.online v1.4.0",
+  "spaceList": [
+    {
+      "key": "diantiqianting",
+      "name": "电梯前厅"
+    },
+    {
+      "key": "xuanuan",
+      "name": "玄关"
+    },
+    {
+      "key": "keting",
+      "name": "客厅"
+    },
+    {
+      "key": "canting",
+      "name": "餐厅"
+    },
+    {
+      "key": "chufang",
+      "name": "厨房"
+    },
+    {
+      "key": "woshi",
+      "name": "卧室"
+    },
+    {
+      "key": "weishengjian",
+      "name": "卫生间"
+    },
+    {
+      "key": "yangtai",
+      "name": "阳台"
+    },
+    {
+      "key": "quanwu",
+      "name": "全屋"
+    },
+    {
+      "key": "dingzhigongnengfang",
+      "name": "功能房"
+    }
+  ],
+  "typeListBySpace": {
+    "diantiqianting": [
+      {
+        "key": "dtqt_kuaidi_waimei",
+        "name": "快递外卖管理"
+      },
+      {
+        "key": "dtqt_chuxing_zhunbei",
+        "name": "出行准备"
+      },
+      {
+        "key": "dtqt_huijia_huanchong",
+        "name": "回家缓冲"
+      },
+      {
+        "key": "dtqt_xiele_shouna",
+        "name": "鞋类收纳"
+      },
+      {
+        "key": "dtqt_chuxing_zhuangbei_shouna",
+        "name": "出行装备收纳"
+      },
+      {
+        "key": "dtqt_jiaotong_gongju_shouna",
+        "name": "交通工具收纳"
+      },
+      {
+        "key": "dtqt_dajian_wupin_shouna",
+        "name": "大件物品收纳"
+      },
+      {
+        "key": "dtqt_anfang_shebei",
+        "name": "安防设备"
+      },
+      {
+        "key": "dtqt_zhineng_shebei",
+        "name": "智能设备"
+      },
+      {
+        "key": "dtqt_qingjie_shebei",
+        "name": "清洁设备"
+      }
+    ],
+    "xuanuan": [
+      {
+        "key": "xg_jimen",
+        "name": "（功能）进出门转换"
+      },
+      {
+        "key": "xg_linshi_zhiwu",
+        "name": "（功能）临时置物"
+      },
+      {
+        "key": "xg_chongwu_chuxing",
+        "name": "（功能）宠物出行"
+      },
+      {
+        "key": "xg_xiele_shouna",
+        "name": "（收纳）鞋类收纳"
+      },
+      {
+        "key": "xg_yimaobao_shouna",
+        "name": "（收纳）衣帽包收纳"
+      },
+      {
+        "key": "xg_dajian_wupin_shouna",
+        "name": "（收纳）大件物品收纳"
+      },
+      {
+        "key": "xg_gongju_shouna",
+        "name": "（收纳）工具收纳"
+      },
+      {
+        "key": "xg_chongwu_yongpin_shouna",
+        "name": "（收纳）宠物用品收纳"
+      },
+      {
+        "key": "xg_qingjie_shebei",
+        "name": "（设备）清洁设备"
+      },
+      {
+        "key": "xg_xihu_shebei",
+        "name": "（设备）洗护设备"
+      },
+      {
+        "key": "xg_xiele_huli_shebei",
+        "name": "（设备）鞋类护理设备"
+      },
+      {
+        "key": "xg_zhineng_shebei",
+        "name": "（设备）智能设备"
+      }
+    ],
+    "keting": [
+      {
+        "key": "kt_xiuxian_fangsong",
+        "name": "（功能）休闲放松"
+      },
+      {
+        "key": "kt_yuedu_bangong",
+        "name": "（功能）阅读办公"
+      },
+      {
+        "key": "kt_jiating_hudong",
+        "name": "（功能）家庭互动"
+      },
+      {
+        "key": "kt_yingyin_yule",
+        "name": "（功能）影音娱乐"
+      },
+      {
+        "key": "kt_shejiao_huike",
+        "name": "（功能）社交会客"
+      },
+      {
+        "key": "kt_qing_canyin",
+        "name": "（功能）轻餐饮"
+      },
+      {
+        "key": "kt_jiankang_yundong",
+        "name": "（功能）健康运动"
+      },
+      {
+        "key": "kt_leqi_lianxi",
+        "name": "（功能）乐器练习"
+      },
+      {
+        "key": "kt_richang_shouna",
+        "name": "（收纳）日常用品收纳"
+      },
+      {
+        "key": "kt_tushu_shouna",
+        "name": "（收纳）图书收纳"
+      },
+      {
+        "key": "kt_yule_shouna",
+        "name": "（收纳）娱乐用品收纳"
+      },
+      {
+        "key": "kt_ertong_shouna",
+        "name": "（收纳）儿童用品收纳"
+      },
+      {
+        "key": "kt_chongwu_shouna",
+        "name": "（收纳）宠物用品收纳"
+      },
+      {
+        "key": "kt_lingshi_yinpin",
+        "name": "（收纳）零食饮品收纳"
+      },
+      {
+        "key": "kt_huanji_shouna",
+        "name": "（收纳）换季用品收纳"
+      },
+      {
+        "key": "kt_jiazheng_shouna",
+        "name": "（收纳）家政用品收纳"
+      },
+      {
+        "key": "kt_zhanshi_shouna",
+        "name": "（收纳）展示收藏收纳"
+      },
+      {
+        "key": "kt_guanying_shebei",
+        "name": "（设备）观影设备"
+      },
+      {
+        "key": "kt_yinxiang_shebei",
+        "name": "（设备）音响设备"
+      },
+      {
+        "key": "kt_youxi_shebei",
+        "name": "（设备）游戏设备"
+      },
+      {
+        "key": "kt_huanjing_shebei",
+        "name": "（设备）环境设备"
+      },
+      {
+        "key": "kt_qingjie_shebei",
+        "name": "（设备）清洁设备"
+      },
+      {
+        "key": "kt_yinpin_shebei",
+        "name": "（设备）饮品设备"
+      },
+      {
+        "key": "kt_jianshen_shebei",
+        "name": "（设备）健身设备"
+      },
+      {
+        "key": "kt_leqi_shebei",
+        "name": "（设备）乐器设备"
+      }
+    ],
+    "chufang": [
+      {
+        "key": "cf_shicai_cunchu",
+        "name": "（功能）食材存储"
+      },
+      {
+        "key": "cf_shicai_chuli",
+        "name": "（功能）食材处理"
+      },
+      {
+        "key": "cf_pengren_xingwei",
+        "name": "（功能）烹饪行为"
+      },
+      {
+        "key": "cf_yinpin_zhizuo",
+        "name": "（功能）饮品制作"
+      },
+      {
+        "key": "cf_canyin_fuzhu",
+        "name": "（功能）用餐辅助"
+      },
+      {
+        "key": "cf_qingjie_xingwei",
+        "name": "（功能）清洁行为"
+      },
+      {
+        "key": "cf_kongjian_xingtai",
+        "name": "（功能）空间形态"
+      },
+      {
+        "key": "cf_shouna_canju",
+        "name": "（收纳）餐具收纳"
+      },
+      {
+        "key": "cf_shouna_chuju",
+        "name": "（收纳）厨具收纳"
+      },
+      {
+        "key": "cf_shouna_shiwu",
+        "name": "（收纳）食品收纳"
+      },
+      {
+        "key": "cf_shouna_rongqi",
+        "name": "（收纳）容器收纳"
+      },
+      {
+        "key": "cf_shouna_qingjie",
+        "name": "（收纳）清洁收纳"
+      },
+      {
+        "key": "cf_shouna_xiaogongju",
+        "name": "（收纳）小工具收纳"
+      },
+      {
+        "key": "cf_shouna_pengren_shebei",
+        "name": "（收纳）烹饪设备"
+      },
+      {
+        "key": "cf_shebei_shicai_chuli",
+        "name": "（设备）食材处理设备"
+      },
+      {
+        "key": "cf_shebei_qingxi_chuli",
+        "name": "（设备）清洗与处理设备"
+      },
+      {
+        "key": "cf_shebei_yinpin",
+        "name": "（设备）饮品设备"
+      },
+      {
+        "key": "cf_shebei_lengcang",
+        "name": "（设备）冷藏设备"
+      },
+      {
+        "key": "cf_shebei_huanjing",
+        "name": "（设备）环境设备"
+      }
+    ],
+    "canting": [
+      {
+        "key": "ct_yongcan_renshu",
+        "name": "（功能）用餐人数"
+      },
+      {
+        "key": "ct_yongcan_fangshi",
+        "name": "（功能）用餐方式"
+      },
+      {
+        "key": "ct_zhengcan_xingwei",
+        "name": "（功能）正餐行为"
+      },
+      {
+        "key": "ct_richang_yinshi",
+        "name": "（功能）日常饮食行为"
+      },
+      {
+        "key": "ct_gongzuo_xuexi",
+        "name": "（功能）工作学习"
+      },
+      {
+        "key": "ct_jiating_hudong",
+        "name": "（功能）家庭互动"
+      },
+      {
+        "key": "ct_linshi_xingwei",
+        "name": "（功能）临时行为"
+      },
+      {
+        "key": "ct_shouna_canju",
+        "name": "（收纳）餐具收纳"
+      },
+      {
+        "key": "ct_shouna_shiwu",
+        "name": "（收纳）食物收纳"
+      },
+      {
+        "key": "ct_shouna_shiyong",
+        "name": "（收纳）使用物品收纳"
+      },
+      {
+        "key": "ct_shouna_canhou",
+        "name": "（收纳）餐后收纳"
+      },
+      {
+        "key": "ct_shouna_teshu",
+        "name": "（收纳）特殊收纳"
+      },
+      {
+        "key": "ct_shebei_jiare",
+        "name": "（设备）加热烹饪设备"
+      },
+      {
+        "key": "ct_shebei_yinshui",
+        "name": "（设备）饮水设备"
+      },
+      {
+        "key": "ct_shebei_kafei",
+        "name": "（设备）咖啡设备"
+      },
+      {
+        "key": "ct_shebei_chayin",
+        "name": "（设备）茶饮设备"
+      },
+      {
+        "key": "ct_shebei_qingjie",
+        "name": "（设备）清洁设备"
+      },
+      {
+        "key": "ct_shebei_lengcang",
+        "name": "（设备）冷藏设备"
+      },
+      {
+        "key": "ct_shebei_huanjing",
+        "name": "（设备）环境设备"
+      }
+    ],
+    "woshi": [
+      {
+        "key": "ws_shuimian_xiuxi",
+        "name": "（功能）睡眠休息"
+      },
+      {
+        "key": "ws_xuexi_bangong",
+        "name": "（功能）学习办公"
+      },
+      {
+        "key": "ws_yule_yingyin",
+        "name": "（功能）娱乐影音"
+      },
+      {
+        "key": "ws_xingxiang_zhengli",
+        "name": "（功能）形象整理"
+      },
+      {
+        "key": "ws_yiwu_zhengli",
+        "name": "（功能）衣物整理"
+      },
+      {
+        "key": "ws_geren_wupin_zhengli",
+        "name": "（功能）个人物品整理"
+      },
+      {
+        "key": "ws_shenghuo_xingwei",
+        "name": "（功能）生活行为"
+      },
+      {
+        "key": "ws_kongjian_gongnengqu",
+        "name": "（功能）空间功能区"
+      },
+      {
+        "key": "ws_shouna_yiwu",
+        "name": "（收纳）衣物收纳"
+      },
+      {
+        "key": "ws_shouna_chuangpin",
+        "name": "（收纳）床品收纳"
+      },
+      {
+        "key": "ws_shouna_shenghuo_zali",
+        "name": "（收纳）生活杂物收纳"
+      },
+      {
+        "key": "ws_shebei_shuijian_huanjing",
+        "name": "（设备）睡眠与环境设备"
+      },
+      {
+        "key": "ws_shebei_yingyin_yule",
+        "name": "（设备）影音娱乐设备"
+      },
+      {
+        "key": "ws_shebei_shenghuo_bianli",
+        "name": "（设备）生活便利设备"
+      },
+      {
+        "key": "ws_shebei_yiwu_huli",
+        "name": "（设备）衣物护理设备"
+      }
+    ],
+    "weishengjian": [
+      {
+        "key": "wsj_ruce_xingwei",
+        "name": "（功能）如厕行为"
+      },
+      {
+        "key": "wsj_xishu_xingwei",
+        "name": "（功能）洗漱行为"
+      },
+      {
+        "key": "wsj_muyu_xingwei",
+        "name": "（功能）沐浴行为"
+      },
+      {
+        "key": "wsj_rongmao_zhengli",
+        "name": "（功能）容貌整理"
+      },
+      {
+        "key": "wsj_qingjie_xihu_xingwei",
+        "name": "（功能）清洁洗护"
+      },
+      {
+        "key": "wsj_chongwu_xiangguan",
+        "name": "（功能）宠物相关"
+      },
+      {
+        "key": "wsj_shouna_xishu_yongpin",
+        "name": "（收纳）洗漱用品收纳"
+      },
+      {
+        "key": "wsj_shouna_maojin_fangzhi",
+        "name": "（收纳）毛巾收纳"
+      },
+      {
+        "key": "wsj_shouna_weisheng_yongpin",
+        "name": "（收纳）卫生用品收纳"
+      },
+      {
+        "key": "wsj_shouna_qingjie_yongpin",
+        "name": "（收纳）清洁用品收纳"
+      },
+      {
+        "key": "wsj_shouna_beiyong_wupin",
+        "name": "（收纳）备用物品收纳"
+      },
+      {
+        "key": "wsj_shebei_jichu_weiyu",
+        "name": "（设备）基础卫浴设备"
+      },
+      {
+        "key": "wsj_shebei_reshui_huanjing",
+        "name": "（设备）热水与环境设备"
+      },
+      {
+        "key": "wsj_shebei_xihu",
+        "name": "（设备）洗护设备"
+      },
+      {
+        "key": "wsj_shebei_jiaju_qingjie",
+        "name": "（设备）家居清洁设备"
+      }
+    ],
+    "yangtai": [
+      {
+        "key": "yt_liangshai_xingwei",
+        "name": "（功能）晾晒行为"
+      },
+      {
+        "key": "yt_xiyi_xingwei",
+        "name": "（功能）洗衣行为"
+      },
+      {
+        "key": "yt_qingjie_xingwei",
+        "name": "（功能）清洁行为"
+      },
+      {
+        "key": "yt_zhongzhi_xingwei",
+        "name": "（功能）种植行为"
+      },
+      {
+        "key": "yt_xiuxian_xingwei",
+        "name": "（功能）休闲行为"
+      },
+      {
+        "key": "yt_chongwu_xingwei",
+        "name": "（功能）宠物行为"
+      },
+      {
+        "key": "yt_shouna_qingjie_yongpin",
+        "name": "（收纳）清洁用品收纳"
+      },
+      {
+        "key": "yt_shouna_xiyi_yongpin",
+        "name": "（收纳）洗衣用品收纳"
+      },
+      {
+        "key": "yt_shouna_gongju",
+        "name": "（收纳）工具收纳"
+      },
+      {
+        "key": "yt_shouna_zawu",
+        "name": "（收纳）杂物收纳"
+      },
+      {
+        "key": "yt_shebei_xiyi",
+        "name": "（设备）洗衣设备"
+      },
+      {
+        "key": "yt_shebei_liangshai",
+        "name": "（设备）晾晒设备"
+      },
+      {
+        "key": "yt_shebei_qingjie",
+        "name": "（设备）清洁设备"
+      },
+      {
+        "key": "yt_shebei_huanjing",
+        "name": "（设备）环境设备"
+      }
+    ],
+    "quanwu": [
+      {
+        "key": "qw_wangluo_zhineng",
+        "name": "（设备）网络与智能系统"
+      },
+      {
+        "key": "qw_wendu_shushi",
+        "name": "（设备）温度与舒适系统"
+      },
+      {
+        "key": "qw_shui_xitong",
+        "name": "（设备）水系统"
+      },
+      {
+        "key": "qw_dianli_zhaoming",
+        "name": "（设备）电力与照明系统"
+      },
+      {
+        "key": "qw_anfang_xitong",
+        "name": "（设备）安防系统"
+      },
+      {
+        "key": "qw_jiegou_kongjian",
+        "name": "（设备）结构系统"
+      }
+    ],
+    "dingzhigongnengfang": [
+      {
+        "key": "df_shuwang",
+        "name": "书房"
+      },
+      {
+        "key": "df_yingyin_shi",
+        "name": "影音室"
+      },
+      {
+        "key": "df_chashi",
+        "name": "茶室"
+      },
+      {
+        "key": "df_bangong_fang",
+        "name": "办公房"
+      },
+      {
+        "key": "df_dianjing_qu",
+        "name": "电竞区"
+      },
+      {
+        "key": "df_yimaojian",
+        "name": "衣帽间"
+      },
+      {
+        "key": "df_huashi",
+        "name": "画室"
+      },
+      {
+        "key": "df_yujia_wudao",
+        "name": "瑜伽室/舞蹈房"
+      },
+      {
+        "key": "df_yinyue_fang",
+        "name": "音乐房"
+      },
+      {
+        "key": "df_qipai_shi",
+        "name": "棋牌室"
+      },
+      {
+        "key": "df_yangguang_fang",
+        "name": "阳光房"
+      },
+      {
+        "key": "df_chongwu_fang",
+        "name": "宠物房"
+      },
+      {
+        "key": "df_xiyifang",
+        "name": "洗衣房"
+      },
+      {
+        "key": "df_800ku",
+        "name": "800库"
+      },
+      {
+        "key": "df_jianshen_fang",
+        "name": "健身房"
+      }
+    ]
+  },
+  "functionsByType": {
+    "xg_jimen": [
+      {
+        "key": "xg_zuoxia_huanxie",
+        "name": "坐下换鞋"
+      },
+      {
+        "key": "xg_guayifu",
+        "name": "挂衣服"
+      },
+      {
+        "key": "xg_quanshenjing",
+        "name": "全身镜"
+      },
+      {
+        "key": "xg_buchuang",
+        "name": "卸补妆"
+      }
+    ],
+    "xg_linshi_zhiwu": [
+      {
+        "key": "xg_linshi_fangbao",
+        "name": "临时放包"
+      },
+      {
+        "key": "xg_linshi_kuaidi",
+        "name": "临时放快递"
+      },
+      {
+        "key": "xg_linshi_waimai",
+        "name": "临时放外卖"
+      },
+      {
+        "key": "xg_linshi_yaoshi",
+        "name": "临时放钥匙"
+      },
+      {
+        "key": "xg_linshi_shuibei",
+        "name": "临时放水杯"
+      }
+    ],
+    "xg_chongwu_chuxing": [
+      {
+        "key": "xg_qianyinsheng",
+        "name": "牵引绳"
+      },
+      {
+        "key": "xg_xiangquan_xiongbeidai",
+        "name": "项圈胸背带"
+      },
+      {
+        "key": "xg_chongwu_waichubao",
+        "name": "宠物外出包"
+      },
+      {
+        "key": "xg_chongwu_shibandai",
+        "name": "宠物拾便袋"
+      },
+      {
+        "key": "xg_chongwu_lingshi",
+        "name": "宠物零食"
+      }
+    ],
+    "xg_xiele_shouna": [
+      {
+        "key": "xg_shouna_changchuanxie",
+        "name": "收纳常穿鞋"
+      },
+      {
+        "key": "xg_shouna_tuoxie",
+        "name": "收纳拖鞋"
+      },
+      {
+        "key": "xg_shouna_zanbuchuanxie",
+        "name": "收纳暂不穿的鞋"
+      }
+    ],
+    "xg_yimaobao_shouna": [
+      {
+        "key": "xg_shouna_maozi",
+        "name": "收纳帽子"
+      },
+      {
+        "key": "xg_shouna_baobao",
+        "name": "收纳暂时不背的包包"
+      },
+      {
+        "key": "xg_linshi_guayiqu",
+        "name": "临时挂衣区"
+      },
+      {
+        "key": "xg_ertong_shubao",
+        "name": "儿童书包收纳"
+      },
+      {
+        "key": "xg_toukui_shouna",
+        "name": "头盔收纳"
+      }
+    ],
+    "xg_dajian_wupin_shouna": [
+      {
+        "key": "xg_fang_xinglixiang",
+        "name": "放行李箱"
+      },
+      {
+        "key": "xg_shouna_beiyong_zuoyi",
+        "name": "收纳家用备用座椅"
+      },
+      {
+        "key": "xg_zixingche_tingfang",
+        "name": "自行车停放区"
+      }
+    ],
+    "xg_gongju_shouna": [
+      {
+        "key": "xg_shi_zi_luo_si_dao",
+        "name": "十字螺丝刀"
+      },
+      {
+        "key": "xg_yi_zi_luo_si_dao",
+        "name": "一字螺丝刀"
+      },
+      {
+        "key": "xg_mei_hua_yi_xing_luo_si_dao_pi_tou_tao_zhuang",
+        "name": "梅花异型螺丝刀批头套装"
+      },
+      {
+        "key": "xg_huo_dong_ban_shou",
+        "name": "活动扳手"
+      },
+      {
+        "key": "xg_dai_ban_shou",
+        "name": "呆扳手"
+      },
+      {
+        "key": "xg_jian_zui_qian",
+        "name": "尖嘴钳"
+      },
+      {
+        "key": "xg_xie_kou_qian",
+        "name": "斜口钳"
+      },
+      {
+        "key": "xg_gang_si_qian",
+        "name": "钢丝钳"
+      },
+      {
+        "key": "xg_yang_jiao_chui",
+        "name": "羊角锤"
+      },
+      {
+        "key": "xg_5mi_gang_juan_chi",
+        "name": "5米钢卷尺"
+      },
+      {
+        "key": "xg_pu_tong_ce_dian_bi",
+        "name": "普通测电笔"
+      },
+      {
+        "key": "xg_gan_ying_ce_dian_bi",
+        "name": "感应测电笔"
+      },
+      {
+        "key": "xg_bo_xian_qian",
+        "name": "剥线钳"
+      },
+      {
+        "key": "xg_ruan_guan_zhuanyong_ban_shou",
+        "name": "软管专用扳手"
+      },
+      {
+        "key": "xg_sheng_liao_dai",
+        "name": "生料带"
+      },
+      {
+        "key": "xg_mei_gong_dao",
+        "name": "美工刀"
+      },
+      {
+        "key": "xg_mi_ni_gang_ju",
+        "name": "迷你钢锯"
+      },
+      {
+        "key": "xg_cu_xi_sha_zhi",
+        "name": "粗细砂纸"
+      },
+      {
+        "key": "xg_jue_yuan_hei_jiao_bu",
+        "name": "绝缘黑胶布"
+      },
+      {
+        "key": "xg_ni_long_za_dai",
+        "name": "尼龙扎带"
+      },
+      {
+        "key": "xg_wan_neng_jiao",
+        "name": "万能胶"
+      },
+      {
+        "key": "xg_su_liao_peng_zhang_luo_si",
+        "name": "塑料膨胀螺丝"
+      },
+      {
+        "key": "xg_shuang_mian_jiao",
+        "name": "双面胶"
+      },
+      {
+        "key": "xg_lao_bao_fang_hu_shou_tao",
+        "name": "劳保防护手套"
+      },
+      {
+        "key": "xg_li_dian_shou_dian_zuan",
+        "name": "锂电手电钻"
+      },
+      {
+        "key": "xg_re_rong_jiao_qiang",
+        "name": "热熔胶枪"
+      },
+      {
+        "key": "xg_guan_zi_ge_dao",
+        "name": "管子割刀"
+      }
+    ],
+    "xg_chongwu_yongpin_shouna": [
+      {
+        "key": "xg_shijin",
+        "name": "湿巾"
+      },
+      {
+        "key": "xg_caijiaojin",
+        "name": "擦脚巾"
+      },
+      {
+        "key": "xg_chongwu_jiaodian",
+        "name": "宠物脚垫"
+      },
+      {
+        "key": "xg_nianmaoqi",
+        "name": "粘毛器"
+      },
+      {
+        "key": "xg_chouchou_penwu",
+        "name": "除臭喷雾"
+      },
+      {
+        "key": "xg_chongwu_lajitong",
+        "name": "宠物垃圾桶"
+      }
+    ],
+    "xg_qingjie_shebei": [
+      {
+        "key": "xg_saodi_jiqiren",
+        "name": "扫地机器人"
+      },
+      {
+        "key": "xg_xichenqi",
+        "name": "吸尘器"
+      },
+      {
+        "key": "xg_xidiji",
+        "name": "洗地机"
+      }
+    ],
+    "xg_xihu_shebei": [
+      {
+        "key": "xg_xishoutai",
+        "name": "洗手台"
+      },
+      {
+        "key": "xg_xiyiji",
+        "name": "洗衣机"
+      },
+      {
+        "key": "xg_hongganji",
+        "name": "烘干机"
+      }
+    ],
+    "xg_xiele_huli_shebei": [
+      {
+        "key": "xg_hongxieqi",
+        "name": "烘鞋器"
+      },
+      {
+        "key": "xg_chouchouji",
+        "name": "除臭机"
+      }
+    ],
+    "xg_zhineng_shebei": [
+      {
+        "key": "xg_zhineng_mensuo",
+        "name": "智能门锁"
+      },
+      {
+        "key": "xg_zhineng_shexiangtou",
+        "name": "智能摄像头"
+      }
+    ],
+    "dtqt_kuaidi_waimei": [
+      {
+        "key": "dtqt_kuaidi_cuncunqu",
+        "name": "快递暂存区"
+      },
+      {
+        "key": "dtqt_waimei_cuncunqu",
+        "name": "外卖暂存区"
+      },
+      {
+        "key": "dtqt_shengxian_linshi",
+        "name": "生鲜临时暂放区"
+      }
+    ],
+    "dtqt_chuxing_zhunbei": [
+      {
+        "key": "dtqt_linshi_huanxie",
+        "name": "临时换鞋"
+      },
+      {
+        "key": "dtqt_linshi_zhengli_yifu",
+        "name": "临时整理衣物"
+      },
+      {
+        "key": "dtqt_qufang_toukui",
+        "name": "取放头盔"
+      },
+      {
+        "key": "dtqt_qufang_yundong_zhuangbei",
+        "name": "取放运动装备"
+      }
+    ],
+    "dtqt_huijia_huanchong": [
+      {
+        "key": "dtqt_yuju_lishuiqu",
+        "name": "雨具沥水区"
+      },
+      {
+        "key": "dtqt_kuaidi_chaixiangqu",
+        "name": "快递拆箱区"
+      }
+    ],
+    "dtqt_xiele_shouna": [
+      {
+        "key": "dtqt_shiwai_xiegui",
+        "name": "室外鞋柜"
+      },
+      {
+        "key": "dtqt_changchuanxie_shouna",
+        "name": "常穿鞋收纳"
+      },
+      {
+        "key": "dtqt_yuxie_shouna",
+        "name": "雨鞋收纳"
+      }
+    ],
+    "dtqt_chuxing_zhuangbei_shouna": [
+      {
+        "key": "dtqt_toukui_shounagui",
+        "name": "头盔收纳柜"
+      },
+      {
+        "key": "dtqt_xueban_shounagui",
+        "name": "雪板收纳柜"
+      },
+      {
+        "key": "dtqt_huaxue_zhuangbei_shouna",
+        "name": "滑雪装备收纳"
+      },
+      {
+        "key": "dtqt_huju_shouna",
+        "name": "护具收纳"
+      }
+    ],
+    "dtqt_jiaotong_gongju_shouna": [
+      {
+        "key": "dtqt_zixingche_tingfangqu",
+        "name": "自行车停放区"
+      },
+      {
+        "key": "dtqt_zhedie_zixingche_shouna",
+        "name": "折叠自行车收纳"
+      },
+      {
+        "key": "dtqt_pinghengche_shouna",
+        "name": "平衡车收纳"
+      },
+      {
+        "key": "dtqt_ertong_huabanchche_shouna",
+        "name": "儿童滑板车收纳"
+      }
+    ],
+    "dtqt_dajian_wupin_shouna": [
+      {
+        "key": "dtqt_xinglixiang_cunfangqu",
+        "name": "行李箱存放区"
+      },
+      {
+        "key": "dtqt_kuangquanshui_tunhuo",
+        "name": "矿泉水囤货区"
+      },
+      {
+        "key": "dtqt_luying_zhuangbei_shouna",
+        "name": "露营装备收纳"
+      },
+      {
+        "key": "dtqt_banjia_zhiang_cuncunqu",
+        "name": "搬家纸箱暂存区"
+      }
+    ],
+    "dtqt_anfang_shebei": [
+      {
+        "key": "dtqt_zhineng_shexiangtou",
+        "name": "智能摄像头"
+      },
+      {
+        "key": "dtqt_keshi_mentong",
+        "name": "可视门铃"
+      }
+    ],
+    "dtqt_zhineng_shebei": [
+      {
+        "key": "dtqt_zhineng_mensuo_liandong",
+        "name": "智能门锁联动"
+      }
+    ],
+    "dtqt_qingjie_shebei": [
+      {
+        "key": "dtqt_hongxieqi",
+        "name": "烘鞋器"
+      },
+      {
+        "key": "dtqt_chouchouji",
+        "name": "除臭机"
+      }
+    ],
+    "kt_xiuxian_fangsong": [
+      {
+        "key": "kt_shafa_xiuxi",
+        "name": "沙发休息"
+      },
+      {
+        "key": "kt_tangping_fangsong",
+        "name": "躺平放松"
+      },
+      {
+        "key": "kt_fadai_duchu",
+        "name": "发呆独处"
+      },
+      {
+        "key": "kt_shu_taiyang",
+        "name": "晒太阳"
+      },
+      {
+        "key": "kt_anmo_fangsong",
+        "name": "按摩放松"
+      }
+    ],
+    "kt_yuedu_bangong": [
+      {
+        "key": "kt_yuedu_shuji",
+        "name": "阅读书籍"
+      },
+      {
+        "key": "kt_juia_bangong",
+        "name": "居家办公"
+      },
+      {
+        "key": "kt_bijiben_bangong",
+        "name": "笔记本办公"
+      },
+      {
+        "key": "kt_pei_haizi_xuexi",
+        "name": "陪孩子学习"
+      }
+    ],
+    "kt_jiating_hudong": [
+      {
+        "key": "kt_qinzi_huodong",
+        "name": "亲子活动"
+      },
+      {
+        "key": "kt_qinzi_yuedu",
+        "name": "亲子阅读"
+      },
+      {
+        "key": "kt_huihua_shougong",
+        "name": "绘画手工"
+      },
+      {
+        "key": "kt_chongwu_hudong",
+        "name": "宠物互动"
+      }
+    ],
+    "kt_yingyin_yule": [
+      {
+        "key": "kt_kan_dianshi",
+        "name": "看电视"
+      },
+      {
+        "key": "kt_kan_dianying",
+        "name": "看电影"
+      },
+      {
+        "key": "kt_touying_guanying",
+        "name": "投影观影"
+      },
+      {
+        "key": "kt_ting_yinyue",
+        "name": "听音乐"
+      },
+      {
+        "key": "kt_kge_yule",
+        "name": "K歌娱乐"
+      },
+      {
+        "key": "kt_zhuji_youxi",
+        "name": "主机游戏"
+      },
+      {
+        "key": "kt_zhuoyou_qipai",
+        "name": "桌游棋牌"
+      }
+    ],
+    "kt_shejiao_huike": [
+      {
+        "key": "kt_richang_daike",
+        "name": "日常待客"
+      },
+      {
+        "key": "kt_pengyou_juhui",
+        "name": "朋友聚会"
+      },
+      {
+        "key": "kt_jiating_juhui",
+        "name": "家庭聚会"
+      },
+      {
+        "key": "kt_linshi_liusu",
+        "name": "临时留宿"
+      }
+    ],
+    "kt_qing_canyin": [
+      {
+        "key": "kt_he_shui",
+        "name": "喝水"
+      },
+      {
+        "key": "kt_he_cha",
+        "name": "喝茶"
+      },
+      {
+        "key": "kt_he_kafei",
+        "name": "喝咖啡"
+      },
+      {
+        "key": "kt_chi_shuiguo",
+        "name": "吃水果"
+      },
+      {
+        "key": "kt_chi_lingshi",
+        "name": "吃零食"
+      },
+      {
+        "key": "kt_linshi_yongcan",
+        "name": "临时用餐"
+      }
+    ],
+    "kt_jiankang_yundong": [
+      {
+        "key": "kt_yujia_tishen",
+        "name": "瑜伽拉伸"
+      },
+      {
+        "key": "kt_youyang_yundong",
+        "name": "有氧运动"
+      },
+      {
+        "key": "kt_kangfu_liliao",
+        "name": "康复理疗"
+      }
+    ],
+    "kt_leqi_lianxi": [
+      {
+        "key": "kt_gangqin_lianxi",
+        "name": "钢琴练习"
+      },
+      {
+        "key": "kt_minyue_lianxi",
+        "name": "民乐练习"
+      },
+      {
+        "key": "kt_gulei_lianxi",
+        "name": "鼓类练习"
+      }
+    ],
+    "kt_richang_shouna": [
+      {
+        "key": "kt_shouna_yaokongqi",
+        "name": "遥控器"
+      },
+      {
+        "key": "kt_shouna_zhiyin",
+        "name": "纸巾"
+      },
+      {
+        "key": "kt_shouna_shuibei",
+        "name": "水杯"
+      },
+      {
+        "key": "kt_shouna_chongdianqi",
+        "name": "充电器"
+      }
+    ],
+    "kt_tushu_shouna": [
+      {
+        "key": "kt_shouna_shuji",
+        "name": "书籍"
+      },
+      {
+        "key": "kt_shouna_zazhi",
+        "name": "杂志"
+      },
+      {
+        "key": "kt_shouna_xuexi_ziliao",
+        "name": "学习资料"
+      }
+    ],
+    "kt_yule_shouna": [
+      {
+        "key": "kt_shouna_youxiji",
+        "name": "游戏机"
+      },
+      {
+        "key": "kt_shouna_youxikadai",
+        "name": "游戏卡带"
+      },
+      {
+        "key": "kt_shouna_zhuoyou",
+        "name": "桌游"
+      }
+    ],
+    "kt_ertong_shouna": [
+      {
+        "key": "kt_shouna_wanju",
+        "name": "玩具"
+      },
+      {
+        "key": "kt_shouna_huiben",
+        "name": "绘本"
+      },
+      {
+        "key": "kt_shouna_xuexi_yongpin",
+        "name": "学习用品"
+      }
+    ],
+    "kt_chongwu_shouna": [
+      {
+        "key": "kt_shouna_chongwu_wanju",
+        "name": "宠物玩具"
+      },
+      {
+        "key": "kt_shouna_chongwu_lingshi",
+        "name": "宠物零食"
+      },
+      {
+        "key": "kt_shouna_chongwu_riyong",
+        "name": "宠物日用品"
+      }
+    ],
+    "kt_lingshi_yinpin": [
+      {
+        "key": "kt_shouna_lingshi",
+        "name": "零食"
+      },
+      {
+        "key": "kt_shouna_yinliao",
+        "name": "饮料"
+      },
+      {
+        "key": "kt_shouna_chaye",
+        "name": "茶叶"
+      },
+      {
+        "key": "kt_shouna_kafei_yongpin",
+        "name": "咖啡用品"
+      }
+    ],
+    "kt_huanji_shouna": [
+      {
+        "key": "kt_shouna_beizi",
+        "name": "被子"
+      },
+      {
+        "key": "kt_shouna_chuangpin",
+        "name": "床品"
+      },
+      {
+        "key": "kt_shouna_taixin",
+        "name": "枕芯"
+      }
+    ],
+    "kt_jiazheng_shouna": [
+      {
+        "key": "kt_shouna_liangshai_yongpin",
+        "name": "晾晒用品"
+      },
+      {
+        "key": "kt_shouna_qingjie_yongpin",
+        "name": "清洁用品"
+      }
+    ],
+    "kt_zhanshi_shouna": [
+      {
+        "key": "kt_shouna_jiulei_shoucang",
+        "name": "酒类收藏"
+      },
+      {
+        "key": "kt_shouna_shouban_shoucang",
+        "name": "手办收藏"
+      },
+      {
+        "key": "kt_shouna_jiangbei_jiangpai",
+        "name": "奖杯奖牌"
+      },
+      {
+        "key": "kt_shouna_zhuangshi_baodian",
+        "name": "装饰摆件"
+      }
+    ],
+    "kt_guanying_shebei": [
+      {
+        "key": "kt_dianshi",
+        "name": "电视"
+      },
+      {
+        "key": "kt_touyingyi",
+        "name": "投影仪"
+      },
+      {
+        "key": "kt_touying_mubu",
+        "name": "幕布"
+      }
+    ],
+    "kt_yinxiang_shebei": [
+      {
+        "key": "kt_yinxiang_xitong",
+        "name": "音响系统"
+      },
+      {
+        "key": "kt_gongfang",
+        "name": "功放"
+      },
+      {
+        "key": "kt_maikefeng",
+        "name": "麦克风"
+      }
+    ],
+    "kt_youxi_shebei": [
+      {
+        "key": "kt_ps5",
+        "name": "PS5"
+      },
+      {
+        "key": "kt_switch",
+        "name": "Switch"
+      },
+      {
+        "key": "kt_xbox",
+        "name": "Xbox"
+      }
+    ],
+    "kt_huanjing_shebei": [
+      {
+        "key": "kt_kongqi_jinghuaqi",
+        "name": "空气净化器"
+      },
+      {
+        "key": "kt_jiashiqi",
+        "name": "加湿器"
+      },
+      {
+        "key": "kt_chushiji",
+        "name": "除湿机"
+      },
+      {
+        "key": "kt_fengshan",
+        "name": "风扇"
+      },
+      {
+        "key": "kt_kongtiao",
+        "name": "空调"
+      },
+      {
+        "key": "kt_xiangxunji",
+        "name": "香薰机"
+      }
+    ],
+    "kt_qingjie_shebei": [
+      {
+        "key": "kt_saodi_jiqiren",
+        "name": "扫地机器人"
+      },
+      {
+        "key": "kt_xidiji",
+        "name": "洗地机"
+      },
+      {
+        "key": "kt_xichenqi",
+        "name": "吸尘器"
+      }
+    ],
+    "kt_yinpin_shebei": [
+      {
+        "key": "kt_yinshuiji",
+        "name": "饮水机"
+      },
+      {
+        "key": "kt_jingshuiqi",
+        "name": "净水器"
+      },
+      {
+        "key": "kt_kafeiji",
+        "name": "咖啡机"
+      },
+      {
+        "key": "kt_xiaobingxiang",
+        "name": "小冰箱"
+      }
+    ],
+    "kt_jianshen_shebei": [
+      {
+        "key": "kt_anmo_yi",
+        "name": "按摩椅"
+      },
+      {
+        "key": "kt_paobuji",
+        "name": "跑步机"
+      },
+      {
+        "key": "kt_jianshen_che",
+        "name": "健身车"
+      },
+      {
+        "key": "kt_huachuan_ji",
+        "name": "划船机"
+      }
+    ],
+    "kt_leqi_shebei": [
+      {
+        "key": "kt_gangqin",
+        "name": "钢琴"
+      },
+      {
+        "key": "kt_guzheng",
+        "name": "古筝"
+      },
+      {
+        "key": "kt_jiazigu",
+        "name": "架子鼓"
+      },
+      {
+        "key": "kt_dianziqin",
+        "name": "电子琴"
+      }
+    ],
+    "cf_shicai_cunchu": [
+      {
+        "key": "cf_cunfang_mimian",
+        "name": "存放米面粮油"
+      },
+      {
+        "key": "cf_cunfang_tiaoweiliao",
+        "name": "存放调味料"
+      },
+      {
+        "key": "cf_cunfang_shuca",
+        "name": "存放蔬菜"
+      },
+      {
+        "key": "cf_cunfang_shuiguo",
+        "name": "存放水果"
+      },
+      {
+        "key": "cf_cunfang_roulei",
+        "name": "存放肉类"
+      },
+      {
+        "key": "cf_cunfang_haixian",
+        "name": "存放海鲜"
+      },
+      {
+        "key": "cf_cunfang_ganhuo",
+        "name": "存放干货"
+      },
+      {
+        "key": "cf_cunfang_yinpin",
+        "name": "存放饮品"
+      }
+    ],
+    "cf_shicai_chuli": [
+      {
+        "key": "cf_qingxi_shuca",
+        "name": "清洗蔬菜"
+      },
+      {
+        "key": "cf_qingxi_shuiguo",
+        "name": "清洗水果"
+      },
+      {
+        "key": "cf_qiepei_shicai",
+        "name": "切配食材"
+      },
+      {
+        "key": "cf_chuli_roulei",
+        "name": "处理肉类"
+      },
+      {
+        "key": "cf_chuli_haixian",
+        "name": "处理海鲜"
+      },
+      {
+        "key": "cf_yuzhi_shicai",
+        "name": "腌制食材"
+      },
+      {
+        "key": "cf_fenzhuang_shicai",
+        "name": "分装食材"
+      },
+      {
+        "key": "cf_beican_zhengli",
+        "name": "备餐整理"
+      }
+    ],
+    "cf_pengren_xingwei": [
+      {
+        "key": "cf_chaocai",
+        "name": "炒菜"
+      },
+      {
+        "key": "cf_zhutang",
+        "name": "煮汤"
+      },
+      {
+        "key": "cf_zhengshiwu",
+        "name": "蒸食物"
+      },
+      {
+        "key": "cf_jianzha",
+        "name": "煎炸食物"
+      },
+      {
+        "key": "cf_hongbei",
+        "name": "烘焙食物"
+      },
+      {
+        "key": "cf_jiare_shiwu",
+        "name": "加热食物"
+      }
+    ],
+    "cf_yinpin_zhizuo": [
+      {
+        "key": "cf_shaoshui",
+        "name": "烧水"
+      },
+      {
+        "key": "cf_paochai",
+        "name": "泡茶"
+      },
+      {
+        "key": "cf_chong_kafei",
+        "name": "冲咖啡"
+      },
+      {
+        "key": "cf_zhizuo_guozhi",
+        "name": "制作果汁"
+      },
+      {
+        "key": "cf_beizhu_yongshui",
+        "name": "准备饮用水"
+      }
+    ],
+    "cf_canyin_fuzhu": [
+      {
+        "key": "cf_shengcai_zhuangpan",
+        "name": "盛菜装盘"
+      },
+      {
+        "key": "cf_fenzhuang_biandang",
+        "name": "分装便当"
+      },
+      {
+        "key": "cf_baifang_yinpin",
+        "name": "摆放饮品"
+      },
+      {
+        "key": "cf_linshi_chi_zaocan",
+        "name": "临时吃早餐"
+      }
+    ],
+    "cf_qingjie_xingwei": [
+      {
+        "key": "cf_qingxi_canju",
+        "name": "清洗餐具"
+      },
+      {
+        "key": "cf_qingxi_guoju",
+        "name": "清洗锅具"
+      },
+      {
+        "key": "cf_chuli_chuyu",
+        "name": "处理厨余垃圾"
+      },
+      {
+        "key": "cf_taimian_qingjie",
+        "name": "台面清洁"
+      },
+      {
+        "key": "cf_dimian_qingjie",
+        "name": "地面清洁"
+      }
+    ],
+    "cf_kongjian_xingtai": [
+      {
+        "key": "cf_guding_daotai",
+        "name": "固定岛台"
+      },
+      {
+        "key": "cf_yidong_daotai",
+        "name": "移动岛台"
+      },
+      {
+        "key": "cf_kaifang_chufang",
+        "name": "开放式厨房"
+      },
+      {
+        "key": "cf_bankaifang_chufang",
+        "name": "半开放式厨房"
+      },
+      {
+        "key": "cf_fengbi_chufang",
+        "name": "封闭式厨房"
+      }
+    ],
+    "cf_shouna_canju": [
+      {
+        "key": "cf_shouna_wanpan",
+        "name": "收纳碗盘"
+      },
+      {
+        "key": "cf_shouna_kuaishao_daocha",
+        "name": "收纳筷勺刀叉"
+      },
+      {
+        "key": "cf_shouna_beizi",
+        "name": "收纳杯子"
+      },
+      {
+        "key": "cf_shouna_canju_xiaogongju",
+        "name": "收纳餐具小工具"
+      }
+    ],
+    "cf_shouna_chuju": [
+      {
+        "key": "cf_shouna_guoju",
+        "name": "收纳锅具"
+      },
+      {
+        "key": "cf_shouna_daoju",
+        "name": "收纳刀具"
+      },
+      {
+        "key": "cf_shouna_zhenban",
+        "name": "收纳砧板"
+      },
+      {
+        "key": "cf_shouna_guochai_jiaju",
+        "name": "收纳锅铲夹具"
+      }
+    ],
+    "cf_shouna_shiwu": [
+      {
+        "key": "cf_shouna_mimian_youliao",
+        "name": "收纳米面粮油"
+      },
+      {
+        "key": "cf_shouna_tiaoweiliao",
+        "name": "收纳调味料"
+      },
+      {
+        "key": "cf_shouna_ganhuo",
+        "name": "收纳干货"
+      },
+      {
+        "key": "cf_shouna_lingshi",
+        "name": "收纳零食"
+      },
+      {
+        "key": "cf_shouna_shuiguo",
+        "name": "收纳水果"
+      },
+      {
+        "key": "cf_shouna_yinpin",
+        "name": "收纳饮品"
+      },
+      {
+        "key": "cf_shouna_baoxian_shicai",
+        "name": "收纳保鲜食材"
+      }
+    ],
+    "cf_shouna_rongqi": [
+      {
+        "key": "cf_shouna_baoxianhe",
+        "name": "收纳保鲜盒"
+      },
+      {
+        "key": "cf_shouna_fanhe",
+        "name": "收纳饭盒"
+      },
+      {
+        "key": "cf_shouna_tiaowei_pinggu",
+        "name": "收纳调料瓶罐"
+      },
+      {
+        "key": "cf_shouna_shounadai",
+        "name": "收纳收纳袋"
+      }
+    ],
+    "cf_shouna_qingjie": [
+      {
+        "key": "cf_shouna_xijie_yongpin",
+        "name": "收纳洗洁用品"
+      },
+      {
+        "key": "cf_shouna_mabu",
+        "name": "收纳抹布"
+      },
+      {
+        "key": "cf_shouna_qingjie_gongju",
+        "name": "收纳清洁工具"
+      },
+      {
+        "key": "cf_shouna_laji_dai",
+        "name": "收纳垃圾袋"
+      }
+    ],
+    "cf_shouna_xiaogongju": [
+      {
+        "key": "cf_shouna_xiangdianqi_peijian",
+        "name": "收纳厨房小电器配件"
+      },
+      {
+        "key": "cf_shouna_hongbei_gongju",
+        "name": "收纳烘焙工具"
+      },
+      {
+        "key": "cf_shouna_liangbei_liangshao",
+        "name": "收纳量杯量勺"
+      }
+    ],
+    "cf_shouna_pengren_shebei": [
+      {
+        "key": "cf_ranqizao",
+        "name": "燃气灶"
+      },
+      {
+        "key": "cf_diancilu",
+        "name": "电磁炉"
+      },
+      {
+        "key": "cf_dianfanbao",
+        "name": "电饭煲"
+      },
+      {
+        "key": "cf_weibolu",
+        "name": "微波炉"
+      },
+      {
+        "key": "cf_kaoxiang",
+        "name": "烤箱"
+      },
+      {
+        "key": "cf_zhengxiang",
+        "name": "蒸箱"
+      },
+      {
+        "key": "cf_kongqizha",
+        "name": "空气炸锅"
+      },
+      {
+        "key": "cf_dianyaliguo",
+        "name": "电压力锅"
+      },
+      {
+        "key": "cf_diandunhuo",
+        "name": "电炖锅"
+      },
+      {
+        "key": "cf_dianbingchang",
+        "name": "电饼铛"
+      },
+      {
+        "key": "cf_duogongneng_liaoguo",
+        "name": "多功能料理锅"
+      },
+      {
+        "key": "cf_liaoliji",
+        "name": "料理机"
+      },
+      {
+        "key": "cf_chushiji",
+        "name": "厨师机"
+      }
+    ],
+    "cf_shebei_shicai_chuli": [
+      {
+        "key": "cf_pobiji",
+        "name": "破壁机"
+      },
+      {
+        "key": "cf_zhajiji",
+        "name": "榨汁机"
+      },
+      {
+        "key": "cf_qiecai_ji",
+        "name": "切菜机"
+      },
+      {
+        "key": "cf_jiaorou_ji",
+        "name": "绞肉机"
+      },
+      {
+        "key": "cf_shiwu_liaoliji",
+        "name": "食物料理机"
+      }
+    ],
+    "cf_shebei_qingxi_chuli": [
+      {
+        "key": "cf_chouyouyanji",
+        "name": "抽油烟机"
+      },
+      {
+        "key": "cf_xiwanji",
+        "name": "洗碗机"
+      },
+      {
+        "key": "cf_xiaodugui",
+        "name": "消毒柜"
+      },
+      {
+        "key": "cf_jingshuiqi",
+        "name": "净水器"
+      },
+      {
+        "key": "cf_ruanshuiji",
+        "name": "软水机"
+      }
+    ],
+    "cf_shebei_yinpin": [
+      {
+        "key": "cf_dianreshuihu",
+        "name": "电热水壶"
+      },
+      {
+        "key": "cf_jire_yinshuiji",
+        "name": "即热饮水机"
+      },
+      {
+        "key": "cf_kafeiji",
+        "name": "咖啡机"
+      }
+    ],
+    "cf_shebei_lengcang": [
+      {
+        "key": "cf_shuangmen_bingxiang",
+        "name": "双门冰箱"
+      },
+      {
+        "key": "cf_sanmen_bingxiang",
+        "name": "三门冰箱"
+      },
+      {
+        "key": "cf_shizi_bingxiang",
+        "name": "十字冰箱"
+      },
+      {
+        "key": "cf_fashi_bingxiang",
+        "name": "法式冰箱"
+      },
+      {
+        "key": "cf_rishi_duomen_bingxiang",
+        "name": "日式多门冰箱"
+      }
+    ],
+    "cf_shebei_huanjing": [
+      {
+        "key": "cf_liangba",
+        "name": "凉霸"
+      },
+      {
+        "key": "cf_chufang_chuwei_shebei",
+        "name": "厨房除味设备"
+      }
+    ],
+    "ct_yongcan_renshu": [
+      {
+        "key": "ct_1_2ren_yongcan",
+        "name": "1–2人用餐"
+      },
+      {
+        "key": "ct_3_4ren_yongcan",
+        "name": "3–4人用餐"
+      },
+      {
+        "key": "ct_5_6ren_yongcan",
+        "name": "5–6人用餐"
+      },
+      {
+        "key": "ct_6renyishang_yongcan",
+        "name": "6人以上用餐"
+      }
+    ],
+    "ct_yongcan_fangshi": [
+      {
+        "key": "ct_zhuocan_yongcan",
+        "name": "坐餐桌用餐"
+      },
+      {
+        "key": "ct_daotai_yongcan",
+        "name": "坐岛台用餐"
+      },
+      {
+        "key": "ct_weizhuo_yongcan",
+        "name": "围桌用餐"
+      },
+      {
+        "key": "ct_linshi_jiazuo",
+        "name": "临时加座用餐"
+      }
+    ],
+    "ct_zhengcan_xingwei": [
+      {
+        "key": "ct_chihuoguo",
+        "name": "吃火锅"
+      },
+      {
+        "key": "ct_chishaokao",
+        "name": "吃烧烤"
+      },
+      {
+        "key": "ct_chizhiwu",
+        "name": "吃炸物"
+      },
+      {
+        "key": "ct_chiwaimai",
+        "name": "吃外卖"
+      },
+      {
+        "key": "ct_chihefan",
+        "name": "吃盒饭"
+      }
+    ],
+    "ct_richang_yinshi": [
+      {
+        "key": "ct_chizaocan",
+        "name": "吃早餐"
+      },
+      {
+        "key": "ct_chiyexiao",
+        "name": "吃夜宵"
+      },
+      {
+        "key": "ct_chishuiguo",
+        "name": "吃水果"
+      },
+      {
+        "key": "ct_chilingshi",
+        "name": "吃零食"
+      },
+      {
+        "key": "ct_hekafei",
+        "name": "喝咖啡"
+      },
+      {
+        "key": "ct_hecha",
+        "name": "喝茶"
+      },
+      {
+        "key": "ct_heyinliao",
+        "name": "喝饮料"
+      }
+    ],
+    "ct_gongzuo_xuexi": [
+      {
+        "key": "ct_bangong",
+        "name": "办公"
+      },
+      {
+        "key": "ct_yongdiannao",
+        "name": "用电脑"
+      },
+      {
+        "key": "ct_xiezuo",
+        "name": "写作"
+      },
+      {
+        "key": "ct_zuoyey",
+        "name": "做作业"
+      }
+    ],
+    "ct_jiating_hudong": [
+      {
+        "key": "ct_liaotian",
+        "name": "聊天"
+      },
+      {
+        "key": "ct_jiedai_keren",
+        "name": "接待客人"
+      },
+      {
+        "key": "ct_jieri_jucan",
+        "name": "节日聚餐"
+      }
+    ],
+    "ct_linshi_xingwei": [
+      {
+        "key": "ct_shouji_chongdian",
+        "name": "手机充电"
+      },
+      {
+        "key": "ct_chaikuaidi",
+        "name": "拆快递"
+      },
+      {
+        "key": "ct_fangwenjian",
+        "name": "放文件"
+      }
+    ],
+    "ct_shouna_canju": [
+      {
+        "key": "ct_shouna_wan",
+        "name": "收纳碗"
+      },
+      {
+        "key": "ct_shouna_pan",
+        "name": "收纳盘"
+      },
+      {
+        "key": "ct_shouna_kuaizi",
+        "name": "收纳筷子"
+      },
+      {
+        "key": "ct_shouna_shaozi",
+        "name": "收纳勺子"
+      },
+      {
+        "key": "ct_shouna_daocha",
+        "name": "收纳刀叉"
+      },
+      {
+        "key": "ct_shouna_beizi",
+        "name": "收纳杯子"
+      },
+      {
+        "key": "ct_shouna_zhiyin",
+        "name": "收纳纸巾"
+      }
+    ],
+    "ct_shouna_shiwu": [
+      {
+        "key": "ct_shouna_dami",
+        "name": "收纳大米"
+      },
+      {
+        "key": "ct_shouna_mianfen",
+        "name": "收纳面粉"
+      },
+      {
+        "key": "ct_shouna_youzhishpin",
+        "name": "收纳食用油"
+      },
+      {
+        "key": "ct_shouna_tiaoweiliao",
+        "name": "收纳调味料"
+      },
+      {
+        "key": "ct_shouna_lingshi",
+        "name": "收纳零食"
+      },
+      {
+        "key": "ct_shouna_shuiguo",
+        "name": "收纳水果"
+      },
+      {
+        "key": "ct_shouna_ganguo",
+        "name": "收纳干货"
+      },
+      {
+        "key": "ct_shouna_yinliao",
+        "name": "收纳饮料"
+      }
+    ],
+    "ct_shouna_shiyong": [
+      {
+        "key": "ct_shouna_changyong_canju",
+        "name": "收纳常用餐具"
+      },
+      {
+        "key": "ct_shouna_changyong_beizhi",
+        "name": "收纳常用水杯"
+      },
+      {
+        "key": "ct_shouna_chongdianxian",
+        "name": "收纳充电线"
+      },
+      {
+        "key": "ct_shouna_chaipai",
+        "name": "收纳插排"
+      },
+      {
+        "key": "ct_shouna_qingjebu",
+        "name": "收纳清洁布"
+      },
+      {
+        "key": "ct_shouna_qingjieji",
+        "name": "收纳清洁剂"
+      }
+    ],
+    "ct_shouna_canhou": [
+      {
+        "key": "ct_fangzhi_weixi_canju",
+        "name": "放置未洗餐具"
+      },
+      {
+        "key": "ct_fangzhi_shengcai",
+        "name": "放置剩菜"
+      },
+      {
+        "key": "ct_dabao_shiwu",
+        "name": "打包食物"
+      },
+      {
+        "key": "ct_shouna_chuwu_laji",
+        "name": "厨余垃圾收纳"
+      },
+      {
+        "key": "ct_shouna_ganlaji",
+        "name": "干垃圾收纳"
+      }
+    ],
+    "ct_shouna_teshu": [
+      {
+        "key": "ct_shouna_ertong_canju",
+        "name": "收纳儿童餐具"
+      },
+      {
+        "key": "ct_shouna_ertong_lingshi",
+        "name": "收纳儿童零食"
+      },
+      {
+        "key": "ct_shouna_chongwu_shiwu",
+        "name": "收纳宠物食物"
+      },
+      {
+        "key": "ct_shouna_chongwu_canju",
+        "name": "收纳宠物餐具"
+      },
+      {
+        "key": "ct_shouna_changyong_yaopin",
+        "name": "收纳常用药品"
+      }
+    ],
+    "ct_shebei_jiare": [
+      {
+        "key": "ct_diancilu",
+        "name": "电磁炉"
+      },
+      {
+        "key": "ct_dianhuoguo",
+        "name": "电火锅"
+      },
+      {
+        "key": "ct_diankaopan",
+        "name": "电烤盘"
+      },
+      {
+        "key": "ct_weibolu",
+        "name": "微波炉"
+      },
+      {
+        "key": "ct_dianrefanhe_jiereqi",
+        "name": "电热饭盒加热器"
+      }
+    ],
+    "ct_shebei_yinshui": [
+      {
+        "key": "ct_jire_yinshuiji",
+        "name": "即热饮水机"
+      },
+      {
+        "key": "ct_taishi_yinshuiji",
+        "name": "台式饮水机"
+      },
+      {
+        "key": "ct_dianreshuihu",
+        "name": "电热水壶"
+      },
+      {
+        "key": "ct_jingyin_yiti_ji",
+        "name": "净饮一体机"
+      }
+    ],
+    "ct_shebei_kafei": [
+      {
+        "key": "ct_jiangnang_kafeiji",
+        "name": "胶囊咖啡机"
+      },
+      {
+        "key": "ct_banqidong_kafeiji",
+        "name": "半自动咖啡机"
+      },
+      {
+        "key": "ct_quanqidong_kafeiji",
+        "name": "全自动咖啡机"
+      },
+      {
+        "key": "ct_dilou_kafeiji",
+        "name": "滴滤咖啡机"
+      }
+    ],
+    "ct_shebei_chayin": [
+      {
+        "key": "ct_dianre_yangshenghu",
+        "name": "电热养生壶"
+      },
+      {
+        "key": "ct_zhuchagi",
+        "name": "煮茶器"
+      },
+      {
+        "key": "ct_paochad_shuihu",
+        "name": "泡茶电水壶"
+      },
+      {
+        "key": "ct_hengwen_shaoshuihu",
+        "name": "恒温烧水壶"
+      }
+    ],
+    "ct_shebei_qingjie": [
+      {
+        "key": "ct_qianrushi_xiaodugui",
+        "name": "嵌入式消毒柜"
+      },
+      {
+        "key": "ct_qianrushi_xiwanji",
+        "name": "嵌入式洗碗机"
+      },
+      {
+        "key": "ct_taishi_xiwanji",
+        "name": "台式洗碗机"
+      },
+      {
+        "key": "ct_canju_hongganji",
+        "name": "餐具烘干机"
+      }
+    ],
+    "ct_shebei_lengcang": [
+      {
+        "key": "ct_shuangmen_bingxiang",
+        "name": "双门冰箱"
+      },
+      {
+        "key": "ct_sanmen_bingxiang",
+        "name": "三门冰箱"
+      },
+      {
+        "key": "ct_shizi_bingxiang",
+        "name": "十字冰箱"
+      },
+      {
+        "key": "ct_fashi_bingxiang",
+        "name": "法式冰箱"
+      },
+      {
+        "key": "ct_rishi_duomen_bingxiang",
+        "name": "日式多门冰箱"
+      }
+    ],
+    "ct_shebei_huanjing": [
+      {
+        "key": "ct_kongqi_jinghuaqi",
+        "name": "空气净化器"
+      },
+      {
+        "key": "ct_canchu_chuweiji",
+        "name": "餐厨除味机"
+      }
+    ],
+    "ws_shuimian_xiuxi": [
+      {
+        "key": "ws_shuimian",
+        "name": "睡觉"
+      },
+      {
+        "key": "ws_wuxiu",
+        "name": "午休"
+      },
+      {
+        "key": "ws_fangsong_tangwo",
+        "name": "放松躺卧"
+      },
+      {
+        "key": "ws_fadai_xiuxi",
+        "name": "发呆休息"
+      }
+    ],
+    "ws_xuexi_bangong": [
+      {
+        "key": "ws_kanshu",
+        "name": "看书"
+      },
+      {
+        "key": "ws_bangong",
+        "name": "办公"
+      },
+      {
+        "key": "ws_yongdiannao_gongzuo",
+        "name": "用电脑工作"
+      },
+      {
+        "key": "ws_xuexi_xiezuoye",
+        "name": "学习写作业"
+      },
+      {
+        "key": "ws_chuli_wenjian",
+        "name": "处理文件"
+      }
+    ],
+    "ws_yule_yingyin": [
+      {
+        "key": "ws_kan_dianshi",
+        "name": "看电视"
+      },
+      {
+        "key": "ws_kan_dianying",
+        "name": "看电影"
+      },
+      {
+        "key": "ws_yongtouying_kan_shipin",
+        "name": "用投影看视频"
+      },
+      {
+        "key": "ws_ting_yinyue",
+        "name": "听音乐"
+      },
+      {
+        "key": "ws_wan_shoubing_youxi",
+        "name": "玩手柄游戏"
+      },
+      {
+        "key": "ws_wan_diannao_youxi",
+        "name": "玩电脑游戏"
+      }
+    ],
+    "ws_xingxiang_zhengli": [
+      {
+        "key": "ws_huazhuang",
+        "name": "化妆"
+      },
+      {
+        "key": "ws_xiezhuang",
+        "name": "卸妆"
+      },
+      {
+        "key": "ws_hufu",
+        "name": "护肤"
+      },
+      {
+        "key": "ws_zhengli_toufa",
+        "name": "整理头发"
+      },
+      {
+        "key": "ws_shichuan_yiwu",
+        "name": "试穿衣物"
+      },
+      {
+        "key": "ws_dapei_fuzhuang",
+        "name": "搭配衣服"
+      }
+    ],
+    "ws_yiwu_zhengli": [
+      {
+        "key": "ws_huan_yifu",
+        "name": "换衣服"
+      },
+      {
+        "key": "ws_shouna_richang_yiwu",
+        "name": "收纳日常衣物"
+      },
+      {
+        "key": "ws_shouna_huanji_yiwu",
+        "name": "收纳换季衣物"
+      },
+      {
+        "key": "ws_zhunbei_dier_tian_yifu",
+        "name": "准备第二天衣服"
+      },
+      {
+        "key": "ws_shouna_neiyi",
+        "name": "收纳内衣"
+      },
+      {
+        "key": "ws_shouna_wazi",
+        "name": "收纳袜子"
+      }
+    ],
+    "ws_geren_wupin_zhengli": [
+      {
+        "key": "ws_shouna_siren_wupin",
+        "name": "收纳私人物品"
+      },
+      {
+        "key": "ws_shouna_suishen_wupin",
+        "name": "收纳随身物品"
+      },
+      {
+        "key": "ws_shouna_shipin",
+        "name": "收纳饰品"
+      },
+      {
+        "key": "ws_shouna_baodai",
+        "name": "收纳包袋"
+      }
+    ],
+    "ws_shenghuo_xingwei": [
+      {
+        "key": "ws_peiban_jiating",
+        "name": "陪伴家人"
+      },
+      {
+        "key": "ws_zhaogu_haizi",
+        "name": "照顾孩子"
+      },
+      {
+        "key": "ws_qinzi_hudong",
+        "name": "亲子互动"
+      },
+      {
+        "key": "ws_yujia_fangsong",
+        "name": "瑜伽放松"
+      },
+      {
+        "key": "ws_qingyundong",
+        "name": "轻运动"
+      }
+    ],
+    "ws_kongjian_gongnengqu": [
+      {
+        "key": "ws_yimao_qu",
+        "name": "衣帽区"
+      },
+      {
+        "key": "ws_dianjing_qu",
+        "name": "电竞区"
+      },
+      {
+        "key": "ws_yujia_qu",
+        "name": "瑜伽区"
+      },
+      {
+        "key": "ws_fangsong_anmo_qu",
+        "name": "放松按摩区"
+      }
+    ],
+    "ws_shouna_yiwu": [
+      {
+        "key": "ws_shouna_shangyi",
+        "name": "收纳上衣"
+      },
+      {
+        "key": "ws_shouna_kuzi",
+        "name": "收纳裤子"
+      },
+      {
+        "key": "ws_shouna_waitao",
+        "name": "收纳外套"
+      },
+      {
+        "key": "ws_shouna_neiyi",
+        "name": "收纳内衣"
+      },
+      {
+        "key": "ws_shouna_wazi",
+        "name": "收纳袜子"
+      },
+      {
+        "key": "ws_shouna_shuiyi",
+        "name": "收纳睡衣"
+      },
+      {
+        "key": "ws_shouna_huanji_yiwu",
+        "name": "收纳换季衣物"
+      }
+    ],
+    "ws_shouna_chuangpin": [
+      {
+        "key": "ws_shouna_beizi",
+        "name": "收纳被子"
+      },
+      {
+        "key": "ws_shouna_chuangdan",
+        "name": "收纳床单"
+      },
+      {
+        "key": "ws_shouna_zhentou",
+        "name": "收纳枕头"
+      },
+      {
+        "key": "ws_shouna_chuangshang_beiyong",
+        "name": "收纳床上备用用品"
+      }
+    ],
+    "ws_shouna_shenghuo_zali": [
+      {
+        "key": "ws_shouna_chongdian_shebei",
+        "name": "收纳充电设备"
+      },
+      {
+        "key": "ws_shouna_dianzishebei",
+        "name": "收纳电子产品"
+      },
+      {
+        "key": "ws_shouna_shuji_zazhi",
+        "name": "收纳书籍杂志"
+      },
+      {
+        "key": "ws_shouna_geren_wenjian",
+        "name": "收纳个人文件"
+      },
+      {
+        "key": "ws_shouna_yaopin",
+        "name": "收纳药品"
+      }
+    ],
+    "ws_shebei_shuijian_huanjing": [
+      {
+        "key": "ws_chuangtoudeng",
+        "name": "床头灯"
+      },
+      {
+        "key": "ws_xiaoyedeng",
+        "name": "小夜灯"
+      },
+      {
+        "key": "ws_jiashiqi",
+        "name": "加湿器"
+      },
+      {
+        "key": "ws_kongqi_jinghuaqi",
+        "name": "空气净化器"
+      },
+      {
+        "key": "ws_dianwenxiang",
+        "name": "电蚊香"
+      },
+      {
+        "key": "ws_kongtiao",
+        "name": "空调"
+      }
+    ],
+    "ws_shebei_yingyin_yule": [
+      {
+        "key": "ws_dianshi",
+        "name": "电视"
+      },
+      {
+        "key": "ws_touyingyi",
+        "name": "投影仪"
+      },
+      {
+        "key": "ws_jihehe",
+        "name": "机顶盒"
+      },
+      {
+        "key": "ws_lanyayinxiang",
+        "name": "蓝牙音箱"
+      },
+      {
+        "key": "ws_zhineng_yinxiang",
+        "name": "智能音箱"
+      }
+    ],
+    "ws_shebei_shenghuo_bianli": [
+      {
+        "key": "ws_xiaobingxiang",
+        "name": "小冰箱"
+      },
+      {
+        "key": "ws_yinshuiji",
+        "name": "饮水机"
+      },
+      {
+        "key": "ws_kafeiji",
+        "name": "咖啡机"
+      },
+      {
+        "key": "ws_shouji_chongdianqi",
+        "name": "手机充电器"
+      },
+      {
+        "key": "ws_wuxian_chongdianqi",
+        "name": "无线充电器"
+      },
+      {
+        "key": "ws_naozhong",
+        "name": "闹钟"
+      }
+    ],
+    "ws_shebei_yiwu_huli": [
+      {
+        "key": "ws_guatangsji",
+        "name": "挂烫机"
+      },
+      {
+        "key": "ws_yuntangsji",
+        "name": "熨烫机"
+      },
+      {
+        "key": "ws_hongganji",
+        "name": "烘干机"
+      }
+    ],
+    "wsj_ruce_xingwei": [
+      {
+        "key": "wsj_ruce",
+        "name": "如厕"
+      },
+      {
+        "key": "wsj_baohu_yinsi",
+        "name": "保护隐私"
+      },
+      {
+        "key": "wsj_shiyong_dunbian",
+        "name": "使用蹲便"
+      },
+      {
+        "key": "wsj_shiyong_zuobian",
+        "name": "使用坐便"
+      }
+    ],
+    "wsj_xishu_xingwei": [
+      {
+        "key": "wsj_xishou",
+        "name": "洗手"
+      },
+      {
+        "key": "wsj_shuaya",
+        "name": "刷牙"
+      },
+      {
+        "key": "wsj_xilian",
+        "name": "洗脸"
+      },
+      {
+        "key": "wsj_shukou",
+        "name": "漱口"
+      },
+      {
+        "key": "wsj_richang_qingjie_huli",
+        "name": "日常清洁护理"
+      }
+    ],
+    "wsj_muyu_xingwei": [
+      {
+        "key": "wsj_linyu",
+        "name": "淋浴"
+      },
+      {
+        "key": "wsj_zuoyu",
+        "name": "坐浴"
+      },
+      {
+        "key": "wsj_paoyu",
+        "name": "泡澡"
+      },
+      {
+        "key": "wsj_pajiao",
+        "name": "泡脚"
+      }
+    ],
+    "wsj_rongmao_zhengli": [
+      {
+        "key": "wsj_huazhuang",
+        "name": "化妆"
+      },
+      {
+        "key": "wsj_xiezhuang",
+        "name": "卸妆"
+      },
+      {
+        "key": "wsj_hufu",
+        "name": "护肤"
+      },
+      {
+        "key": "wsj_chui_toufa",
+        "name": "吹头发"
+      },
+      {
+        "key": "wsj_zhengli_toufa",
+        "name": "整理头发"
+      },
+      {
+        "key": "wsj_tixu",
+        "name": "剃须"
+      },
+      {
+        "key": "wsj_zhengli_yirong",
+        "name": "整理仪容"
+      }
+    ],
+    "wsj_qingjie_xihu_xingwei": [
+      {
+        "key": "wsj_qingxi_shenti",
+        "name": "清洗身体"
+      },
+      {
+        "key": "wsj_qingxi_toufa",
+        "name": "清洗头发"
+      },
+      {
+        "key": "wsj_qingxi_yiwu",
+        "name": "清洗衣物"
+      },
+      {
+        "key": "wsj_qingxi_neiyi",
+        "name": "清洗内衣"
+      },
+      {
+        "key": "wsj_qingjie_xishu_yongpin",
+        "name": "清洁洗漱用品"
+      },
+      {
+        "key": "wsj_qingjie_maojin",
+        "name": "清洁毛巾"
+      }
+    ],
+    "wsj_chongwu_xiangguan": [
+      {
+        "key": "wsj_maosha_penqu",
+        "name": "猫砂盆区"
+      },
+      {
+        "key": "wsj_chongwu_cesuo_qu",
+        "name": "宠物如厕区"
+      }
+    ],
+    "wsj_shouna_xishu_yongpin": [
+      {
+        "key": "wsj_shouna_yashua_yaogao",
+        "name": "收纳牙刷牙膏"
+      },
+      {
+        "key": "wsj_shouna_ximiannai",
+        "name": "收纳洗面奶"
+      },
+      {
+        "key": "wsj_shouna_muyu_yongpin",
+        "name": "收纳沐浴用品"
+      },
+      {
+        "key": "wsj_shouna_hufu_yongpin",
+        "name": "收纳护肤品"
+      },
+      {
+        "key": "wsj_shouna_tixu_yongpin",
+        "name": "收纳剃须用品"
+      }
+    ],
+    "wsj_shouna_maojin_fangzhi": [
+      {
+        "key": "wsj_shouna_maojin",
+        "name": "收纳毛巾"
+      },
+      {
+        "key": "wsj_shouna_yujin",
+        "name": "收纳浴巾"
+      },
+      {
+        "key": "wsj_shouna_xilianjin",
+        "name": "收纳洗脸巾"
+      },
+      {
+        "key": "wsj_shouna_beiyong_bulei",
+        "name": "收纳备用布类用品"
+      }
+    ],
+    "wsj_shouna_weisheng_yongpin": [
+      {
+        "key": "wsj_shouna_zhijin",
+        "name": "收纳纸巾"
+      },
+      {
+        "key": "wsj_shouna_weishengzhi",
+        "name": "收纳卫生纸"
+      },
+      {
+        "key": "wsj_shouna_weishengjin",
+        "name": "收纳卫生巾"
+      },
+      {
+        "key": "wsj_shouna_shijin",
+        "name": "收纳湿巾"
+      }
+    ],
+    "wsj_shouna_qingjie_yongpin": [
+      {
+        "key": "wsj_shouna_qingjieji",
+        "name": "收纳清洁剂"
+      },
+      {
+        "key": "wsj_shouna_shuaizi",
+        "name": "收纳刷子"
+      },
+      {
+        "key": "wsj_shouna_tuoba",
+        "name": "收纳拖把"
+      },
+      {
+        "key": "wsj_shouna_laji_dai",
+        "name": "收纳垃圾袋"
+      }
+    ],
+    "wsj_shouna_beiyong_wupin": [
+      {
+        "key": "wsj_shouna_beiyong_yashua",
+        "name": "收纳备用牙刷"
+      },
+      {
+        "key": "wsj_shouna_beiyong_maojin",
+        "name": "收纳备用毛巾"
+      },
+      {
+        "key": "wsj_shouna_beiyong_xihu_yongpin",
+        "name": "收纳备用洗护用品"
+      },
+      {
+        "key": "wsj_shouna_changyong_yaopin",
+        "name": "收纳常用药品"
+      }
+    ],
+    "wsj_shebei_jichu_weiyu": [
+      {
+        "key": "wsj_matong",
+        "name": "马桶"
+      },
+      {
+        "key": "wsj_dunbianqi",
+        "name": "蹲便器"
+      },
+      {
+        "key": "wsj_linyu_huasha",
+        "name": "淋浴花洒"
+      },
+      {
+        "key": "wsj_yugang",
+        "name": "浴缸"
+      },
+      {
+        "key": "wsj_xishoutai",
+        "name": "洗手台"
+      }
+    ],
+    "wsj_shebei_reshui_huanjing": [
+      {
+        "key": "wsj_reshuiqi",
+        "name": "热水器"
+      },
+      {
+        "key": "wsj_yuba",
+        "name": "浴霸"
+      },
+      {
+        "key": "wsj_paishan",
+        "name": "排气扇"
+      },
+      {
+        "key": "wsj_nuanfengji",
+        "name": "暖风机"
+      },
+      {
+        "key": "wsj_yushi_kongtiao",
+        "name": "浴室空调"
+      },
+      {
+        "key": "wsj_chushiji",
+        "name": "除湿机"
+      }
+    ],
+    "wsj_shebei_xihu": [
+      {
+        "key": "wsj_xiyiji",
+        "name": "洗衣机"
+      },
+      {
+        "key": "wsj_hongganji",
+        "name": "烘干机"
+      },
+      {
+        "key": "wsj_neiyi_xiyiji",
+        "name": "内衣洗衣机"
+      },
+      {
+        "key": "wsj_dianyashua_chongdian",
+        "name": "电动牙刷充电底座"
+      },
+      {
+        "key": "wsj_chuifengji",
+        "name": "吹风机"
+      }
+    ],
+    "wsj_shebei_jiaju_qingjie": [
+      {
+        "key": "wsj_saodijiqiren",
+        "name": "扫地机器人"
+      },
+      {
+        "key": "wsj_xichengqi",
+        "name": "吸尘器"
+      },
+      {
+        "key": "wsj_xidiji",
+        "name": "洗地机"
+      }
+    ],
+    "yt_liangshai_xingwei": [
+      {
+        "key": "yt_liangshai_yifu",
+        "name": "晾晒衣服"
+      },
+      {
+        "key": "yt_liangshai_beizi",
+        "name": "晾晒被子"
+      },
+      {
+        "key": "yt_liangshai_xiezi",
+        "name": "晾晒鞋子"
+      },
+      {
+        "key": "yt_liangshai_dajian_buyi",
+        "name": "晾晒大件布艺"
+      },
+      {
+        "key": "yt_kuaisu_lianggan_yiwu",
+        "name": "快速晾干衣物"
+      },
+      {
+        "key": "yt_chuli_yutian_yiwu",
+        "name": "处理雨天湿衣"
+      }
+    ],
+    "yt_xiyi_xingwei": [
+      {
+        "key": "yt_xiyi",
+        "name": "洗衣"
+      },
+      {
+        "key": "yt_shouxi_yiwu",
+        "name": "手洗衣物"
+      },
+      {
+        "key": "yt_chuli_zang_yiwu",
+        "name": "处理脏衣物"
+      },
+      {
+        "key": "yt_fenlei_daixi_yiwu",
+        "name": "分类待洗衣物"
+      },
+      {
+        "key": "yt_zhengli_xiyi_yiwu",
+        "name": "整理洗后衣物"
+      }
+    ],
+    "yt_qingjie_xingwei": [
+      {
+        "key": "yt_qingxi_tuoba",
+        "name": "清洗拖把"
+      },
+      {
+        "key": "yt_qingxi_mabu",
+        "name": "清洗抹布"
+      },
+      {
+        "key": "yt_qingjie_dimian_wuzi",
+        "name": "清洁地面污渍"
+      },
+      {
+        "key": "yt_dasao_dimian",
+        "name": "打扫地面"
+      },
+      {
+        "key": "yt_qingli_yangtai_jishui",
+        "name": "清理阳台积水"
+      },
+      {
+        "key": "yt_kuaisu_huifu_zhengqi",
+        "name": "快速恢复整洁"
+      }
+    ],
+    "yt_zhongzhi_xingwei": [
+      {
+        "key": "yt_yang_zhiwu",
+        "name": "养植物"
+      },
+      {
+        "key": "yt_jiaohua",
+        "name": "浇花"
+      },
+      {
+        "key": "yt_xiujian_zhiwu",
+        "name": "修剪植物"
+      },
+      {
+        "key": "yt_zhongzhi_shucai",
+        "name": "种植蔬菜"
+      },
+      {
+        "key": "yt_zhongzhi_jiandan_guoshi",
+        "name": "种植简单果蔬"
+      }
+    ],
+    "yt_xiuxian_xingwei": [
+      {
+        "key": "yt_shaitaiyang",
+        "name": "晒太阳"
+      },
+      {
+        "key": "yt_chuifeng_fangsong",
+        "name": "吹风放松"
+      },
+      {
+        "key": "yt_xiuxian_zuowo",
+        "name": "休息坐卧"
+      },
+      {
+        "key": "yt_kan_fengjing",
+        "name": "看风景"
+      },
+      {
+        "key": "yt_duanchi_tingliu",
+        "name": "短暂停留"
+      },
+      {
+        "key": "yt_hecha_fangsong",
+        "name": "喝茶放松"
+      },
+      {
+        "key": "yt_diaoyi_xiuxian",
+        "name": "吊椅休闲"
+      },
+      {
+        "key": "yt_linshi_bangong",
+        "name": "临时办公"
+      }
+    ],
+    "yt_chongwu_xingwei": [
+      {
+        "key": "yt_chongwu_huodong",
+        "name": "宠物活动"
+      },
+      {
+        "key": "yt_maopajia_shengyong",
+        "name": "猫爬架使用"
+      },
+      {
+        "key": "yt_chongwu_xiuxi",
+        "name": "宠物休息"
+      },
+      {
+        "key": "yt_maoshapen_shengyong",
+        "name": "猫砂盆使用"
+      },
+      {
+        "key": "yt_chongwu_qingjie",
+        "name": "宠物清洁"
+      }
+    ],
+    "yt_shouna_qingjie_yongpin": [
+      {
+        "key": "yt_shouna_xiyiye",
+        "name": "收纳洗衣液"
+      },
+      {
+        "key": "yt_shouna_roushunji",
+        "name": "收纳柔顺剂"
+      },
+      {
+        "key": "yt_shouna_qingjieji",
+        "name": "收纳清洁剂"
+      },
+      {
+        "key": "yt_shouna_shuaizi",
+        "name": "收纳刷子"
+      },
+      {
+        "key": "yt_shouna_mabu",
+        "name": "收纳抹布"
+      },
+      {
+        "key": "yt_shouna_tuoba",
+        "name": "收纳拖把"
+      }
+    ],
+    "yt_shouna_xiyi_yongpin": [
+      {
+        "key": "yt_shouna_yijia",
+        "name": "收纳衣架"
+      },
+      {
+        "key": "yt_shouna_liangyi_jia",
+        "name": "收纳晾衣夹"
+      },
+      {
+        "key": "yt_shouna_liangyi_sheng",
+        "name": "收纳晾衣绳"
+      },
+      {
+        "key": "yt_shouna_liaoyilan",
+        "name": "收纳洗衣篮"
+      }
+    ],
+    "yt_shouna_gongju": [
+      {
+        "key": "yt_shouna_weixiu_gongju",
+        "name": "收纳维修工具"
+      },
+      {
+        "key": "yt_shouna_qingjie_gongju",
+        "name": "收纳清洁工具"
+      },
+      {
+        "key": "yt_shouna_yuanyi_gongju",
+        "name": "收纳园艺工具"
+      },
+      {
+        "key": "yt_shouna_xiaoxing_shebei",
+        "name": "收纳小型设备"
+      }
+    ],
+    "yt_shouna_zawu": [
+      {
+        "key": "yt_shouna_zawu",
+        "name": "收纳杂物"
+      },
+      {
+        "key": "yt_shouna_huanji_wupin",
+        "name": "收纳换季物品"
+      },
+      {
+        "key": "yt_linshi_fang_dajian_wupin",
+        "name": "临时存放大件物品"
+      }
+    ],
+    "yt_shebei_xiyi": [
+      {
+        "key": "yt_xiyiji",
+        "name": "洗衣机"
+      },
+      {
+        "key": "yt_hongganji",
+        "name": "烘干机"
+      },
+      {
+        "key": "yt_xihong_yiti_ji",
+        "name": "洗烘一体机"
+      },
+      {
+        "key": "yt_neiyi_xiyiji",
+        "name": "内衣洗衣机"
+      },
+      {
+        "key": "yt_xixieji",
+        "name": "洗鞋机"
+      }
+    ],
+    "yt_shebei_liangshai": [
+      {
+        "key": "yt_diangyi_jia",
+        "name": "电动晾衣架"
+      },
+      {
+        "key": "yt_zhineng_yi_xitong",
+        "name": "智能晾衣系统"
+      },
+      {
+        "key": "yt_ganyiji",
+        "name": "干衣机"
+      }
+    ],
+    "yt_shebei_qingjie": [
+      {
+        "key": "yt_gaoya_qingxi_ji",
+        "name": "高压清洗机"
+      },
+      {
+        "key": "yt_xiaoxing_xichenqi",
+        "name": "小型吸尘器"
+      },
+      {
+        "key": "yt_xidiji",
+        "name": "洗地机"
+      },
+      {
+        "key": "yt_saodijiqiren_jizhan",
+        "name": "扫地机器人基站"
+      }
+    ],
+    "yt_shebei_huanjing": [
+      {
+        "key": "yt_chushiji",
+        "name": "除湿机"
+      }
+    ],
+    "qw_wangluo_zhineng": [
+      {
+        "key": "qw_guangmao",
+        "name": "光猫"
+      },
+      {
+        "key": "qw_luyouqi",
+        "name": "路由器"
+      },
+      {
+        "key": "qw_mesh_zuwang",
+        "name": "Mesh组网"
+      },
+      {
+        "key": "qw_quanwu_zhineng_xitong",
+        "name": "全屋智能控制系统"
+      }
+    ],
+    "qw_wendu_shushi": [
+      {
+        "key": "qw_dinuan",
+        "name": "地暖"
+      },
+      {
+        "key": "qw_nuanqiang",
+        "name": "墙暖"
+      },
+      {
+        "key": "qw_zhongyang_kongtiao",
+        "name": "中央空调"
+      },
+      {
+        "key": "qw_fenti_kongtiao",
+        "name": "分体空调"
+      },
+      {
+        "key": "qw_xinfeng_xitong",
+        "name": "新风系统"
+      },
+      {
+        "key": "qw_kongqi_jinghuaqi",
+        "name": "空气净化器"
+      },
+      {
+        "key": "qw_chushiji",
+        "name": "除湿机"
+      }
+    ],
+    "qw_shui_xitong": [
+      {
+        "key": "qw_quanwu_jingshui_xitong",
+        "name": "全屋净水系统"
+      },
+      {
+        "key": "qw_qianzhi_guolqi",
+        "name": "前置过滤器"
+      },
+      {
+        "key": "qw_zhongyang_jingshuiqi",
+        "name": "中央净水器"
+      },
+      {
+        "key": "qw_zhongyang_ruanshuiji",
+        "name": "中央软水机"
+      }
+    ],
+    "qw_dianli_zhaoming": [
+      {
+        "key": "qw_yingji_beiyong_dianyuan",
+        "name": "应急备用电源"
+      },
+      {
+        "key": "qw_quanwu_zhineng_zhaoming",
+        "name": "全屋智能照明系统"
+      },
+      {
+        "key": "qw_ganying_zhaoming",
+        "name": "感应照明系统"
+      },
+      {
+        "key": "qw_changjing_zhaoming",
+        "name": "场景照明系统"
+      },
+      {
+        "key": "qw_quanwu_chazuo_guihua",
+        "name": "全屋插座规划系统"
+      }
+    ],
+    "qw_anfang_xitong": [
+      {
+        "key": "qw_zhineng_mensuo",
+        "name": "智能门锁"
+      },
+      {
+        "key": "qw_jiankong_shexiangtou",
+        "name": "监控摄像头"
+      },
+      {
+        "key": "qw_menchuang_chuanganqi",
+        "name": "门窗传感器"
+      },
+      {
+        "key": "qw_yanwu_baojingqi",
+        "name": "烟雾报警器"
+      },
+      {
+        "key": "qw_ranqi_baojingqi",
+        "name": "燃气报警器"
+      },
+      {
+        "key": "qw_jinji_hujiao_xitong",
+        "name": "紧急呼叫系统"
+      }
+    ],
+    "qw_jiegou_kongjian": [
+      {
+        "key": "qw_geyin_xitong",
+        "name": "隔音系统"
+      },
+      {
+        "key": "qw_fangshui_xitong",
+        "name": "防水系统"
+      },
+      {
+        "key": "qw_fangchao_xitong",
+        "name": "防潮系统"
+      },
+      {
+        "key": "qw_baowen_gere_xitong",
+        "name": "保温隔热系统"
+      }
+    ],
+    "df_shuwang": [
+      {
+        "key": "df_shuwang_shuzhuo",
+        "name": "书桌"
+      },
+      {
+        "key": "df_shuwang_shugui",
+        "name": "书柜"
+      },
+      {
+        "key": "df_shuwang_yuedu_yi",
+        "name": "阅读椅"
+      },
+      {
+        "key": "df_shuwang_luodeng",
+        "name": "落地灯"
+      },
+      {
+        "key": "df_shuwang_bijiben",
+        "name": "电脑/笔记本"
+      },
+      {
+        "key": "df_shuwang_daedeng",
+        "name": "台灯"
+      },
+      {
+        "key": "df_shuwang_shujia",
+        "name": "书架"
+      },
+      {
+        "key": "df_shuwang_kafeiji",
+        "name": "咖啡机"
+      },
+      {
+        "key": "df_shuwang_chashui_shouna",
+        "name": "茶水收纳"
+      },
+      {
+        "key": "df_shuwang_wenju_shouna",
+        "name": "文具收纳"
+      }
+    ],
+    "df_yingyin_shi": [
+      {
+        "key": "df_yingyin_touyingyi",
+        "name": "投影仪"
+      },
+      {
+        "key": "df_yingyin_mubu",
+        "name": "幕布"
+      },
+      {
+        "key": "df_yingyin_xiangsheng",
+        "name": "音响系统"
+      },
+      {
+        "key": "df_yingyin_shafa",
+        "name": "沙发/躺椅"
+      },
+      {
+        "key": "df_yingyin_dianshi",
+        "name": "电视"
+      },
+      {
+        "key": "df_yingyin_bofang_shebei",
+        "name": "播放设备"
+      },
+      {
+        "key": "df_yingyin_geyin",
+        "name": "隔音措施"
+      },
+      {
+        "key": "df_yingyin_xingkongding",
+        "name": "星空顶"
+      },
+      {
+        "key": "df_yingyin_dengguang_kongzhi",
+        "name": "灯光控制"
+      },
+      {
+        "key": "df_yingyin_shouna_gui",
+        "name": "收纳柜"
+      }
+    ],
+    "df_chashi": [
+      {
+        "key": "df_chashi_chazhuo",
+        "name": "茶桌"
+      },
+      {
+        "key": "df_chashi_chayi",
+        "name": "茶椅/蒲团"
+      },
+      {
+        "key": "df_chashi_chagui",
+        "name": "茶柜"
+      },
+      {
+        "key": "df_chashi_chaju_shouna",
+        "name": "茶具收纳"
+      },
+      {
+        "key": "df_chashi_shaoshuihu",
+        "name": "烧水壶/茶炉"
+      },
+      {
+        "key": "df_chashi_chaye_shouna",
+        "name": "茶叶收纳"
+      },
+      {
+        "key": "df_chashi_lvzhi",
+        "name": "绿植"
+      },
+      {
+        "key": "df_chashi_guahua",
+        "name": "挂画"
+      },
+      {
+        "key": "df_chashi_chuwugui",
+        "name": "储物柜"
+      },
+      {
+        "key": "df_chashi_ditan",
+        "name": "地毯"
+      }
+    ],
+    "df_bangong_fang": [
+      {
+        "key": "df_bangong_bangongzhuo",
+        "name": "办公桌"
+      },
+      {
+        "key": "df_bangong_bangongyi",
+        "name": "办公椅"
+      },
+      {
+        "key": "df_bangong_wenjiagui",
+        "name": "文件柜"
+      },
+      {
+        "key": "df_bangong_dayinji",
+        "name": "打印机"
+      },
+      {
+        "key": "df_bangong_shouna_jia",
+        "name": "收纳架"
+      },
+      {
+        "key": "df_bangong_dianzidaping",
+        "name": "电子大屏"
+      },
+      {
+        "key": "df_bangong_baiban",
+        "name": "白板"
+      },
+      {
+        "key": "df_bangong_touyingyi",
+        "name": "投影仪"
+      },
+      {
+        "key": "df_bangong_huiyizhuo",
+        "name": "会议桌"
+      },
+      {
+        "key": "df_bangong_lvzhi",
+        "name": "绿植"
+      },
+      {
+        "key": "df_bangong_chashui_batai",
+        "name": "茶水吧台"
+      }
+    ],
+    "df_dianjing_qu": [
+      {
+        "key": "df_dianjing_zhuo",
+        "name": "电竞桌"
+      },
+      {
+        "key": "df_dianjing_yi",
+        "name": "电竞椅"
+      },
+      {
+        "key": "df_dianjing_youxiji",
+        "name": "游戏机（PS5/Switch/Xbox）"
+      },
+      {
+        "key": "df_dianjing_xianshiqi",
+        "name": "显示器"
+      },
+      {
+        "key": "df_dianjing_jianpan_shubiao",
+        "name": "键盘鼠标"
+      },
+      {
+        "key": "df_dianjing_erji_jiaying",
+        "name": "耳机支架"
+      },
+      {
+        "key": "df_dianjing_shoubing_shouna",
+        "name": "手柄收纳"
+      },
+      {
+        "key": "df_dianjing_shouban_zhanshi",
+        "name": "手办展示"
+      },
+      {
+        "key": "df_dianjing_youxi_shounagui",
+        "name": "游戏收纳柜"
+      },
+      {
+        "key": "df_dianjing_beijing_dengdai",
+        "name": "背景灯带"
+      },
+      {
+        "key": "df_dianjing_kongtiao",
+        "name": "空调"
+      },
+      {
+        "key": "df_dianjing_fengshan",
+        "name": "风扇"
+      },
+      {
+        "key": "df_dianjing_saixie_moniqi",
+        "name": "赛车模拟器"
+      },
+      {
+        "key": "df_dianjing_feixing_moniqi",
+        "name": "飞行模拟器"
+      },
+      {
+        "key": "df_dianjing_VR_shebei",
+        "name": "VR设备"
+      },
+      {
+        "key": "df_dianjing_3D_dayinji",
+        "name": "3D打印机"
+      }
+    ],
+    "df_yimaojian": [
+      {
+        "key": "df_yimaojian_yigui",
+        "name": "衣柜"
+      },
+      {
+        "key": "df_yimaojian_chuanyijing",
+        "name": "穿衣镜"
+      },
+      {
+        "key": "df_yimaojian_shuzhuangtai",
+        "name": "梳妆台"
+      },
+      {
+        "key": "df_yimaojian_shoushi_shouna",
+        "name": "首饰收纳"
+      },
+      {
+        "key": "df_yimaojian_baogui",
+        "name": "包柜"
+      },
+      {
+        "key": "df_yimaojian_xiegui",
+        "name": "鞋柜"
+      },
+      {
+        "key": "df_yimaojian_huanyi_deng",
+        "name": "换衣凳"
+      },
+      {
+        "key": "df_yimaojian_xingli_cunfang",
+        "name": "行李箱存放区"
+      },
+      {
+        "key": "df_yimaojian_yuntang_shebei",
+        "name": "熨烫设备"
+      },
+      {
+        "key": "df_yimaojian_shouna_he",
+        "name": "收纳盒/抽屉"
+      },
+      {
+        "key": "df_yimaojian_chuanyi_deng",
+        "name": "穿衣灯/镜灯"
+      },
+      {
+        "key": "df_yimaojian_fangchen_dai",
+        "name": "防尘袋/衣罩"
+      }
+    ],
+    "df_huashi": [
+      {
+        "key": "df_huashi_huajia",
+        "name": "画架"
+      },
+      {
+        "key": "df_huashi_huadeng",
+        "name": "画凳/画家椅"
+      },
+      {
+        "key": "df_huashi_yanliao_shouna",
+        "name": "颜料收纳"
+      },
+      {
+        "key": "df_huashi_huabi_shouna",
+        "name": "画笔收纳"
+      },
+      {
+        "key": "df_huashi_chuwugui",
+        "name": "储物柜"
+      },
+      {
+        "key": "df_huashi_xiBi_tong",
+        "name": "洗笔桶/水槽"
+      },
+      {
+        "key": "df_huashi_huabu_cunfang",
+        "name": "画布/画框存放"
+      },
+      {
+        "key": "df_huashi_shedeng",
+        "name": "射灯/聚光灯"
+      },
+      {
+        "key": "df_huashi_tiaosetai",
+        "name": "调色台"
+      },
+      {
+        "key": "df_huashi_canzhaowu_tai",
+        "name": "参照物台"
+      },
+      {
+        "key": "df_huashi_quanshenjing",
+        "name": "全身镜"
+      },
+      {
+        "key": "df_huashi_tongfeng_shebei",
+        "name": "通风设备"
+      }
+    ],
+    "df_yujia_wudao": [
+      {
+        "key": "df_yujia_jingzhiqiang",
+        "name": "镜子墙"
+      },
+      {
+        "key": "df_yujia_bagan",
+        "name": "把杆"
+      },
+      {
+        "key": "df_yujia_yujiadian",
+        "name": "瑜伽垫"
+      },
+      {
+        "key": "df_yujia_wudao_diban",
+        "name": "舞蹈地板"
+      },
+      {
+        "key": "df_yujia_yinxiang",
+        "name": "音响"
+      },
+      {
+        "key": "df_yujia_kongtiao",
+        "name": "空调"
+      },
+      {
+        "key": "df_yujia_xinfeng",
+        "name": "新风"
+      },
+      {
+        "key": "df_yujia_gengyi",
+        "name": "更衣室"
+      },
+      {
+        "key": "df_yujia_yimaojia",
+        "name": "衣帽架"
+      },
+      {
+        "key": "df_yujia_chuwugui",
+        "name": "储物柜"
+      },
+      {
+        "key": "df_yujia_tizhongcheng",
+        "name": "体重秤"
+      },
+      {
+        "key": "df_yujia_lvzhi",
+        "name": "绿植"
+      },
+      {
+        "key": "df_yujia_diran",
+        "name": "地暖"
+      },
+      {
+        "key": "df_yujia_luodi_jing",
+        "name": "落地镜"
+      },
+      {
+        "key": "df_yujia_yujia_qiu",
+        "name": "瑜伽球"
+      },
+      {
+        "key": "df_yujia_fuzhu_qiju",
+        "name": "辅助器具"
+      }
+    ],
+    "df_yinyue_fang": [
+      {
+        "key": "df_yinyue_leqi_shouna",
+        "name": "乐器收纳架"
+      },
+      {
+        "key": "df_yinyue_pujia",
+        "name": "谱架"
+      },
+      {
+        "key": "df_yinyue_yinxiang",
+        "name": "音响"
+      },
+      {
+        "key": "df_yinyue_jianting_yinxiang",
+        "name": "监听音箱"
+      },
+      {
+        "key": "df_yinyue_maikefeng",
+        "name": "麦克风"
+      },
+      {
+        "key": "df_yinyue_erji",
+        "name": "耳机"
+      },
+      {
+        "key": "df_yinyue_luyin_shebei",
+        "name": "录音设备"
+      },
+      {
+        "key": "df_yinyue_geyin",
+        "name": "隔音措施"
+      },
+      {
+        "key": "df_yinyue_pujia_deng",
+        "name": "谱架灯"
+      },
+      {
+        "key": "df_yinyue_lianxi_deng",
+        "name": "练习凳"
+      },
+      {
+        "key": "df_yinyue_qin_deng",
+        "name": "琴凳"
+      },
+      {
+        "key": "df_yinyue_pu_shouna",
+        "name": "乐谱收纳"
+      },
+      {
+        "key": "df_yinyue_dengguang_fenwei",
+        "name": "灯光氛围"
+      },
+      {
+        "key": "df_yinyue_kongtiao",
+        "name": "空调"
+      },
+      {
+        "key": "df_yinyue_xinfeng",
+        "name": "新风"
+      }
+    ],
+    "df_qipai_shi": [
+      {
+        "key": "df_qipai_majiang_zhuo",
+        "name": "麻将桌"
+      },
+      {
+        "key": "df_qipai_puke_zhuo",
+        "name": "扑克桌"
+      },
+      {
+        "key": "df_qipai_xiangqi_zhuo",
+        "name": "象棋桌"
+      },
+      {
+        "key": "df_qipai_weiqi_zhuo",
+        "name": "围棋桌"
+      },
+      {
+        "key": "df_qipai_yizi",
+        "name": "椅子"
+      },
+      {
+        "key": "df_qipai_chouma_shouna",
+        "name": "筹码收纳"
+      },
+      {
+        "key": "df_qipai_paiju_shouna",
+        "name": "牌具收纳"
+      },
+      {
+        "key": "df_qipai_chashui_gui",
+        "name": "茶水柜"
+      },
+      {
+        "key": "df_qipai_dianxin_tai",
+        "name": "点心台"
+      },
+      {
+        "key": "df_qipai_kongqi_jinghua",
+        "name": "空气净化"
+      },
+      {
+        "key": "df_qipai_xinfeng",
+        "name": "新风"
+      },
+      {
+        "key": "df_qipai_geyin",
+        "name": "隔音"
+      }
+    ],
+    "df_yangguang_fang": [
+      {
+        "key": "df_yangguang_zheyanglian",
+        "name": "遮阳帘"
+      },
+      {
+        "key": "df_yangguang_tianmu",
+        "name": "天幕"
+      },
+      {
+        "key": "df_yangguang_fangshai_boli",
+        "name": "防晒玻璃"
+      },
+      {
+        "key": "df_yangguang_lvzhi_huajia",
+        "name": "绿植花架"
+      },
+      {
+        "key": "df_yangguang_xiuxian_yi",
+        "name": "休闲椅"
+      },
+      {
+        "key": "df_yangguang_diaoyi",
+        "name": "吊椅"
+      },
+      {
+        "key": "df_yangguang_chazhuo",
+        "name": "茶桌"
+      },
+      {
+        "key": "df_yangguang_jiashiqi",
+        "name": "加湿器"
+      },
+      {
+        "key": "df_yangguang_shuijing",
+        "name": "水景"
+      },
+      {
+        "key": "df_yangguang_kongtiao",
+        "name": "空调"
+      },
+      {
+        "key": "df_yangguang_fengshan",
+        "name": "风扇"
+      },
+      {
+        "key": "df_yangguang_shouna_gui",
+        "name": "收纳柜"
+      },
+      {
+        "key": "df_yangguang_ditan",
+        "name": "地毯"
+      },
+      {
+        "key": "df_yangguang_didian",
+        "name": "地垫"
+      },
+      {
+        "key": "df_yangguang_qunuan_shebei",
+        "name": "取暖设备"
+      },
+      {
+        "key": "df_yangguang_chuwu_jia",
+        "name": "储物架"
+      },
+      {
+        "key": "df_yangguang_fenwei_deng",
+        "name": "氛围灯"
+      }
+    ],
+    "df_chongwu_fang": [
+      {
+        "key": "df_chongwu_wo",
+        "name": "宠物窝"
+      },
+      {
+        "key": "df_chongwu_chuang",
+        "name": "宠物床"
+      },
+      {
+        "key": "df_chongwu_shipen",
+        "name": "食盆"
+      },
+      {
+        "key": "df_chongwu_shuipen",
+        "name": "水盆"
+      },
+      {
+        "key": "df_chongwu_zidong_yingyinshuiji",
+        "name": "自动饮水机"
+      },
+      {
+        "key": "df_chongwu_zidong_weishiqi",
+        "name": "自动喂食器"
+      },
+      {
+        "key": "df_chongwu_maopajia",
+        "name": "猫爬架"
+      },
+      {
+        "key": "df_chongwu_maoshapen",
+        "name": "猫砂盆"
+      },
+      {
+        "key": "df_chongwu_wanju_shouna",
+        "name": "宠物玩具收纳"
+      },
+      {
+        "key": "df_chongwu_tuiche",
+        "name": "宠物推车"
+      },
+      {
+        "key": "df_chongwu_qingjie_gongju",
+        "name": "清洁工具"
+      },
+      {
+        "key": "df_chongwu_men",
+        "name": "宠物门"
+      },
+      {
+        "key": "df_chongwu_weilan",
+        "name": "宠物围栏"
+      },
+      {
+        "key": "df_chongwu_kongqi_jinghua",
+        "name": "空气净化"
+      },
+      {
+        "key": "df_chongwu_chuwei_shebei",
+        "name": "除味设备"
+      }
+    ],
+    "df_xiyifang": [
+      {
+        "key": "df_xiyifang_xiyiji",
+        "name": "洗衣机"
+      },
+      {
+        "key": "df_xiyifang_hongganji",
+        "name": "烘干机"
+      },
+      {
+        "key": "df_xiyifang_xiyitai",
+        "name": "洗衣台"
+      },
+      {
+        "key": "df_xiyifang_cuoyiban",
+        "name": "搓衣板"
+      },
+      {
+        "key": "df_xiyifang_xiyuye_shouna",
+        "name": "洗衣液收纳"
+      },
+      {
+        "key": "df_xiyifang_zangyi_lan",
+        "name": "脏衣篮"
+      },
+      {
+        "key": "df_xiyifang_yuntang_shebei",
+        "name": "熨烫设备"
+      },
+      {
+        "key": "df_xiyifang_liangyi_jia",
+        "name": "晾衣架"
+      },
+      {
+        "key": "df_xiyifang_zhedie_tai",
+        "name": "折叠台"
+      },
+      {
+        "key": "df_xiyifang_yuntangtai",
+        "name": "熨烫台"
+      },
+      {
+        "key": "df_xiyifang_tuobachi",
+        "name": "拖把池"
+      },
+      {
+        "key": "df_xiyifang_qingjie_yongpin_shouna",
+        "name": "清洁用品收纳"
+      }
+    ],
+    "df_800ku": [
+      {
+        "key": "df_800ku_jinshu_huojia",
+        "name": "金属货架"
+      },
+      {
+        "key": "df_800ku_chuwu_xiang",
+        "name": "储物箱"
+      },
+      {
+        "key": "df_800ku_shouna_he",
+        "name": "收纳盒"
+      },
+      {
+        "key": "df_800ku_biaoqian_xitong",
+        "name": "标签系统"
+      },
+      {
+        "key": "df_800ku_tizi",
+        "name": "梯子"
+      },
+      {
+        "key": "df_800ku_zhaoming_deng",
+        "name": "照明灯"
+      },
+      {
+        "key": "df_800ku_fangchen_bu",
+        "name": "防尘布"
+      },
+      {
+        "key": "df_800ku_lunzi_shouna_jia",
+        "name": "轮子收纳架"
+      },
+      {
+        "key": "df_800ku_gongju_gui",
+        "name": "工具柜"
+      },
+      {
+        "key": "df_800ku_xiehe_shouna",
+        "name": "鞋盒收纳"
+      },
+      {
+        "key": "df_800ku_xingli_cunfang_jia",
+        "name": "行李箱存放架"
+      },
+      {
+        "key": "df_800ku_chushi_shebei",
+        "name": "除湿设备"
+      },
+      {
+        "key": "df_800ku_jiankong_xitong",
+        "name": "监控系统"
+      }
+    ],
+    "df_jianshen_fang": [
+      {
+        "key": "df_jianshen_paobu_ji",
+        "name": "跑步机"
+      },
+      {
+        "key": "df_jianshen_donggan_danche",
+        "name": "动感单车"
+      },
+      {
+        "key": "df_jianshen_tuoyuan_ji",
+        "name": "椭圆机"
+      },
+      {
+        "key": "df_jianshen_liangliang_xunlian",
+        "name": "力量训练器械"
+      },
+      {
+        "key": "df_jianshen_yujiaadian",
+        "name": "瑜伽垫"
+      },
+      {
+        "key": "df_jianshen_yaoling",
+        "name": "哑铃"
+      },
+      {
+        "key": "df_jianshen_gangling_jia",
+        "name": "杠铃架"
+      },
+      {
+        "key": "df_jianshen_jianshen_jing",
+        "name": "健身镜"
+      },
+      {
+        "key": "df_jianshen_didian",
+        "name": "地垫"
+      },
+      {
+        "key": "df_jianshen_fanghua_dian",
+        "name": "防滑垫"
+      },
+      {
+        "key": "df_jianshen_kongtiao",
+        "name": "空调"
+      },
+      {
+        "key": "df_jianshen_xinfeng",
+        "name": "新风"
+      },
+      {
+        "key": "df_jianshen_chuwu_gui",
+        "name": "储物柜"
+      },
+      {
+        "key": "df_jianshen_maojin_jia",
+        "name": "毛巾架"
+      },
+      {
+        "key": "df_jianshen_yinshui_ji",
+        "name": "饮水机"
+      },
+      {
+        "key": "df_jianshen_nengliang_yinliao_gui",
+        "name": "能量饮料柜"
+      },
+      {
+        "key": "df_jianshen_yinxiang",
+        "name": "音响"
+      },
+      {
+        "key": "df_jianshen_kongqi_jinghua",
+        "name": "空气净化"
+      }
+    ]
+  }
+}

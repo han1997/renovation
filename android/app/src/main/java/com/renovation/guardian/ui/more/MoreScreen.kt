@@ -74,14 +74,13 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MoreScreen() {
+fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
     val vm: MoreViewModel = viewModel()
     val profile by vm.profile.collectAsState(initial = null)
     val contacts by vm.contacts.collectAsState(initial = emptyList())
     val notes by vm.notes.collectAsState(initial = emptyList())
     val quickNotes by vm.quickNotes.collectAsState(initial = emptyList())
     val stages by vm.stages.collectAsState(initial = emptyList())
-    val spaces by vm.spaces.collectAsState(initial = emptyList())
     val exportActions = LocalExportActions.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -91,14 +90,12 @@ fun MoreScreen() {
     var showContact by remember { mutableStateOf<ContactEntity?>(null) }
     var showNote by remember { mutableStateOf<NoteEntity?>(null) }
     var showQuickNote by remember { mutableStateOf<QuickNoteEntity?>(null) }
-    var showSpaceAdd by remember { mutableStateOf(false) }
     var showReset by remember { mutableStateOf(false) }
 
-    // 待确认删除的对象（统一走 ConfirmDeleteDialog）
+    // 待确认删除的对象(统一走 ConfirmDeleteDialog)
     var deleteContactTarget by remember { mutableStateOf<ContactEntity?>(null) }
     var deleteNoteTarget by remember { mutableStateOf<NoteEntity?>(null) }
     var deleteQuickNoteId by remember { mutableStateOf<String?>(null) }
-    var deleteSpaceTarget by remember { mutableStateOf<com.renovation.guardian.data.db.SpaceNeedWithStages?>(null) }
 
     val tierName = { id: String? -> vm.tiers.firstOrNull { it.id == id }?.name ?: id ?: "—" }
     val modeName = { id: String? -> vm.modes.firstOrNull { it.id == id }?.name ?: id ?: "—" }
@@ -293,32 +290,21 @@ fun MoreScreen() {
             }
 
             item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SectionTitle("空间需求", modifier = Modifier.weight(1f))
-                    IconButton(onClick = { showSpaceAdd = true }) {
-                        Icon(Icons.Filled.Add, contentDescription = "新增空间需求")
-                    }
-                }
-            }
-            if (spaces.isEmpty()) {
-                item {
-                    Text(
-                        "写下需要改造的空间（如主卧、厨房），自动生成对应阶段的任务",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                    )
-                }
-            }
-            items(spaces, key = { it.id }) { s ->
                 SectionCard {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(s.emoji, style = MaterialTheme.typography.titleLarge)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth().clickable { onOpenPlanner() }.padding(vertical = 4.dp),
+                    ) {
+                        Text("📋", style = MaterialTheme.typography.titleLarge)
                         Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
-                            Text(s.name, style = MaterialTheme.typography.bodyLarge)
-                            s.description?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                            Text("需求规划", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                "逐空间规划功能需求,标注重要度并生成装修需求清单",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
-                        IconButton(onClick = { deleteSpaceTarget = s }) { Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error) }
+                        Text("进入 ›", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -387,9 +373,6 @@ fun MoreScreen() {
             scope.launch { snackbar.showSnackbar("已保存") }
         }
     }
-    if (showSpaceAdd) {
-        SpaceAddDialog(presets = vm.spacePresets, onPick = { vm.addSpaceFromPreset(it); showSpaceAdd = false; scope.launch { snackbar.showSnackbar("已保存") } }, onDismiss = { showSpaceAdd = false })
-    }
     if (showReset) {
         AlertDialog(
             onDismissRequest = { showReset = false },
@@ -428,14 +411,6 @@ fun MoreScreen() {
             title = "删除随手记",
             onConfirm = { vm.deleteQuickNote(id); deleteQuickNoteId = null },
             onDismiss = { deleteQuickNoteId = null },
-        )
-    }
-    deleteSpaceTarget?.let { s ->
-        ConfirmDeleteDialog(
-            title = "删除空间需求",
-            text = "确定删除「${s.name}」？其派生的未完成任务会一并移除。",
-            onConfirm = { vm.deleteSpace(s.id); deleteSpaceTarget = null },
-            onDismiss = { deleteSpaceTarget = null },
         )
     }
 }
@@ -615,35 +590,6 @@ private fun NoteDialog(
 }
 
 @Composable
-private fun SpaceAddDialog(
-    presets: List<com.renovation.guardian.data.knowledge.SpaceNeedJson>,
-    onPick: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } },
-        title = { Text("添加空间需求") },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                presets.forEach { p ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().clickable { onPick(p.id) }.padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(p.emoji, style = MaterialTheme.typography.titleMedium)
-                        Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
-                            Text(p.name, style = MaterialTheme.typography.bodyLarge)
-                            Text(p.desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
-                }
-            }
-        },
-    )
-}
-
-/** 品类常量 → 中文标签（wish 分组标题用）。 */
 private fun quickNoteCategoryLabel(category: String): String = when (category) {
     QuickNoteEntity.CATEGORY_FURNITURE -> "家具"
     QuickNoteEntity.CATEGORY_APPLIANCE -> "家电"

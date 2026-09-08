@@ -4,12 +4,17 @@
 
 数据分两类：
 
-- **只读知识数据**：`assets/knowledge.json` + `assets/prices.json`，启动时一次性读入内存缓存；
+- **只读知识数据**：`assets/knowledge.json` / `prices.json` / `decobox_catalog.json` / `decobox_requirements.json`，启动时一次性读入内存缓存；
 - **用户数据**：Room（SQLite）16 张表，由 DAO / Repository 读写。
 
-## Room 表（v2）
+## Room 表(v3)
 
-`AppDatabase`（`data/db/AppDatabase.kt`）`version = 2`，`exportSchema = true`（schema 落 `app/schemas`），`fallbackToDestructiveMigration()` 已移除，v1→v2 起全部走显式 `Migration`（`MIGRATION_1_2` 新增 `quick_note` 表；schema 1.json / 2.json 均已导出）。
+`AppDatabase`(`data/db/AppDatabase.kt`)`version = 3`,`exportSchema = true`(schema 落 `app/schemas`)。v1 起全部走显式 `Migration`,`fallbackToDestructiveMigration()` 仅兜底未定义版本跳变:
+
+- `MIGRATION_1_2`:新增 `quick_note`(随手记);
+- `MIGRATION_2_3`:新增 `quote_plan`(逐空间报价,`state_json` 存完整向导状态)与 `planner_state`(需求规划,单行),**删除**已弃用的 `space_need` / `space_need_stage`(数据不迁移)。schema 1.json / 2.json / 3.json 均已导出。
+
+迁移测试不走 `MigrationTestHelper`(AGP9 无 mergeDebugUnitTestAssets),手工建旧版库跑迁移,覆盖 v1→v3 与 v2→v3,见 `MigrationTest.kt`。
 
 | 表 | 实体 | 说明 |
 |----|------|------|
@@ -21,8 +26,8 @@
 | `stage_override` | `StageOverrideEntity` | 整段完成覆盖 |
 | `budget_category` | `BudgetCategoryEntity` | 预算分类 |
 | `expense` | `ExpenseEntity` | 支出条目 |
-| `space_need` | `SpaceNeedEntity` | 空间需求 |
-| `space_need_stage` | `SpaceNeedStageEntity` | 空间 ↔ 阶段关联 |
+| `quote_plan` | `QuotePlanEntity` | decobox 逐空间报价方案(`mode`: full/semi/partial;`state_json` 存完整向导状态) |
+| `planner_state` | `PlannerStateEntity` | 需求规划状态(单行,`id` 固定 1;`state_json`) |
 | `checklist` | `ChecklistEntity` | 验收清单目录 |
 | `checklist_item` | `ChecklistItemEntity` | 验收条目目录 |
 | `checklist_item_check` | `ChecklistItemCheckEntity` | 验收条目勾选 |
@@ -52,7 +57,11 @@
 
 - `assets/knowledge.json`：镜像 Web `window.DATA`（`version` + `stages` / `checklists` / `tips` / `styles` / `styleQuiz` / `materialTimeline` / `modes` / `whoBuilds` / `glossary` / `spaceNeeds` 等）。结构见 `data/knowledge/KnowledgeJson.kt`。
 - `assets/prices.json`：镜像 Web `window.PRICES`（`version` + `reserveRatio` / `tiers` / `grades` / `rates` / `reference`）。结构见 `data/knowledge/PricesJson.kt`。
+- `assets/decobox_catalog.json`:decobox.online v1.4.0 材料目录与计算参数(墙/顶/地/其他主材/附加项/全屋工程/局改/门·洁具品牌矩阵/面积推荐)。由 `tools/extract_decobox.py` 从站点 bundle 生成;结构见 `data/knowledge/DecoboxCatalogJson.kt`。
+- `assets/decobox_requirements.json`:需求规划目录(10 预设空间 / 150 需求类型 / 819 叶子项)。同脚本生成;结构见 `data/knowledge/DecoboxRequirementsJson.kt`。
+
 - **Android 知识数据独立维护**；Web 版自 2026-09-05 起已封存，后续知识更新仅修改 Android 的 assets 与相关模型，不再要求同步 Web 数据或检查双端文案一致性。
+> **Warning(数值契约)**:资产 JSON 的整数值(单价/费率/默认数量等)必须以整数输出,禁止带浮点尾数(如 `1000.0`)。kotlinx-serialization 严格模式读 Int 字段遇 `1000.0` 会抛 `JsonDecodingException`。提取脚本 `tools/extract_decobox.py` 的 `to_jsonable()` 已把整值 float 归一为 int;手工改 assets 时留意。
 - `reference.items[].price` 是自由文本（如 "30–80元/㎡"），非数字，Android 端仅展示或做区间解析，不参与计算。
 
 ## 启动装载与种子

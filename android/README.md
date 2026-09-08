@@ -7,6 +7,7 @@
 - 数据本地化优先，无后端、无登录、无云同步；换机靠 Android 端 JSON 备份 / 恢复（不等同于 Web 备份迁移）。
 - 面向中国大陆用户（简体中文），不强依赖 Google Play / GMS。
 - MVP 覆盖五 Tab（首页 / 流程 / 预算 / 指南 / 我的）+ 首次设置向导 + JSON 备份/恢复 + CSV 导出。
+- **decobox 集成(2026-09-08)**:预算 Tab「逐空间报价」= 装修宝典预算计算器(整装 / 半包 / 局改三模式,面积估算、工艺联动、主材矩阵、实时预算对比、清单导出);「我的」Tab「需求规划」= 逐空间功能需求规划(150 类型 / 819 需求项,四档重要度)。数据离线内置(`assets/decobox_catalog.json` / `decobox_requirements.json`),计算引擎纯 Kotlin,方案以 JSON blob 存 Room(`quote_plan` / `planner_state`)。
 
 ## 技术栈版本
 

@@ -1,0 +1,1277 @@
+{
+  "version": "2026-09-07",
+  "source": "decobox.online v1.4.0 (2025-2026 market snapshot)",
+  "craft": {
+    "gypsumLevel": 15,
+    "grout": 20
+  },
+  "areas": {
+    "wallFactor": 4,
+    "partialCeilingFactor": 0.6,
+    "partialCeilingMin": 3
+  },
+  "managementFeeRate": 8,
+  "defaultHouse": {
+    "totalArea": 90,
+    "budget": 120000,
+    "ceilingHeight": 2.4
+  },
+  "roomPresets": [
+    {
+      "maxArea": 55,
+      "rooms": [
+        {
+          "roomName": "客餐厅",
+          "ratio": 0.34
+        },
+        {
+          "roomName": "卧室",
+          "ratio": 0.27
+        },
+        {
+          "roomName": "厨房",
+          "ratio": 0.12
+        },
+        {
+          "roomName": "卫生间",
+          "ratio": 0.1
+        },
+        {
+          "roomName": "阳台",
+          "ratio": 0.09
+        },
+        {
+          "roomName": "玄关过道",
+          "ratio": 0.08
+        }
+      ]
+    },
+    {
+      "maxArea": 95,
+      "rooms": [
+        {
+          "roomName": "客厅",
+          "ratio": 0.26
+        },
+        {
+          "roomName": "餐厅",
+          "ratio": 0.11
+        },
+        {
+          "roomName": "主卧",
+          "ratio": 0.16
+        },
+        {
+          "roomName": "次卧",
+          "ratio": 0.13
+        },
+        {
+          "roomName": "厨房",
+          "ratio": 0.08
+        },
+        {
+          "roomName": "卫生间",
+          "ratio": 0.06
+        },
+        {
+          "roomName": "阳台",
+          "ratio": 0.09
+        },
+        {
+          "roomName": "玄关过道",
+          "ratio": 0.11
+        }
+      ]
+    },
+    {
+      "maxArea": 130,
+      "rooms": [
+        {
+          "roomName": "客厅",
+          "ratio": 0.24
+        },
+        {
+          "roomName": "餐厅",
+          "ratio": 0.1
+        },
+        {
+          "roomName": "主卧",
+          "ratio": 0.15
+        },
+        {
+          "roomName": "次卧",
+          "ratio": 0.12
+        },
+        {
+          "roomName": "书房",
+          "ratio": 0.09
+        },
+        {
+          "roomName": "厨房",
+          "ratio": 0.07
+        },
+        {
+          "roomName": "卫生间",
+          "ratio": 0.06
+        },
+        {
+          "roomName": "主卫",
+          "ratio": 0.05
+        },
+        {
+          "roomName": "阳台",
+          "ratio": 0.07
+        },
+        {
+          "roomName": "玄关过道",
+          "ratio": 0.05
+        }
+      ]
+    },
+    {
+      "maxArea": null,
+      "rooms": [
+        {
+          "roomName": "客厅",
+          "ratio": 0.22
+        },
+        {
+          "roomName": "餐厅",
+          "ratio": 0.1
+        },
+        {
+          "roomName": "主卧",
+          "ratio": 0.14
+        },
+        {
+          "roomName": "次卧",
+          "ratio": 0.11
+        },
+        {
+          "roomName": "儿童房",
+          "ratio": 0.1
+        },
+        {
+          "roomName": "书房",
+          "ratio": 0.08
+        },
+        {
+          "roomName": "厨房",
+          "ratio": 0.06
+        },
+        {
+          "roomName": "卫生间",
+          "ratio": 0.05
+        },
+        {
+          "roomName": "主卫",
+          "ratio": 0.04
+        },
+        {
+          "roomName": "阳台",
+          "ratio": 0.06
+        },
+        {
+          "roomName": "玄关过道",
+          "ratio": 0.04
+        }
+      ]
+    }
+  ],
+  "wall": [
+    {
+      "id": "wall-paint",
+      "label": "乳胶漆",
+      "variants": [
+        {
+          "id": "nippon-bamboo",
+          "brand": "立邦",
+          "series": "竹炭金装净味",
+          "specs": [
+            {
+              "id": "nippon-bamboo-5l",
+              "label": "5L 桶",
+              "unitLabel": "桶",
+              "unitPrice": 237,
+              "coveragePerUnit": 35
+            }
+          ]
+        }
+      ],
+      "craftSteps": [
+        {
+          "id": "wall-scrape",
+          "label": "原墙大白铲除",
+          "unitPrice": 8
+        },
+        {
+          "id": "wall-primer",
+          "label": "墙锢涂膜",
+          "unitPrice": 4
+        },
+        {
+          "id": "wall-gypsum",
+          "label": "石膏找平",
+          "unitPrice": 15
+        },
+        {
+          "id": "wall-putty",
+          "label": "批刮腻子",
+          "unitPrice": 12
+        },
+        {
+          "id": "wall-sand",
+          "label": "砂纸打磨",
+          "unitPrice": 4
+        },
+        {
+          "id": "wall-corner",
+          "label": "阴阳角找直",
+          "unitPrice": 6
+        },
+        {
+          "id": "wall-paintwork",
+          "label": "刷乳胶漆",
+          "unitPrice": 10
+        }
+      ]
+    },
+    {
+      "id": "wall-tile",
+      "label": "瓷砖",
+      "variants": [
+        {
+          "id": "dongpeng-fullbody",
+          "brand": "东鹏",
+          "series": "通体砖",
+          "specs": [
+            {
+              "id": "dongpeng-fullbody-800",
+              "label": "单片 800×800",
+              "unitLabel": "片",
+              "unitPrice": 39,
+              "coveragePerUnit": 0.64
+            }
+          ]
+        }
+      ],
+      "craftSteps": [
+        {
+          "id": "wtile-aux",
+          "label": "铺贴辅材",
+          "unitPrice": 30
+        },
+        {
+          "id": "wtile-lay",
+          "label": "铺贴人工",
+          "unitPrice": 35
+        }
+      ]
+    }
+  ],
+  "ceiling": [
+    {
+      "id": "ceiling-gypsum",
+      "label": "石膏板吊顶",
+      "variants": [
+        {
+          "id": "taishan-flat",
+          "brand": "泰山",
+          "series": "平顶",
+          "specs": [
+            {
+              "id": "taishan-flat-sqm",
+              "label": "标准",
+              "unitLabel": "㎡",
+              "unitPrice": 130,
+              "coveragePerUnit": 1
+            }
+          ]
+        },
+        {
+          "id": "taishan-shape",
+          "brand": "泰山",
+          "series": "造型顶",
+          "specs": [
+            {
+              "id": "taishan-shape-sqm",
+              "label": "标准",
+              "unitLabel": "㎡",
+              "unitPrice": 190,
+              "coveragePerUnit": 1
+            }
+          ]
+        }
+      ],
+      "craftSteps": [
+        {
+          "id": "gypsum-frame",
+          "label": "轻钢龙骨基层制作",
+          "unitPrice": 45
+        },
+        {
+          "id": "gypsum-board",
+          "label": "石膏板安装固定",
+          "unitPrice": 20
+        }
+      ],
+      "fixedCrafts": true
+    },
+    {
+      "id": "ceiling-aluminum",
+      "label": "铝扣板",
+      "variants": [
+        {
+          "id": "aopu-regular",
+          "brand": "奥普",
+          "series": "300×300 普通款",
+          "specs": [
+            {
+              "id": "aopu-regular-sqm",
+              "label": "标准",
+              "unitLabel": "㎡",
+              "unitPrice": 90,
+              "coveragePerUnit": 1
+            }
+          ]
+        },
+        {
+          "id": "aopu-thick",
+          "brand": "奥普",
+          "series": "加厚抗菌款",
+          "specs": [
+            {
+              "id": "aopu-thick-sqm",
+              "label": "标准",
+              "unitLabel": "㎡",
+              "unitPrice": 130,
+              "coveragePerUnit": 1
+            }
+          ]
+        }
+      ],
+      "craftSteps": [
+        {
+          "id": "alu-frame",
+          "label": "铝扣板安装基层（龙骨系统）",
+          "unitPrice": 15
+        },
+        {
+          "id": "alu-install",
+          "label": "铝扣板安装",
+          "unitPrice": 15
+        }
+      ],
+      "fixedCrafts": true
+    }
+  ],
+  "floor": [
+    {
+      "id": "floor-tile",
+      "label": "瓷砖",
+      "variants": [
+        {
+          "id": "dongpeng-fullbody",
+          "brand": "东鹏",
+          "series": "通体砖",
+          "specs": [
+            {
+              "id": "dongpeng-fullbody-800",
+              "label": "单片 800×800",
+              "unitLabel": "片",
+              "unitPrice": 39,
+              "coveragePerUnit": 0.64
+            }
+          ]
+        }
+      ],
+      "craftSteps": [
+        {
+          "id": "ftile-aux",
+          "label": "铺贴辅材",
+          "unitPrice": 30
+        },
+        {
+          "id": "ftile-lay",
+          "label": "铺贴人工",
+          "unitPrice": 35
+        }
+      ]
+    },
+    {
+      "id": "floor-wood",
+      "label": "木地板",
+      "variants": [
+        {
+          "id": "der-lam",
+          "brand": "德尔",
+          "series": "强化木地板",
+          "specs": [
+            {
+              "id": "der-lam-sqm",
+              "label": "1200×195×12mm",
+              "unitLabel": "㎡",
+              "unitPrice": 74,
+              "coveragePerUnit": 1,
+              "includesSkirting": true
+            }
+          ]
+        }
+      ],
+      "craftSteps": []
+    }
+  ],
+  "spaceExtras": [
+    {
+      "id": "waterproof",
+      "label": "防水工程",
+      "basis": "area",
+      "unit": "㎡",
+      "unitPrice": 65,
+      "desc": "阳台/卫生间墙地面防水"
+    },
+    {
+      "id": "pipeWrap",
+      "label": "包管+隔音",
+      "basis": "count",
+      "unit": "根",
+      "unitPrice": 380
+    },
+    {
+      "id": "wallDemolition",
+      "label": "墙体拆改",
+      "basis": "area",
+      "unit": "㎡",
+      "unitPrice": 35
+    }
+  ],
+  "otherMains": [
+    {
+      "id": "door",
+      "label": "门",
+      "defaultQty": 1,
+      "types": [
+        {
+          "id": "door-wood",
+          "label": "木门",
+          "specs": [
+            {
+              "id": "door-wood-frame-single",
+              "label": "门套单包口",
+              "unit": "樘",
+              "unitPrice": 1200
+            },
+            {
+              "id": "door-wood-frame-double",
+              "label": "门套双包口",
+              "unit": "樘",
+              "unitPrice": 1600
+            }
+          ]
+        },
+        {
+          "id": "door-metal-slide",
+          "label": "金属移门",
+          "specs": [
+            {
+              "id": "slide-ground",
+              "label": "地轨推拉门 · 35×16 型材",
+              "unit": "㎡",
+              "unitPrice": 265
+            },
+            {
+              "id": "slide-hanging",
+              "label": "吊轨门 · 35×16 型材",
+              "unit": "㎡",
+              "unitPrice": 405
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "skirting",
+      "label": "踢脚线",
+      "defaultQty": 20,
+      "suggestQtyByPerimeter": true,
+      "qtyDeduction": 1,
+      "types": [
+        {
+          "id": "skirting-alu",
+          "label": "铝合金",
+          "specs": [
+            {
+              "id": "skirting-alu-3",
+              "label": "宽 3cm",
+              "unit": "米",
+              "unitPrice": 15
+            },
+            {
+              "id": "skirting-alu-5",
+              "label": "宽 5cm",
+              "unit": "米",
+              "unitPrice": 20
+            }
+          ]
+        },
+        {
+          "id": "skirting-pvc",
+          "label": "PVC",
+          "specs": [
+            {
+              "id": "skirting-pvc-3",
+              "label": "宽 3cm",
+              "unit": "米",
+              "unitPrice": 8
+            },
+            {
+              "id": "skirting-pvc-5",
+              "label": "宽 5cm",
+              "unit": "米",
+              "unitPrice": 12
+            }
+          ]
+        },
+        {
+          "id": "skirting-wood",
+          "label": "实木",
+          "specs": [
+            {
+              "id": "skirting-wood-3",
+              "label": "宽 3cm",
+              "unit": "米",
+              "unitPrice": 30
+            },
+            {
+              "id": "skirting-wood-5",
+              "label": "宽 5cm",
+              "unit": "米",
+              "unitPrice": 40
+            }
+          ]
+        },
+        {
+          "id": "skirting-tile",
+          "label": "瓷砖踢脚线",
+          "specs": [
+            {
+              "id": "skirting-tile-3",
+              "label": "宽 3cm",
+              "unit": "米",
+              "unitPrice": 15
+            },
+            {
+              "id": "skirting-tile-5",
+              "label": "宽 5cm",
+              "unit": "米",
+              "unitPrice": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "windowsill",
+      "label": "窗台石",
+      "defaultQty": 2,
+      "types": [
+        {
+          "id": "windowsill-marble",
+          "label": "大理石",
+          "specs": [
+            {
+              "id": "windowsill-marble-w22",
+              "label": "≤22cm",
+              "unit": "延米",
+              "unitPrice": 150
+            },
+            {
+              "id": "windowsill-marble-w28",
+              "label": "22–28cm",
+              "unit": "延米",
+              "unitPrice": 190
+            },
+            {
+              "id": "windowsill-marble-w35",
+              "label": "28–35cm",
+              "unit": "延米",
+              "unitPrice": 240
+            }
+          ]
+        },
+        {
+          "id": "windowsill-quartz",
+          "label": "石英石",
+          "specs": [
+            {
+              "id": "windowsill-quartz-w22",
+              "label": "≤22cm",
+              "unit": "延米",
+              "unitPrice": 220
+            },
+            {
+              "id": "windowsill-quartz-w28",
+              "label": "22–28cm",
+              "unit": "延米",
+              "unitPrice": 270
+            },
+            {
+              "id": "windowsill-quartz-w35",
+              "label": "28–35cm",
+              "unit": "延米",
+              "unitPrice": 330
+            }
+          ]
+        },
+        {
+          "id": "windowsill-artificial",
+          "label": "人造石",
+          "specs": [
+            {
+              "id": "windowsill-artificial-w22",
+              "label": "≤22cm",
+              "unit": "延米",
+              "unitPrice": 120
+            },
+            {
+              "id": "windowsill-artificial-w28",
+              "label": "22–28cm",
+              "unit": "延米",
+              "unitPrice": 150
+            },
+            {
+              "id": "windowsill-artificial-w35",
+              "label": "28–35cm",
+              "unit": "延米",
+              "unitPrice": 190
+            }
+          ]
+        },
+        {
+          "id": "windowsill-granite",
+          "label": "花岗岩",
+          "specs": [
+            {
+              "id": "windowsill-granite-w22",
+              "label": "≤22cm",
+              "unit": "延米",
+              "unitPrice": 180
+            },
+            {
+              "id": "windowsill-granite-w28",
+              "label": "22–28cm",
+              "unit": "延米",
+              "unitPrice": 220
+            },
+            {
+              "id": "windowsill-granite-w35",
+              "label": "28–35cm",
+              "unit": "延米",
+              "unitPrice": 270
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lighting",
+      "label": "灯具",
+      "defaultQty": 1,
+      "types": [
+        {
+          "id": "light-main",
+          "label": "主灯",
+          "specs": [
+            {
+              "id": "light-main-std",
+              "label": "标准",
+              "unit": "套",
+              "unitPrice": 1500
+            }
+          ]
+        },
+        {
+          "id": "light-down",
+          "label": "筒灯",
+          "specs": [
+            {
+              "id": "light-down-std",
+              "label": "标准",
+              "unit": "个",
+              "unitPrice": 45
+            }
+          ]
+        },
+        {
+          "id": "light-linear",
+          "label": "线性灯",
+          "specs": [
+            {
+              "id": "light-linear-std",
+              "label": "标准",
+              "unit": "米",
+              "unitPrice": 60
+            }
+          ]
+        },
+        {
+          "id": "light-spot",
+          "label": "射灯",
+          "specs": [
+            {
+              "id": "light-spot-std",
+              "label": "标准",
+              "unit": "个",
+              "unitPrice": 55
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sanitary",
+      "label": "洁具",
+      "defaultQty": 1,
+      "types": [
+        {
+          "id": "sanitary-heater",
+          "label": "风暖一体机",
+          "specs": [
+            {
+              "id": "sanitary-heater-std",
+              "label": "标准",
+              "unit": "套",
+              "unitPrice": 1200
+            }
+          ]
+        },
+        {
+          "id": "sanitary-toilet",
+          "label": "坐便",
+          "specs": [
+            {
+              "id": "sanitary-toilet-std",
+              "label": "标准",
+              "unit": "套",
+              "unitPrice": 1800
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kitchen-hardware",
+      "label": "厨房五金",
+      "defaultQty": 1,
+      "types": [
+        {
+          "id": "kh-sink",
+          "label": "大单槽",
+          "specs": [
+            {
+              "id": "kh-sink-std",
+              "label": "标准",
+              "unit": "套",
+              "unitPrice": 800
+            }
+          ]
+        },
+        {
+          "id": "kh-faucet",
+          "label": "抽拉龙头",
+          "specs": [
+            {
+              "id": "kh-faucet-std",
+              "label": "标准",
+              "unit": "个",
+              "unitPrice": 300
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bath-hardware",
+      "label": "卫浴五金",
+      "defaultQty": 1,
+      "types": [
+        {
+          "id": "bh-towel",
+          "label": "毛巾架",
+          "specs": [
+            {
+              "id": "bh-towel-std",
+              "label": "标准",
+              "unit": "个",
+              "unitPrice": 120
+            }
+          ]
+        },
+        {
+          "id": "bh-paper",
+          "label": "卷纸架",
+          "specs": [
+            {
+              "id": "bh-paper-std",
+              "label": "标准",
+              "unit": "个",
+              "unitPrice": 40
+            }
+          ]
+        },
+        {
+          "id": "bh-basin-faucet",
+          "label": "面盆龙头",
+          "specs": [
+            {
+              "id": "bh-basin-faucet-std",
+              "label": "标准",
+              "unit": "个",
+              "unitPrice": 260
+            }
+          ]
+        },
+        {
+          "id": "bh-shower-set",
+          "label": "淋浴花洒",
+          "specs": [
+            {
+              "id": "bh-shower-set-std",
+              "label": "标准",
+              "unit": "套",
+              "unitPrice": 900
+            }
+          ]
+        },
+        {
+          "id": "bh-drain",
+          "label": "地漏",
+          "specs": [
+            {
+              "id": "bh-drain-std",
+              "label": "标准",
+              "unit": "个",
+              "unitPrice": 60
+            }
+          ]
+        },
+        {
+          "id": "bh-angle-valve",
+          "label": "角阀",
+          "specs": [
+            {
+              "id": "bh-angle-valve-std",
+              "label": "标准",
+              "unit": "个",
+              "unitPrice": 25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "switch-panel",
+      "label": "开关面板",
+      "defaultQty": 5,
+      "types": [
+        {
+          "id": "sp-86",
+          "label": "86 型面板",
+          "specs": [
+            {
+              "id": "sp-86-std",
+              "label": "标准",
+              "unit": "个",
+              "unitPrice": 15
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "houseWorks": {
+    "plumbing": 150,
+    "hauling": 1500,
+    "cleaning": 500,
+    "protection": 500
+  },
+  "partialItems": [
+    {
+      "id": "wall-refresh",
+      "label": "墙面刷新",
+      "unit": "㎡",
+      "integerQty": false,
+      "needsArea": false,
+      "tiers": [
+        {
+          "id": "light",
+          "label": "墙面结实，只是旧了",
+          "unitPrice": 45,
+          "note": "不用铲：修补 → 打磨 → 重刷乳胶漆，人工一口价，乳胶漆按所选品牌另计"
+        },
+        {
+          "id": "full",
+          "label": "有掉皮、发霉、开裂",
+          "unitPrice": 85,
+          "note": "铲到底重做：铲除 → 墙固 → 找平 → 腻子 → 刷漆，人工一口价，乳胶漆按所选品牌另计"
+        }
+      ]
+    },
+    {
+      "id": "floor-replace",
+      "label": "地面更换",
+      "unit": "㎡",
+      "integerQty": false,
+      "needsArea": false,
+      "tiers": [
+        {
+          "id": "tile",
+          "label": "瓷砖",
+          "catalogCategoryId": "floor-tile"
+        },
+        {
+          "id": "wood",
+          "label": "木地板",
+          "catalogCategoryId": "floor-wood"
+        }
+      ]
+    }
+  ],
+  "partialFees": {
+    "demoRatePerSqm": 25,
+    "protectRatePerSqm": 8,
+    "protectMin": 300,
+    "hauling": 800
+  },
+  "doors": [
+    {
+      "id": "tata",
+      "label": "TATA 木门",
+      "standardOpening": {
+        "height": 2300,
+        "width": 900,
+        "wallThickness": 240
+      },
+      "series": [
+        {
+          "id": "tz",
+          "label": "免漆门 · TZ 系列",
+          "unitPrice": 1150,
+          "framePrices": {
+            "single": 105,
+            "double": 128
+          }
+        },
+        {
+          "id": "t",
+          "label": "免漆门 · T 系列",
+          "unitPrice": 1010,
+          "framePrices": {
+            "single": 105,
+            "double": 128
+          }
+        }
+      ]
+    },
+    {
+      "id": "guanzun",
+      "label": "重庆冠尊",
+      "standardOpening": {
+        "height": 2100,
+        "width": 900,
+        "wallThickness": 240
+      },
+      "customOpening": true,
+      "surcharge": {
+        "tallFrom": 2100,
+        "tallTo": 2300,
+        "wideFrom": 900,
+        "wideTo": 1000,
+        "perLeaf": 60,
+        "tubeFrom": 2300,
+        "tubePerLeaf": 60
+      },
+      "series": [
+        {
+          "id": "baked",
+          "label": "烤漆门",
+          "unitPrice": 655,
+          "framePrices": {
+            "single": 53,
+            "double": 64
+          }
+        },
+        {
+          "id": "nopaint",
+          "label": "无漆门",
+          "unitPrice": 590,
+          "framePrices": {
+            "single": 53,
+            "double": 64
+          }
+        }
+      ]
+    }
+  ],
+  "doorGlasses": {
+    "slide-ground": [
+      {
+        "id": "standard",
+        "label": "标配玻璃",
+        "unitPrice": 0
+      },
+      {
+        "id": "gray",
+        "label": "5mm 灰玻",
+        "unitPrice": 25
+      },
+      {
+        "id": "oil-sand",
+        "label": "5mm 灰油砂",
+        "unitPrice": 35
+      },
+      {
+        "id": "ultra-clear",
+        "label": "5mm 超白玻",
+        "unitPrice": 30
+      }
+    ],
+    "slide-hanging": [
+      {
+        "id": "standard",
+        "label": "标配玻璃",
+        "unitPrice": 0
+      },
+      {
+        "id": "ultra-oil-sand",
+        "label": "5mm 超白油砂",
+        "unitPrice": 40
+      },
+      {
+        "id": "changhong",
+        "label": "5mm 长虹",
+        "unitPrice": 30
+      },
+      {
+        "id": "ultra-changhong",
+        "label": "5mm 超白长虹",
+        "unitPrice": 45
+      }
+    ]
+  },
+  "doorFrameStyles": [
+    "single",
+    "double"
+  ],
+  "windowsillEdges": [
+    {
+      "id": "straight",
+      "label": "直边",
+      "unitPrice": 0
+    },
+    {
+      "id": "round",
+      "label": "圆边",
+      "unitPrice": 20
+    },
+    {
+      "id": "french",
+      "label": "法国边",
+      "unitPrice": 35
+    }
+  ],
+  "windowsillDefaults": {
+    "opening": 1.5,
+    "earLeft": 3,
+    "earRight": 3
+  },
+  "heaterBrands": [
+    {
+      "id": "opple",
+      "label": "欧普"
+    },
+    {
+      "id": "nvc",
+      "label": "雷士"
+    },
+    {
+      "id": "panasonic",
+      "label": "松下"
+    },
+    {
+      "id": "aupu",
+      "label": "奥普"
+    }
+  ],
+  "heaterTiers": [
+    {
+      "id": "three",
+      "label": "三合一"
+    },
+    {
+      "id": "four",
+      "label": "四合一"
+    },
+    {
+      "id": "five",
+      "label": "五合一"
+    }
+  ],
+  "heaterMatrix": {
+    "opple": {
+      "three": 400,
+      "four": 600,
+      "five": 900
+    },
+    "nvc": {
+      "three": 450,
+      "four": 650,
+      "five": 950
+    },
+    "panasonic": {
+      "three": 600,
+      "four": 900,
+      "five": 1300
+    },
+    "aupu": {
+      "three": 500,
+      "four": 800,
+      "five": 1200
+    }
+  },
+  "toiletBrands": [
+    {
+      "id": "arrow",
+      "label": "箭牌"
+    },
+    {
+      "id": "hengjie",
+      "label": "恒洁"
+    },
+    {
+      "id": "jomoo",
+      "label": "九牧"
+    }
+  ],
+  "toiletAddonPrices": [
+    300,
+    400
+  ],
+  "toiletKinds": [
+    {
+      "id": "normal",
+      "label": "普通坐便",
+      "shortLabel": "普通"
+    },
+    {
+      "id": "smart",
+      "label": "智能坐便",
+      "shortLabel": "智能"
+    }
+  ],
+  "toiletMatrix": {
+    "arrow": {
+      "normal": 900,
+      "smart": 2600
+    },
+    "hengjie": {
+      "normal": 1000,
+      "smart": 2800
+    },
+    "jomoo": {
+      "normal": 950,
+      "smart": 2700
+    }
+  },
+  "multiPickIds": [
+    "lighting",
+    "bath-hardware",
+    "kitchen-hardware"
+  ],
+  "defaultQtys": {
+    "light-main": 1,
+    "light-down": 4,
+    "light-linear": 5,
+    "light-spot": 2,
+    "bh-towel": 1,
+    "bh-paper": 1,
+    "bh-basin-faucet": 1,
+    "bh-shower-set": 1,
+    "bh-drain": 3,
+    "bh-angle-valve": 6,
+    "kh-sink": 1,
+    "kh-faucet": 1
+  },
+  "houseExtras": [
+    {
+      "id": "cleaning",
+      "label": "开荒保洁"
+    },
+    {
+      "id": "protection",
+      "label": "成品保护"
+    }
+  ],
+  "extraWorks": [
+    {
+      "id": "light-cove",
+      "label": "灯槽及灯具结构制作",
+      "items": [
+        {
+          "id": "linear-cove",
+          "label": "线性灯槽制作",
+          "unit": "米",
+          "unitPrice": 45,
+          "defaultQty": 5
+        },
+        {
+          "id": "magnetic-cove",
+          "label": "磁吸灯槽制作",
+          "unit": "米",
+          "unitPrice": 65,
+          "defaultQty": 5
+        }
+      ]
+    },
+    {
+      "id": "hvac",
+      "label": "中央空调相关制作",
+      "items": [
+        {
+          "id": "hvac-supply",
+          "label": "中央空调出风口制作",
+          "unit": "个",
+          "unitPrice": 120,
+          "defaultQty": 2
+        },
+        {
+          "id": "hvac-return",
+          "label": "中央空调回风口制作",
+          "unit": "个",
+          "unitPrice": 120,
+          "defaultQty": 2
+        }
+      ]
+    },
+    {
+      "id": "curtain-box",
+      "label": "窗帘盒制作",
+      "items": [
+        {
+          "id": "curtain-concealed",
+          "label": "暗藏式窗帘盒制作",
+          "unit": "米",
+          "unitPrice": 80,
+          "defaultQty": 3
+        },
+        {
+          "id": "curtain-base",
+          "label": "窗帘盒基层处理",
+          "unit": "米",
+          "unitPrice": 40,
+          "defaultQty": 3
+        }
+      ]
+    }
+  ]
+}

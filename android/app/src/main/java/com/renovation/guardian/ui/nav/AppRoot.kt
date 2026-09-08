@@ -44,8 +44,14 @@ import com.renovation.guardian.ui.stages.StagesScreen
 import com.renovation.guardian.ui.budget.BudgetScreen
 import com.renovation.guardian.ui.guide.GuideScreen
 import com.renovation.guardian.ui.more.MoreScreen
+import com.renovation.guardian.ui.planner.PlannerScreen
+import com.renovation.guardian.ui.quote.QuoteScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+
+/** 全屏子路由(非 Tab):逐空间报价计算器与需求规划。 */
+const val QuoteRoute = "quote"
+const val PlannerRoute = "planner"
 
 /** 顶层 5 个 Tab 路由。 */
 sealed class TopLevelRoute(val route: String, val label: String, val icon: ImageVector) {
@@ -170,9 +176,11 @@ private fun MainTabs() {
         ) {
             composable(TopLevelRoute.Home.route) { HomeScreen() }
             composable(TopLevelRoute.Stages.route) { StagesScreen() }
-            composable(TopLevelRoute.Budget.route) { BudgetScreen() }
+            composable(TopLevelRoute.Budget.route) { BudgetScreen(onOpenQuote = { navController.navigate(QuoteRoute) }) }
             composable(TopLevelRoute.Guide.route) { GuideScreen() }
-            composable(TopLevelRoute.More.route) { MoreScreen() }
+            composable(TopLevelRoute.More.route) { MoreScreen(onOpenPlanner = { navController.navigate(PlannerRoute) }) }
+            composable(QuoteRoute) { QuoteScreen(onBack = { navController.popBackStack() }) }
+            composable(PlannerRoute) { PlannerScreen(onBack = { navController.popBackStack() }) }
         }
     }
 }

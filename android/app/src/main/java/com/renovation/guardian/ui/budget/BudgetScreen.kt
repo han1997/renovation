@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BudgetScreen() {
+fun BudgetScreen(onOpenQuote: () -> Unit = {}) {
     val vm: BudgetViewModel = viewModel()
     val categories by vm.categories.collectAsState(initial = emptyList())
     val csvRows by vm.csvRows.collectAsState(initial = emptyList())
@@ -104,6 +104,25 @@ fun BudgetScreen() {
             // 底部留出 FAB 高度，避免最后一个卡片被遮挡
             contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 96.dp),
         ) {
+            item {
+                SectionCard {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth().clickable { onOpenQuote() }.padding(vertical = 4.dp),
+                    ) {
+                        Text("🧮", style = MaterialTheme.typography.titleLarge)
+                        Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
+                            Text("逐空间报价", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                "整装 / 半包 / 局改预算计算器,按空间逐项选材并生成清单",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Text("进入 ›", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
             item {
                 SectionCard {
                     Column {

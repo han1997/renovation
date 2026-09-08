@@ -15,16 +15,14 @@ class MoreViewModel(application: Application) : AppViewModel(application) {
     val contacts = container.contactRepo.observeAll()
     val notes = container.noteRepo.observeAll()
     val quickNotes = container.quickNoteRepo.observeAll()
-    val spaces = container.spaceNeedRepo.observeAll()
 
-    /** 14 阶段目录（随手记「阶段备忘」关联用）。 */
+    /** 14 阶段目录(随手记「阶段备忘」关联用)。 */
     val stages = container.stageRepo.observeAll()
 
     val tiers = container.knowledge.prices?.tiers ?: emptyList()
     val modes = container.knowledge.knowledge?.modes ?: emptyList()
     val grades = container.knowledge.prices?.grades ?: emptyList()
     val styles = container.knowledge.knowledge?.styles ?: emptyList()
-    val spacePresets = container.knowledge.knowledge?.spaceNeeds ?: emptyList()
 
     fun updateProfile(areaM2: Double, tierId: String, modeId: String, gradeId: String, startDate: String?) {
         viewModelScope.launch { container.houseProfileRepo.updateProfile(areaM2, tierId, modeId, gradeId, startDate) }
@@ -68,27 +66,6 @@ class MoreViewModel(application: Application) : AppViewModel(application) {
 
     fun deleteQuickNote(id: String) {
         viewModelScope.launch { container.quickNoteRepo.delete(id) }
-    }
-
-    fun addSpaceFromPreset(presetId: String) {
-        viewModelScope.launch {
-            val p = spacePresets.firstOrNull { it.id == presetId } ?: return@launch
-            container.spaceNeedRepo.addPreset(
-                presetId = p.id,
-                name = p.name,
-                emoji = p.emoji,
-                desc = p.desc,
-                stageIds = p.stageIds,
-                budgetCategoryId = p.budgetCat,
-                budgetNote = p.budgetNote,
-                tasks = p.tasks.map { it.stageId to it.text },
-                today = today,
-            )
-        }
-    }
-
-    fun deleteSpace(id: String) {
-        viewModelScope.launch { container.spaceNeedRepo.delete(id) }
     }
 
     suspend fun exportJsonString(): String = container.importExportRepo.exportJson()

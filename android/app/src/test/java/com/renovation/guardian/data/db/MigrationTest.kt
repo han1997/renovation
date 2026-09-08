@@ -48,16 +48,16 @@ class MigrationTest {
         context.deleteDatabase(TEST_DB)
     }
 
-    /** 从导出的 schema JSON 手工建 v1 数据库文件。 */
-    private fun createV1Database(): SupportSQLiteDatabase {
-        val schema = loadSchemaJson(1)
+    /** 从导出的 schema JSON 手工建指定版本的数据库文件。 */
+    private fun createDatabaseAtVersion(version: Int): SupportSQLiteDatabase {
+        val schema = loadSchemaJson(version)
         val database = schema["database"]!!.jsonObject
         val entities = database["entities"]!!.jsonArray
         val setupQueries = database["setupQueries"]!!.jsonArray
 
         val configuration = SupportSQLiteOpenHelper.Configuration.builder(context)
             .name(TEST_DB)
-            .callback(object : SupportSQLiteOpenHelper.Callback(1) {
+            .callback(object : SupportSQLiteOpenHelper.Callback(version) {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     entities.forEach { entity ->
                         val obj = entity.jsonObject
@@ -78,6 +78,8 @@ class MigrationTest {
             .build()
         return androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory().create(configuration).writableDatabase
     }
+
+    private fun createV1Database(): SupportSQLiteDatabase = createDatabaseAtVersion(1)
 
     private fun loadSchemaJson(version: Int): kotlinx.serialization.json.JsonObject {
         val candidates = listOf(
@@ -117,7 +119,7 @@ class MigrationTest {
 
         // 2) Room 打开 v1 文件库（自动跑 MIGRATION_1_2 并做 schema 校验）
         val db = Room.databaseBuilder(context, AppDatabase::class.java, TEST_DB)
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
             .allowMainThreadQueries()
             .build()
 
@@ -157,6 +159,82 @@ class MigrationTest {
             val saved = db.quickNoteDao().getById("qn1")
             assertEquals("买冰箱", saved?.content)
             assertEquals(QuickNoteEntity.TYPE_WISH, saved?.type)
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
+    fun migrate2To3_dropsSpaceNeed_andAddsQuoteTables() = runBlocking {
+        // 1) 手工建 v2 库并写入 space_need + expense 用户数据
+        createDatabaseAtVersion(2).use { v2 ->
+            v2.execSQL(
+                """
+                INSERT INTO house_profile
+                    (id, area_m2, tier_id, mode_id, grade_id, start_date, total_budget_cents, style_id, style_quiz_at, created_at)
+                VALUES
+                    (1, 88.0, 'mid', 'full', 'eco', '2026-01-01', 150000, 'style_japandi', NULL, '2026-01-01')
+                """.trimIndent(),
+            )
+            v2.execSQL(
+                """
+                INSERT INTO space_need (id, preset_id, name, emoji, description, budget_category_id, budget_note, is_custom, created_at)
+                VALUES ('sp1', 'preset_1', '主卧', '🛏️', '旧空间需求', NULL, NULL, 0, '2026-01-02')
+                """.trimIndent(),
+            )
+            v2.execSQL(
+                """
+                INSERT INTO space_need_stage (space_id, stage_id, order_index)
+                VALUES ('sp1', 's1', 0)
+                """.trimIndent(),
+            )
+            v2.execSQL(
+                """
+                INSERT INTO expense (id, name, amount_cents, category_id, date, note, created_at)
+                VALUES ('ex1', '瓷砖', 150000, 'bc1', '2026-01-02', '客厅', '2026-01-02')
+                """.trimIndent(),
+            )
+        }
+
+        // 2) Room 打开 v2 文件库(自动跑 MIGRATION_2_3)
+        val db = Room.databaseBuilder(context, AppDatabase::class.java, TEST_DB)
+            .addMigrations(AppDatabase.MIGRATION_2_3)
+            .allowMainThreadQueries()
+            .build()
+
+        try {
+            // 3) 旧 space_need 表被删除;数据不再可见
+            val tables = db.openHelper.readableDatabase
+                .query("SELECT name FROM sqlite_master WHERE type='table'").use { c ->
+                    val names = mutableListOf<String>()
+                    while (c.moveToNext()) names += c.getString(0)
+                    names
+                }
+            assertTrue("space_need" !in tables)
+            assertTrue("space_need_stage" !in tables)
+
+            // 4) 既有 expense 数据不丢
+            db.openHelper.readableDatabase.query("SELECT amount_cents FROM expense WHERE id = 'ex1'").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(150000L, c.getLong(0))
+            }
+
+            // 5) 新表可读写
+            db.quotePlanDao().upsert(
+                QuotePlanEntity(
+                    id = "qp1", name = "我的方案", mode = "full",
+                    stateJson = "{}", createdAt = "2026-09-08", updatedAt = "2026-09-08",
+                ),
+            )
+            assertEquals("我的方案", db.quotePlanDao().getById("qp1")?.name)
+
+            db.plannerStateDao().upsert(
+                PlannerStateEntity(
+                    id = PlannerStateEntity.SINGLE_ROW_ID,
+                    stateJson = "{}", updatedAt = "2026-09-08",
+                ),
+            )
+            assertEquals(PlannerStateEntity.SINGLE_ROW_ID, db.plannerStateDao().get()?.id)
         } finally {
             db.close()
         }
