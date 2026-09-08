@@ -638,3 +638,36 @@ Android 流程页（StagesScreen）展开详情由单卡连排改为分区块 Se
 ### Next Steps
 
 - None - task complete
+
+
+## Session 20: decobox 集成:逐空间报价 + 需求规划
+
+**Date**: 2026-09-08
+**Task**: decobox 集成:逐空间报价 + 需求规划
+**Branch**: `main`
+
+### Summary
+
+主会话 inline 完成 decobox-integration:提取站点 bundle 生成 assets(150 类型/819 需求项,实测计数修正),Room v3 迁移(新增 quote_plan/planner_state、删除 space_need)、纯 Kotlin 报价引擎 + 单测、quote/planner 四步 UI、文本/长图导出、FileProvider。验证 testDebugUnitTest/lintDebug/assembleDebug 全绿。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `36ea8c4` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
