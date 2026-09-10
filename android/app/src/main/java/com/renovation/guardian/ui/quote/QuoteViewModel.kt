@@ -1,139 +1,84 @@
 package com.renovation.guardian.ui.quote
 
 import android.app.Application
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewModelScope
-import com.renovation.guardian.data.knowledge.DecoboxCatalogJson
+import androidx.compose.runtime.*
+import com.renovation.guardian.data.db.QuotePlanEntity
+import com.renovation.guardian.data.knowledge.DecoboxStateJson
+import com.renovation.guardian.data.repo.BudgetApplyPreview
 import com.renovation.guardian.ui.AppViewModel
-import com.renovation.guardian.ui.quote.engine.HouseInfo
-import com.renovation.guardian.ui.quote.engine.QuoteCalculator
-import com.renovation.guardian.ui.quote.engine.QuoteMode
-import com.renovation.guardian.ui.quote.engine.QuotePlanState
-import com.renovation.guardian.ui.quote.engine.QuoteResult
-import com.renovation.guardian.ui.quote.engine.QuoteRoomState
-import kotlinx.coroutines.launch
+import com.renovation.guardian.ui.quote.engine.*
+import com.renovation.guardian.domain.quote.*
+import com.renovation.guardian.util.IdGen
+import kotlin.math.round
 
-/**
- * 逐空间报价向导状态 + 计算。state 以可变状态持有,由 [QuoteScreen] 渲染;
- * 每次改动即时重算 [result]。方案保存走 [com.renovation.guardian.data.repo.QuotePlanRepository]。
- */
 class QuoteViewModel(application: Application) : AppViewModel(application) {
-
-    val catalog: DecoboxCatalogJson?
-        get() = container.knowledge.decoboxCatalog
-
-    var state by mutableStateOf(QuotePlanState())
-        private set
-
-    var editingPlanId by mutableStateOf<String?>(null)
-        private set
-
-    val result: QuoteResult?
-        get() = catalog?.let { QuoteCalculator.calculate(it, state) }
-
-    private val today: String get() = container.todayProvider()
-
-    fun newPlan() {
+    val catalog get() = container.knowledge.decoboxCatalog
+    val plans = container.quotePlanRepo.observeAllPlans()
+    val categories = container.budgetRepo.observeCategories()
+    var state by mutableStateOf(QuotePlanState()); private set
+    var editing by mutableStateOf(false); private set
+    var editingPlanId by mutableStateOf<String?>(null); private set
+    var planName by mutableStateOf(""); private set
+    var editorRevision by mutableStateOf(0); private set
+    private var savedState: QuotePlanState? = null
+    val dirty get() = editing && (savedState == null || state.copy(wizardStep = 1) != savedState?.copy(wizardStep = 1))
+    private val computed = derivedStateOf {
+        try { catalog?.let { QuoteCalculator.calculate(it, state) } } catch (_: Exception) { null }
+    }
+    val result get() = computed.value
+    fun update(change: (QuotePlanState) -> QuotePlanState) { state = change(state) }
+    fun setStep(step: Int) { state = state.copy(wizardStep = step.coerceIn(1, 4)) }
+    fun setMode(mode: QuoteMode) { state = state.copy(mode = mode, wizardStep = 1); editorRevision++ }
+    fun newPlan() = perform(success = null, singleFlight = true) {
+        val c = requireNotNull(catalog) { "报价目录不可用" }
+        val profile = container.houseProfileRepo.get()
+        state = QuotePlanState(house = HouseInfo(profile?.areaM2 ?: c.defaultHouse.totalArea,
+            profile?.totalBudgetCents ?: com.renovation.guardian.util.MoneyUtil.fromYuan(c.defaultHouse.budget), c.defaultHouse.ceilingHeight))
+        editingPlanId = null; savedState = null; planName = "新报价方案"; editing = true; editorRevision++
+    }
+    fun loadPlan(id: String) = perform(success = null, singleFlight = true) {
+        val plan = requireNotNull(container.quotePlanRepo.getPlan(id)) { "方案已不存在" }
+        val decoded = DecoboxStateJson.json.decodeFromString(QuotePlanState.serializer(), plan.stateJson)
+        QuoteValidation.validate(decoded, catalog)
+        state = decoded.copy(partialWorks = decoded.partialWorks.map { w -> w.copy(qtyRows = w.qtyRows.map { q -> if (q.id.isBlank()) q.copy(id = IdGen.new("pq")) else q }) }, rooms = decoded.rooms.map { r -> r.copy(mains = r.mains.map { if (it.id.isBlank()) it.copy(id = IdGen.new("qm")) else it }) })
+        savedState = state; editingPlanId = plan.id; planName = plan.name; editing = true; editorRevision++
+    }
+    fun closeEditor() { editing = false }
+    fun updateRoom(id: String, change: (QuoteRoomState) -> QuoteRoomState) { update { it.copy(rooms = it.rooms.map { r -> if (r.id == id) change(r) else r }) } }
+    fun addRoom() { update { it.copy(rooms = it.rooms + QuoteRoomState(IdGen.new("qr"), "房间 ${it.rooms.size + 1}", 10.0, isDefault = false)) } }
+    fun removeRoom(id: String) { update { it.copy(rooms = it.rooms.filterNot { r -> r.id == id }) } }
+    fun recommendRooms() {
         val c = catalog ?: return
-        state = QuotePlanState(
-            mode = QuoteMode.FULL,
-            house = HouseInfo(
-                totalArea = c.defaultHouse.totalArea,
-                budgetCents = com.renovation.guardian.util.MoneyUtil.fromYuan(c.defaultHouse.budget),
-                ceilingHeight = c.defaultHouse.ceilingHeight,
-            ),
-        )
-        editingPlanId = null
+        val presets = c.roomPresets.firstOrNull { it.maxArea == null || state.house.totalArea <= it.maxArea }?.rooms.orEmpty()
+        update { s -> s.copy(rooms = presets.map { QuoteRoomState(IdGen.new("qr"), it.roomName, round(s.house.totalArea * it.ratio * 10) / 10) }) }
+        editorRevision++
     }
-
-    fun loadPlan(id: String) {
-        viewModelScope.launch {
-            val plan = container.quotePlanRepo.getPlan(id) ?: return@launch
-            val decoded = runCatching {
-                com.renovation.guardian.data.knowledge.DecoboxStateJson.json.decodeFromString(
-                    QuotePlanState.serializer(), plan.stateJson,
-                )
-            }.getOrNull() ?: return@launch
-            state = decoded
-            editingPlanId = id
-        }
+    fun unconfiguredRooms(): List<QuoteRoomState> = if (state.mode == QuoteMode.PARTIAL) emptyList() else state.rooms.filter {
+        it.wall.categoryId.isBlank() && it.floor.categoryId.isBlank() && (it.ceilingPlan == CeilingPlan.NONE || it.ceiling.categoryId.isBlank()) &&
+            it.mains.isEmpty() && it.extras.values.none { extra -> extra.enabled }
     }
-
-    fun setMode(mode: QuoteMode) {
-        state = state.copy(mode = mode, wizardStep = 1)
+    fun completionError(): String? {
+        try { QuoteValidation.validate(state, catalog) } catch (e: Exception) { return e.message ?: "报价配置无效" }
+        if (!state.house.totalArea.isFinite() || state.house.totalArea <= 0 || state.house.ceilingHeight <= 0) return "请填写有效房屋信息"
+        if (state.mode != QuoteMode.PARTIAL && (state.rooms.isEmpty() || state.rooms.any { it.name.isBlank() || it.area <= 0 || !it.area.isFinite() })) return "请添加空间并填写有效名称与面积"
+        if (state.mode == QuoteMode.PARTIAL && state.partialWorks.none { it.enabled && it.qtyRows.any { q -> q.area > 0 } }) return "请启用局改事项并填写施工面积"
+        if (result == null || result?.lines.isNullOrEmpty()) return "请先配置选材或工程项目"
+        return null
     }
-
-    fun setHouse(totalArea: Double, budgetCents: Long, ceilingHeight: Double) {
-        state = state.copy(house = HouseInfo(totalArea, budgetCents, ceilingHeight))
+    fun savePlan(name: String, asNew: Boolean = false, onSaved: () -> Unit = {}) = perform(onSuccess = onSaved, singleFlight = true) {
+        require(name.isNotBlank()) { "请填写方案名称" }
+        check(completionError() == null) { completionError().orEmpty() }
+        val snapshot = state
+        val text = DecoboxStateJson.json.encodeToString(QuotePlanState.serializer(), snapshot)
+        val id = editingPlanId.takeUnless { asNew }
+        if (id == null) editingPlanId = container.quotePlanRepo.savePlan(name.trim(), snapshot.mode.name.lowercase(), text, container.todayProvider()).id
+        else container.quotePlanRepo.updatePlanState(id, text, container.todayProvider(), name.trim(), snapshot.mode.name.lowercase())
+        planName = name.trim(); savedState = snapshot
     }
-
-    fun setStep(step: Int) {
-        state = state.copy(wizardStep = step)
-    }
-
-    // ---- 空间 ----
-    fun setRooms(rooms: List<QuoteRoomState>) {
-        state = state.copy(rooms = rooms)
-    }
-
-    fun updateRoom(index: Int, transform: (QuoteRoomState) -> QuoteRoomState) {
-        val rooms = state.rooms.toMutableList()
-        if (index in rooms.indices) rooms[index] = transform(rooms[index])
-        state = state.copy(rooms = rooms)
-    }
-
-    fun setHouseWorks(id: String, enabled: Boolean, priceOverride: Int?) {
-        val cur = state.houseWorks[id] ?: com.renovation.guardian.ui.quote.engine.HouseWorkInput()
-        val map = state.houseWorks.toMutableMap()
-        map[id] = cur.copy(enabled = enabled, priceOverride = priceOverride)
-        state = state.copy(houseWorks = map)
-    }
-
-    /** 保存当前方案为新方案或覆盖。 */
-    fun savePlan(name: String, onDone: (Boolean) -> Unit) {
-        val json = com.renovation.guardian.data.knowledge.DecoboxStateJson.json.encodeToString(
-            QuotePlanState.serializer(), state,
-        )
-        viewModelScope.launch {
-            val id = editingPlanId
-            if (id != null) {
-                container.quotePlanRepo.updatePlanState(id, json, today)
-            } else {
-                container.quotePlanRepo.savePlan(name, state.mode.name.lowercase(), json, today)
-            }
-            onDone(true)
-        }
-    }
-
-    fun deletePlan(id: String) {
-        viewModelScope.launch { container.quotePlanRepo.deletePlan(id) }
-    }
-
-    /** 写入预算(按大项覆盖 budget_category.planned_cents + 同步总预算)。 */
-    fun writeToBudget(onDone: (Boolean) -> Unit) {
-        val r = result ?: return
-        viewModelScope.launch {
-            val cats = container.quotePlanRepo.listBudgetCategories().associateBy { it.id }
-            val s = r.summary
-            val writes = linkedMapOf<String, Long>()
-            when {
-                "b-full" in cats -> writes["b-full"] = r.totalCents
-                "b-whole" in cats -> writes["b-whole"] = r.totalCents
-                "b-main" in cats -> {
-                    if ("b-labor" in cats) writes["b-labor"] = s.laborAuxCents
-                    if ("b-aux" in cats) writes["b-aux"] = 0L
-                    if ("b-main" in cats) writes["b-main"] = s.includedMainCents + s.managementCents + s.houseWorkCents
-                }
-                else -> {
-                    if ("b-construct" in cats) writes["b-construct"] = s.laborAuxCents + s.includedMainCents
-                    if ("b-main" in cats) writes["b-main"] = s.managementCents
-                    if ("b-misc" in cats) writes["b-misc"] = s.houseWorkCents
-                }
-            }
-            container.quotePlanRepo.writeQuoteToBudget(writes, r.totalCents)
-            onDone(true)
-        }
+    fun renamePlan(plan: QuotePlanEntity, name: String, onSaved: () -> Unit) = perform(onSuccess = onSaved, singleFlight = true) { container.quotePlanRepo.renamePlan(plan.id, name, container.todayProvider()) }
+    fun deletePlan(id: String) = perform("已删除") { container.quotePlanRepo.deletePlan(id) }
+    fun applyBudget(preview: BudgetApplyPreview, onDone: () -> Unit) = perform("已更新分类计划，总预算上限和支出未变", onDone, singleFlight = true) {
+        check(result?.estimatedTotalCents == preview.estimatedTotalCents) { "报价已变化，请重新预览" }
+        container.quotePlanRepo.applyBudgetPreview(preview)
     }
 }

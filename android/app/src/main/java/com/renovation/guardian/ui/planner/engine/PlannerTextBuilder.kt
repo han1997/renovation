@@ -1,5 +1,7 @@
 package com.renovation.guardian.ui.planner.engine
 
+import com.renovation.guardian.domain.planner.*
+
 /**
  * 需求规划清单文本导出:标题「装修需求清单」,按空间分组,含重要度标注。
  */
@@ -11,7 +13,7 @@ object PlannerTextBuilder {
         lines.groupBy { it.roomName }.forEach { (room, items) ->
             sb.append("\n【$room】").append("\n")
             items.forEach { l ->
-                sb.append("  ${l.itemName}(${l.importance.label})").append("\n")
+                sb.append("  ${l.itemName}${l.importance?.let { "(${it.label})" }.orEmpty()}").append("\n")
             }
         }
         return sb.toString().trimEnd()

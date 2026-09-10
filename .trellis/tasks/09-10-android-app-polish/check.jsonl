@@ -1,0 +1,12 @@
+{"file": ".trellis/spec/android/index.md", "reason": "Android 全 App 完善契约与源码审计"}
+{"file": ".trellis/spec/android/directory-structure.md", "reason": "Android 全 App 完善契约与源码审计"}
+{"file": ".trellis/spec/android/data-layer.md", "reason": "Android 全 App 完善契约与源码审计"}
+{"file": ".trellis/spec/android/ui-theme.md", "reason": "Android 全 App 完善契约与源码审计"}
+{"file": ".trellis/spec/android/type-money.md", "reason": "Android 全 App 完善契约与源码审计"}
+{"file": ".trellis/spec/android/quality-guidelines.md", "reason": "Android 全 App 完善契约与源码审计"}
+{"file": ".trellis/spec/android/build-signing.md", "reason": "Android 全 App 完善契约与源码审计"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Android 全 App 完善契约与源码审计"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Android 全 App 完善契约与源码审计"}
+{"file": ".trellis/tasks/09-10-android-app-polish/research/audit.md", "reason": "Android 全 App 完善契约与源码审计"}
+{"file": ".trellis/spec/android/app-polish-contracts.md", "reason": "本轮接口契约与已验证/待验收边界"}
+{"file": ".trellis/tasks/09-10-android-app-polish/research/verification.md", "reason": "本轮接口契约与已验证/待验收边界"}

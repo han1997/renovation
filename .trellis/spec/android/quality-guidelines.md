@@ -82,3 +82,15 @@ gradlew.bat :app:assembleDebug
 ## 国产 ROM 注意
 
 `dynamicColorScheme` 在 MIUI/HyperOS、ColorOS、OriginOS 上支持度未实测，改主题后需在真机验证「换壁纸 → App 颜色变化」。
+
+## 本机工具与 Compose 同步（09-10 补充）
+
+- Windows PowerShell 5.1 的默认管道编码是 ASCII。禁止把含中文的写文件脚本直接 `| python -`，否则可能得到问号。可用 `.NET File.WriteAllText(..., UTF8Encoding(false))` 生成临时脚本，再以显式 UTF-8 读取执行。
+- 本机 Python 3.8 对含长中文行的源文件曾报 `Non-UTF-8`，而逐字节 UTF-8 解码正常。已验证的绕过方式：`exec(compile(path.read_text(encoding="utf-8"), str(path), "exec"))`；不要以忽略解码错误掩盖损坏。写后必须检查中文与 `git diff --check`。
+- Robolectric Compose 等待 Room/VM 回调时，轮询原始 `mutableStateOf` 字段不等于驱动 UI 主循环。等待实际语义树条件（`fetchSemanticsNodes()`）或用 Compose 的 idle 同步；不能靠加长超时或删掉断言。
+- 新增 `WorkflowComposeTest` 使用真实 Room 和真实目录，VM 注入只替换 Application 容器。截图是 JVM 渲染，不能替代设备上的系统文件选择器、分享和动态壁纸取色验证。
+- `assembleDebugAndroidTest` 会暴露测试依赖的许可证资源冲突。使用 `packaging.resources.merges` 合并 `META-INF/LICENSE*` / `NOTICE*`，保留许可证，而不是删除测试或整个依赖。
+
+- Windows JVM 下 AndroidX `FileProvider.SimplePathStrategy.belongsToRoot` 使用 `rootPath + '/'` 判断，而 Java canonicalPath 用反斜杠，因此有效 cache-path 也可能报无法找到根。不能为让单测通过放宽真实 provider 路径。JVM 文件操作测试用 ShadowContentResolver 注册流，验证写入/关闭/失败/取消；`AppNavigationUiTest.fileProviderAllowsReadingTheGeneratedImage` 在 Android 设备验证真实 URI。
+
+- JUnit4 的 `@Test` 必须返回 void/Unit。不要写 `fun test() = runBlocking { ...assertIsDisplayed() }`：最后一个 Compose assertion 返回 SemanticsNodeInteraction，会让真实 AndroidJUnit4 runner 拒绝整个测试类。使用普通函数体，runBlocking 只包仓库调用，并用语义树等待异步 UI；APK 能打包不代表测试类可运行。

@@ -90,8 +90,21 @@ class TaskRepository(private val db: AppDatabase) {
         }
     }
 
+    suspend fun saveTask(taskId: String, text: String, note: String?, date: String?, isTemplate: Boolean) {
+        require(text.isNotBlank()) { "任务名称不能为空" }
+        date?.let { kotlinx.datetime.LocalDate.parse(it) }
+        db.withTransaction {
+            updateTaskText(taskId, text.trim(), note, isTemplate)
+            if (isTemplate) setTemplateDueDate(taskId, date)
+            else {
+                val task = requireNotNull(db.taskDao().getById(taskId)) { "任务已不存在" }
+                db.taskDao().upsert(task.copy(dueDate = date))
+            }
+        }
+    }
+
     /** 删除任务：模板任务与自定义任务都允许。 */
-    suspend fun deleteTask(taskId: String, isTemplate: Boolean) {
+    suspend fun deleteTask(taskId: String, isTemplate: Boolean) = db.withTransaction {
         if (isTemplate) {
             db.taskTemplateDao().deleteById(taskId)
             db.taskDao().deleteCompletion(taskId)
@@ -124,7 +137,9 @@ class TaskRepository(private val db: AppDatabase) {
     suspend fun restoreDefaultTasks(stageId: String, templates: List<TaskTemplateEntity>) {
         db.withTransaction {
             val stageTemplates = db.taskTemplateDao().listByStage(stageId)
-            stageTemplates.forEach { db.taskTemplateDao().deleteById(it.id) }
+            val defaults = templates.map { it.id }.toSet()
+            // 非内置 ID 的任务是用户新增项，恢复默认不能清掉它们。
+            stageTemplates.filter { it.id in defaults }.forEach { db.taskTemplateDao().deleteById(it.id) }
             db.taskTemplateDao().seedAll(templates)
         }
     }

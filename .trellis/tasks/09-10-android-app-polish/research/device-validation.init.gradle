@@ -1,0 +1,11 @@
+// 临时设备验收使用独立包名和构建目录，不触碰原 debug 安装或正常 APK。
+gradle.beforeProject { project ->
+    if (project.path == ':app') {
+        project.layout.buildDirectory.set(new File(project.projectDir, 'build/device-validation'))
+        project.plugins.withId('com.android.application') {
+            project.extensions.getByName('androidComponents').finalizeDsl { android ->
+                android.buildTypes.getByName('debug').applicationIdSuffix = '.validation20260910'
+            }
+        }
+    }
+}

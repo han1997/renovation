@@ -33,16 +33,15 @@ fun SectionCard(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        onClick = onClick ?: {},
-    ) {
-        Box(modifier = Modifier.padding(16.dp)) { content() }
+    val body: @Composable () -> Unit = { Box(modifier = Modifier.padding(16.dp)) { content() } }
+    if (onClick == null) {
+        Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)) { body() }
+    } else {
+        Card(onClick = onClick, modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)) { body() }
     }
 }
 
@@ -169,5 +168,14 @@ fun SectionTitle(
             color = MaterialTheme.colorScheme.onSurface,
         )
         trailing?.invoke()
+    }
+}
+
+/** 紧凑金额行：标签左对齐、金额右对齐，避免窄屏三列互相挤压。 */
+@Composable
+fun MoneyLine(label: String, cents: Long, emphasized: Boolean = false) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)) {
+        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        MoneyText(cents, style = if (emphasized) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyLarge)
     }
 }

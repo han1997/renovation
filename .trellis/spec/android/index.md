@@ -18,6 +18,7 @@
 | Guide | Description | Status |
 |-------|-------------|--------|
 | [Directory Structure](./directory-structure.md) | 包结构、分层边界、模块契约 | Filled |
+| [App Polish Contracts](./app-polish-contracts.md) | 金额/备份 v2/报价预算/规划/执行结果契约 | Filled |
 | [Data Layer](./data-layer.md) | Room 表 / DAO、金额 cents 约定、知识数据 assets、种子写入 | Filled |
 | [UI & Theme](./ui-theme.md) | Compose 界面分层、Material You 取色、静态回退色板 | Filled |
 | [Type & Money](./type-money.md) | MoneyUtil 金额约定、JSON 数据类型安全、日期/id 约定 | Filled |

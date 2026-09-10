@@ -9,6 +9,7 @@ import com.renovation.guardian.data.knowledge.KnowledgeSeeder
 import com.renovation.guardian.data.knowledge.ProfileSnapshot
 import com.renovation.guardian.util.MoneyUtil
 import kotlinx.coroutines.flow.Flow
+import androidx.room.withTransaction
 
 class HouseProfileRepository(
     private val db: AppDatabase,
@@ -25,16 +26,18 @@ class HouseProfileRepository(
     /**
      * 完成向导：写 profile + 应用预算模板（已有分类保留支出 + 自定义；模板分类刷新 planned）。
      */
-    suspend fun finishOnboarding(
+    suspend fun finishOnboardingCents(
         areaM2: Double,
         tierId: String,
         modeId: String,
         gradeId: String,
         startDate: String?,
-        totalBudgetYuan: Double,
+        totalBudgetCents: Long,
         selectedPresetIds: List<String>,
         customSpaces: List<CustomSpaceInput>,
-    ): HouseProfileEntity {
+    ): HouseProfileEntity = db.withTransaction {
+        require(areaM2.isFinite() && areaM2 > 0) { "面积必须大于零" }
+        require(totalBudgetCents >= 0) { "预算不能为负数" }
         val existing = db.houseProfileDao().get()
         val now = today()
         val profile = HouseProfileEntity(
@@ -44,7 +47,7 @@ class HouseProfileRepository(
             modeId = modeId,
             gradeId = gradeId,
             startDate = startDate,
-            totalBudgetCents = MoneyUtil.fromYuan(totalBudgetYuan),
+            totalBudgetCents = totalBudgetCents,
             styleId = existing?.styleId,
             styleQuizAt = existing?.styleQuizAt,
             createdAt = existing?.createdAt ?: now,
@@ -58,8 +61,12 @@ class HouseProfileRepository(
         )
         applyBudgetTemplate(tplCats)
 
-        return profile
+        profile
     }
+
+    suspend fun finishOnboarding(areaM2: Double, tierId: String, modeId: String, gradeId: String, startDate: String?,
+        totalBudgetYuan: Double, selectedPresetIds: List<String>, customSpaces: List<CustomSpaceInput>) =
+        finishOnboardingCents(areaM2, tierId, modeId, gradeId, startDate, MoneyUtil.fromYuan(totalBudgetYuan), selectedPresetIds, customSpaces)
 
     private suspend fun applyBudgetTemplate(tpl: List<BudgetCategoryEntity>) {
         val existing = db.budgetCategoryDao().listAll().associateBy { it.id }
@@ -67,7 +74,6 @@ class HouseProfileRepository(
             val ex = existing[tplCat.id]
             if (ex != null) ex.copy(plannedCents = tplCat.plannedCents) else tplCat
         }
-        val customCats = existing.values.filter { it.id.startsWith("bc_") && merged.none { it.id == it.id } }
         // 仅追加现有"非模板 / 非内置 id"的自定义分类（保留用户的 bc_xxx 等）
         val extras = existing.values.filter { ex ->
             ex.id.startsWith("bc_") && merged.none { it.id == ex.id }
@@ -102,6 +108,13 @@ class HouseProfileRepository(
                 startDate = startDate,
             ),
         )
+    }
+
+    suspend fun saveSettings(area: Double, tier: String, mode: String, grade: String, date: String?, budget: Long) = db.withTransaction {
+        require(area.isFinite() && area > 0 && budget >= 0) { "面积或预算无效" }
+        date?.let { kotlinx.datetime.LocalDate.parse(it) }
+        val profile = requireNotNull(db.houseProfileDao().get()) { "房屋信息已不存在" }
+        db.houseProfileDao().upsert(profile.copy(areaM2 = area, tierId = tier, modeId = mode, gradeId = grade, startDate = date, totalBudgetCents = budget))
     }
 
     suspend fun alignTotalToCategoriesSum() {

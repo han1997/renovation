@@ -1,4 +1,4 @@
-package com.renovation.guardian.ui.quote.engine
+package com.renovation.guardian.domain.quote
 
 import kotlinx.serialization.Serializable
 
@@ -60,6 +60,7 @@ data class ExtraInput(
     val pipeWrapCount: Int = 1,
     /** wallDemolition: 拆改面积 m2 */
     val wallDemolitionArea: Double = 0.0,
+    val waterproofUseEstimate: Boolean = true,
 )
 
 /** 其他主材单项选择(门/踢脚线/窗台石/灯具/洁具/五金/面板)。 */
@@ -86,6 +87,7 @@ data class MainSelection(
     val qtyOverride: Double? = null,
     val priceOverride: Int? = null,
     val sourcing: Sourcing = Sourcing.SELF,
+    val id: String = "",
 )
 
 /** 房间报价状态。 */
@@ -124,12 +126,14 @@ data class PartialWorkInput(
     val paintSpecId: String? = null,
     val paintSourcing: Sourcing = Sourcing.INCLUDED,
     val priceOverride: Int? = null,
+    val floorSelection: SurfaceSelection? = null,
 )
 
 @Serializable
 data class PartialQtyRow(
     val roomName: String = "",
     val area: Double = 0.0,
+    val id: String = "",
 )
 
 /** 一次报价的完整状态(可序列化存入 Room)。 */

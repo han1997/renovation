@@ -1,10 +1,13 @@
 package com.renovation.guardian.data.db
 
+import kotlinx.serialization.Serializable
+
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "note")
+@Serializable
 data class NoteEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "title") val title: String,
@@ -14,6 +17,7 @@ data class NoteEntity(
 )
 
 @Entity(tableName = "contact")
+@Serializable
 data class ContactEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "name") val name: String,

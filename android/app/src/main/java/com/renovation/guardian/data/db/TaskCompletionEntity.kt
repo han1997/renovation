@@ -1,5 +1,7 @@
 package com.renovation.guardian.data.db
 
+import kotlinx.serialization.Serializable
+
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -10,6 +12,7 @@ import androidx.room.PrimaryKey
  * 重叠的部分。
  */
 @Entity(tableName = "task_completion")
+@Serializable
 data class TaskCompletionEntity(
     @PrimaryKey @ColumnInfo(name = "template_id") val templateId: String,
     @ColumnInfo(name = "due_date") val dueDate: String?,

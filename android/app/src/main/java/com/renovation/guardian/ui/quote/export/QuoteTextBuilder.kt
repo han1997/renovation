@@ -1,7 +1,7 @@
 package com.renovation.guardian.ui.quote.export
 
-import com.renovation.guardian.ui.quote.engine.QuoteLine
-import com.renovation.guardian.ui.quote.engine.QuoteResult
+import com.renovation.guardian.domain.quote.QuoteLine
+import com.renovation.guardian.domain.quote.QuoteResult
 import com.renovation.guardian.util.MoneyUtil
 
 /**
@@ -15,11 +15,13 @@ object QuoteTextBuilder {
 
     private const val LINE_SEP = "\n"
 
-    fun build(result: QuoteResult, modeLabel: String, totalArea: Double, ceilingHeight: Double): String {
+    fun build(result: QuoteResult, modeLabel: String, totalArea: Double, ceilingHeight: Double, unconfiguredRooms: List<String> = emptyList()): String {
         val sb = StringBuilder()
         sb.append("装修宝典($modeLabel)").append(LINE_SEP)
         sb.append("总建面 ${trimNum(totalArea)}m2 · 预算 ${MoneyUtil.format(result.budgetCents)} 元 · 完成面层高 ${trimNum(ceilingHeight)}m")
         sb.append(LINE_SEP).append(LINE_SEP)
+
+        if (unconfiguredRooms.isNotEmpty()) sb.append("未配置选材的空间（未计空间费用）：${unconfiguredRooms.joinToString("、")}").append(LINE_SEP)
 
         // 按房间分组
         val byRoom = result.lines.filter { it.roomId != null }.groupBy { it.roomId }
@@ -47,7 +49,7 @@ object QuoteTextBuilder {
         val unitPrice = MoneyUtil.format(l.unitPriceCents)
         val subtotal = MoneyUtil.format(l.subtotalCents)
         val prefix = if (l.partLabel.isNotBlank() && l.roomId != null) "${l.partLabel} · " else ""
-        val sourcing = if (l.sourcing == com.renovation.guardian.ui.quote.engine.Sourcing.SELF) "(自购)" else ""
+        val sourcing = if (l.sourcing == com.renovation.guardian.domain.quote.Sourcing.SELF) "(自购)" else ""
         sb.append("  $prefix${l.label}: ${qty}${l.unit} × ¥$unitPrice = ¥$subtotal$sourcing")
         l.note?.let { sb.append("($it)") }
         sb.append(LINE_SEP)
@@ -62,16 +64,16 @@ object QuoteTextBuilder {
         if (s.partialItemCents > 0) lines += "局改事项" to s.partialItemCents
         if (s.partialFeeCents > 0) lines += "局改费用" to s.partialFeeCents
         if (s.managementCents > 0) lines += "管理费" to s.managementCents
-        if (lines.isEmpty()) return
         sb.append(LINE_SEP).append("【费用小计】").append(LINE_SEP)
         lines.forEach { (k, v) ->
             sb.append("  $k:¥${MoneyUtil.format(v)}").append(LINE_SEP)
         }
         sb.append(LINE_SEP)
-        sb.append("预计总价:¥${MoneyUtil.format(r.totalCents)}").append(LINE_SEP)
+        sb.append("施工方报价:¥${MoneyUtil.format(r.totalCents)}").append(LINE_SEP)
         if (s.selfMainCents > 0) {
-            sb.append("自购另计:¥${MoneyUtil.format(s.selfMainCents)}(不计入总价)").append(LINE_SEP)
+            sb.append("自购预计:¥${MoneyUtil.format(s.selfMainCents)}(不计入施工方报价)").append(LINE_SEP)
         }
+        sb.append("本方案合计:¥${MoneyUtil.format(r.estimatedTotalCents)}").append(LINE_SEP)
         if (r.overBudget) {
             sb.append("超出预算:¥${MoneyUtil.format(r.overBudgetCents)}").append(LINE_SEP)
         } else {

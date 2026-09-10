@@ -37,6 +37,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import com.renovation.guardian.ui.components.OperationFeedback
+import com.renovation.guardian.ui.components.DatePickerField
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,14 +65,23 @@ import com.renovation.guardian.ui.components.SectionCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StagesScreen() {
+fun StagesScreen(initialStageId: String? = null) {
     val vm: StagesViewModel = viewModel()
     val stages by vm.stages.collectAsState(initial = emptyList())
     val progress by vm.progress.collectAsState(initial = emptyList())
-    var expandedId by remember { mutableStateOf<String?>(null) }
+    var expandedId by rememberSaveable { mutableStateOf(initialStageId) }
+    var deleteTemplateId by remember { mutableStateOf<String?>(null) }
+    val host = remember { SnackbarHostState() }
+    OperationFeedback(vm, host)
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(initialStageId, stages) {
+        val index = stages.indexOfFirst { it.id == initialStageId }
+        if (index >= 0) { expandedId = initialStageId; listState.scrollToItem(index) }
+    }
     var deleteCustomTask by remember { mutableStateOf<TaskEntity?>(null) }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(host) },
         topBar = { TopAppBar(title = { Text("装修流程") }) },
     ) { inner ->
         if (stages.isEmpty()) {
@@ -86,6 +103,7 @@ fun StagesScreen() {
             }
         } else {
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize().padding(inner).padding(horizontal = 16.dp).imePadding(),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -110,7 +128,7 @@ fun StagesScreen() {
                             vm = vm,
                             onRequestDeleteCustom = { deleteCustomTask = it },
                             onRequestDeleteTemplate = { templateId ->
-                                vm.deleteTemplate(templateId)
+                                deleteTemplateId = templateId
                             },
                             defaultTemplateCount = vm.defaultTemplateCount(stage.id),
                         )
@@ -120,6 +138,8 @@ fun StagesScreen() {
         }
     }
 
+    deleteTemplateId?.let { id -> ConfirmDeleteDialog(title = "删除任务",
+        onConfirm = { vm.deleteTemplate(id); deleteTemplateId = null }, onDismiss = { deleteTemplateId = null }) }
     deleteCustomTask?.let { task ->
         ConfirmDeleteDialog(
             title = "删除任务",
@@ -187,8 +207,10 @@ private fun StageDetailContent(
     defaultTemplateCount: Int,
 ) {
     var newTask by remember { mutableStateOf("") }
-    var editTemplate by remember { mutableStateOf<TemplateTaskUi?>(null) }
-    var editCustom by remember { mutableStateOf<TaskEntity?>(null) }
+    var editTemplateId by rememberSaveable { mutableStateOf<String?>(null) }
+    val editTemplate = detail.templates.firstOrNull { it.id == editTemplateId }
+    var editCustomId by rememberSaveable { mutableStateOf<String?>(null) }
+    val editCustom = detail.customTasks.firstOrNull { it.id == editCustomId }
     var showRestoreConfirm by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -246,7 +268,7 @@ private fun StageDetailContent(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { editTemplate = t }
+                                .clickable { editTemplateId = t.id }
                                 .padding(vertical = 6.dp),
                         ) {
                             Checkbox(checked = t.done, onCheckedChange = { vm.toggleTemplate(t.id, it) })
@@ -271,7 +293,7 @@ private fun StageDetailContent(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { editCustom = c }
+                                .clickable { editCustomId = c.id }
                                 .padding(vertical = 6.dp),
                         ) {
                             Checkbox(checked = c.done, onCheckedChange = { vm.toggleCustom(c.id, it) })
@@ -289,7 +311,7 @@ private fun StageDetailContent(
                 ) {
                     TextButton(
                         onClick = { showRestoreConfirm = true },
-                        enabled = detail.templates.size < defaultTemplateCount,
+                        enabled = defaultTemplateCount > 0,
                     ) {
                         Icon(
                             Icons.Filled.Refresh,
@@ -315,8 +337,7 @@ private fun StageDetailContent(
                         keyboardActions = KeyboardActions(
                             onDone = {
                                 if (newTask.isNotBlank()) {
-                                    vm.addCustom(detail.stage.id, newTask)
-                                    newTask = ""
+                                    vm.addCustom(detail.stage.id, newTask) { newTask = "" }
                                 }
                             },
                         ),
@@ -324,8 +345,7 @@ private fun StageDetailContent(
                     IconButton(
                         onClick = {
                             if (newTask.isNotBlank()) {
-                                vm.addCustom(detail.stage.id, newTask)
-                                newTask = ""
+                                vm.addCustom(detail.stage.id, newTask) { newTask = "" }
                             }
                         },
                         enabled = newTask.isNotBlank(),
@@ -371,10 +391,10 @@ private fun StageDetailContent(
         TaskEditDialog(
             initialText = t.text,
             initialNote = t.tip,
-            onDismiss = { editTemplate = null },
-            onSave = { text, note ->
-                vm.updateTemplateText(t.id, text, note)
-                editTemplate = null
+            initialDate = t.dueDate,
+            onDismiss = { editTemplateId = null },
+            onSave = { text, note, date ->
+                vm.saveTask(t.id, text, note, date, true) { editTemplateId = null }
             },
         )
     }
@@ -383,10 +403,10 @@ private fun StageDetailContent(
         TaskEditDialog(
             initialText = c.text,
             initialNote = c.tip,
-            onDismiss = { editCustom = null },
-            onSave = { text, note ->
-                vm.updateCustom(c.id, text, note)
-                editCustom = null
+            initialDate = c.dueDate,
+            onDismiss = { editCustomId = null },
+            onSave = { text, note, date ->
+                vm.saveTask(c.id, text, note, date, false) { editCustomId = null }
             },
         )
     }
@@ -397,7 +417,7 @@ private fun StageDetailContent(
             title = { Text("恢复默认清单") },
             text = {
                 Text(
-                    "将清空本阶段全部任务并恢复为默认清单（共 $defaultTemplateCount 项），已添加的自定义任务不受影响。确定恢复吗？",
+                    "将还原本阶段的内置任务清单（共 $defaultTemplateCount 项），已添加的自定义任务不受影响。确定恢复吗？",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             },
@@ -420,22 +440,25 @@ private fun StageDetailContent(
 private fun TaskEditDialog(
     initialText: String,
     initialNote: String?,
+    initialDate: String?,
     onDismiss: () -> Unit,
-    onSave: (String, String?) -> Unit,
+    onSave: (String, String?, String?) -> Unit,
 ) {
-    var text by remember(initialText) { mutableStateOf(initialText) }
-    var note by remember(initialNote) { mutableStateOf(initialNote ?: "") }
+    var text by rememberSaveable(initialText) { mutableStateOf(initialText) }
+    var note by rememberSaveable(initialNote) { mutableStateOf(initialNote ?: "") }
+    var date by rememberSaveable(initialDate) { mutableStateOf(initialDate) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("编辑任务") },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState()).imePadding()) {
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
                     label = { Text("任务内容") },
                     modifier = Modifier.fillMaxWidth(),
                 )
+                DatePickerField(value = date, onDateSelected = { date = it }, label = "截止日期（可选）", onClear = { date = null })
                 Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
                     value = note,
@@ -448,7 +471,7 @@ private fun TaskEditDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onSave(text.trim(), note.trim().ifBlank { null }) },
+                onClick = { onSave(text.trim(), note.trim().ifBlank { null }, date) },
                 enabled = text.isNotBlank(),
             ) { Text("保存") }
         },

@@ -22,7 +22,9 @@ class KnowledgeCache(private val context: Context) {
     @Volatile var decoboxRequirements: DecoboxRequirementsJson? = null
         private set
 
+    @Synchronized
     fun load() {
+        if (knowledge != null && prices != null && decoboxCatalog != null && decoboxRequirements != null) return
         val json = Json {
             ignoreUnknownKeys = true
             prettyPrint = false

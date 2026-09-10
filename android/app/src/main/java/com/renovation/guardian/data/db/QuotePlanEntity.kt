@@ -1,5 +1,7 @@
 package com.renovation.guardian.data.db
 
+import kotlinx.serialization.Serializable
+
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -9,6 +11,7 @@ import androidx.room.PrimaryKey
  * 结构演进不受 schema 约束(第一版无跨方案查询需求,见 PRD ADR)。
  */
 @Entity(tableName = "quote_plan")
+@Serializable
 data class QuotePlanEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "name") val name: String,
@@ -21,6 +24,7 @@ data class QuotePlanEntity(
 
 /** 需求规划当前状态(单行表,id 恒为 1)。 */
 @Entity(tableName = "planner_state")
+@Serializable
 data class PlannerStateEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: Int = SINGLE_ROW_ID,
     @ColumnInfo(name = "state_json") val stateJson: String,

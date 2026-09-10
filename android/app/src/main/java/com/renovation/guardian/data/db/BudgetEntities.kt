@@ -1,11 +1,14 @@
 package com.renovation.guardian.data.db
 
+import kotlinx.serialization.Serializable
+
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /** 预算分类。`planned_cents` 用分（cents）。 */
 @Entity(tableName = "budget_category")
+@Serializable
 data class BudgetCategoryEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "name") val name: String,
@@ -18,6 +21,7 @@ data class BudgetCategoryEntity(
 
 /** 支出条目。`amount_cents` 用分（cents）。 */
 @Entity(tableName = "expense")
+@Serializable
 data class ExpenseEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "name") val name: String,

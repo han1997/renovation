@@ -1,5 +1,7 @@
 package com.renovation.guardian.data.db
 
+import kotlinx.serialization.Serializable
+
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -14,6 +16,7 @@ import androidx.room.PrimaryKey
     tableName = "house_profile",
     primaryKeys = ["id"],
 )
+@Serializable
 data class HouseProfileEntity(
     @ColumnInfo(name = "id") val id: Int = SINGLE_ROW_ID,
     @ColumnInfo(name = "area_m2") val areaM2: Double,

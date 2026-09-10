@@ -6,6 +6,7 @@ import com.renovation.guardian.data.db.QuotePlanEntity
 import com.renovation.guardian.data.db.BudgetCategoryEntity
 import com.renovation.guardian.util.IdGen
 import kotlinx.coroutines.flow.Flow
+import androidx.room.withTransaction
 
 /**
  * decobox 逐空间报价方案 + 需求规划状态的持久化(JSON blob 存 Room,见 PRD ADR)。
@@ -32,9 +33,9 @@ class QuotePlanRepository(private val db: AppDatabase) {
         return plan
     }
 
-    suspend fun updatePlanState(id: String, stateJson: String, updatedAt: String) {
-        val plan = db.quotePlanDao().getById(id) ?: return
-        db.quotePlanDao().upsert(plan.copy(stateJson = stateJson, updatedAt = updatedAt))
+    suspend fun updatePlanState(id: String, stateJson: String, updatedAt: String, name: String? = null, mode: String? = null) {
+        val plan = requireNotNull(db.quotePlanDao().getById(id)) { "方案已不存在" }
+        db.quotePlanDao().upsert(plan.copy(stateJson = stateJson, updatedAt = updatedAt, name = name ?: plan.name, mode = mode ?: plan.mode))
     }
 
     suspend fun deletePlan(id: String) {
@@ -61,18 +62,27 @@ class QuotePlanRepository(private val db: AppDatabase) {
      * - 覆盖 `budget_category.planned_cents`,总预算同步为清单总价;
      * - 已有支出不动。
      */
-    suspend fun writeQuoteToBudget(
-        categoryCents: Map<String, Long>,
-        totalCents: Long,
-    ) {
-        db.budgetCategoryDao().upsertAll(
-            categoryCents.map { (id, cents) ->
-                val cat = db.budgetCategoryDao().getById(id)
-                if (cat != null) cat.copy(plannedCents = cents) else null
-            }.filterNotNull(),
-        )
-        val profile = db.houseProfileDao().get() ?: return
-        db.houseProfileDao().upsert(profile.copy(totalBudgetCents = totalCents))
+    suspend fun applyBudgetPreview(preview: BudgetApplyPreview) = db.withTransaction {
+        require(preview.changes.isNotEmpty()) { "请先选择目标分类" }
+        require(preview.changes.map { it.categoryId }.distinct().size == preview.changes.size)
+        val total = preview.changes.fold(0L) { sum, c -> Math.addExact(sum, c.afterCents) }
+        require(total == preview.estimatedTotalCents) { "分类金额与清单合计不一致" }
+        val updates = preview.changes.map { change ->
+            require(change.afterCents >= 0)
+            val category = requireNotNull(db.budgetCategoryDao().getById(change.categoryId)) { "分类已被删除，请重新预览" }
+            check(category.plannedCents == change.beforeCents || category.plannedCents == change.afterCents) { "预算已变化，请重新预览" }
+            category.copy(plannedCents = change.afterCents)
+        }
+        val updatedIds = updates.map { it.id }.toSet()
+        (db.budgetCategoryDao().listAll().filterNot { it.id in updatedIds } + updates).fold(0L) { sum, c -> Math.addExact(sum, c.plannedCents) }
+        db.budgetCategoryDao().upsertAll(updates)
+        // 房屋上限与历史支出绝不在此修改。
+    }
+
+    suspend fun renamePlan(id: String, name: String, today: String) {
+        require(name.isNotBlank()) { "请填写方案名称" }
+        val plan = requireNotNull(db.quotePlanDao().getById(id)) { "方案已不存在" }
+        db.quotePlanDao().upsert(plan.copy(name = name.trim(), updatedAt = today))
     }
 
     suspend fun listBudgetCategories(): List<BudgetCategoryEntity> = db.budgetCategoryDao().listAll()

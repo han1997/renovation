@@ -20,7 +20,7 @@
 |----|------|------|
 | `house_profile` | `HouseProfileEntity` | 房屋信息，单行（`id` 固定 `1`） |
 | `stage` | `StageEntity` | 14 阶段目录（种子） |
-| `task_template` | `TaskTemplateEntity` | 内置模板任务（种子） |
+| `task_template` | `TaskTemplateEntity` | 初始模板及用户新增/修改的阶段任务（可变） |
 | `task_completion` | `TaskCompletionEntity` | 模板任务勾选 / 日期 |
 | `task` | `TaskEntity` | 用户任务（自建 `CUSTOM` / 派生 `DERIVED_FROM_SPACE`） |
 | `stage_override` | `StageOverrideEntity` | 整段完成覆盖 |
@@ -51,7 +51,7 @@
 - `budget_category.planned_cents`、`expense.amount_cents`、`house_profile.total_budget_cents`。
 - 换算统一走 `util/MoneyUtil.kt`（`fromYuan` / `toYuan` / `format` / `formatFull`）。
 - Repository 层对外接口可用元（`Double`），内部写入前必须 `MoneyUtil.fromYuan` 折算。
-- JSON 备份沿用 Web 语义用元（float），导入用 `MoneyUtil.fromYuan` 写 cents（见 `ImportExportRepository`）。
+- Android 备份 v2 使用整数分；v1 元金额仅作读取兼容。完整契约见 [全 App 数据与交互契约](./app-polish-contracts.md)。
 
 ## 知识数据 assets
 
@@ -67,8 +67,8 @@
 ## 启动装载与种子
 
 1. `RenovationApp` 持有 `KnowledgeCache`，`onCreate` 中调用 `load()` 一次性解析两个 assets。
-2. `KnowledgeSeeder`（`data/knowledge/KnowledgeSeeder.kt`）负责把「目录数据」（阶段 / 模板任务 / 验收清单）写入 Room，属只读种子，不清除。
-3. 用户数据不清除种子；`AppContainer.clearAllData()` 只清除用户表，保留只读种子表。
+2. `KnowledgeSeeder` 在事务中初始化阶段、初始任务与验收目录。阶段/验收目录只读，任务模板可由用户增删改。
+3. `AppContainer.clearAllData()` 清除用户数据并恢复默认任务，保留阶段/验收目录；不删除外部文件。已初始化的空任务表不自动重新播种。
 
 > **Warning（回归防护）**：`seedIfEmpty` **必须在 `RenovationApp.onCreate` 启动链路被调用**（应用级 `CoroutineScope(SupervisorJob() + Dispatchers.Default)` 异步执行，不用 GlobalScope）。该函数静默幂等（种子表 count>0 即跳过），但若无人调用，`stage` / `task_template` / `checklist` 三张种子表永远为空，流程页完全空白且**无任何报错**——移植 / 重构启动链路时极易遗漏（曾实际发生，见任务 `09-05-fix-stage-seed`）。
 >
@@ -76,7 +76,7 @@
 
 ## 导入 / 导出
 
-- `ImportExportRepository`（`data/repo/ImportExportRepository.kt`）：
-  - `exportJson()` 导出为与 Web `Store.state` 对齐的 JSON（`profile` / `tasksDone` / `taskDates` / `customTasks` / `stageOverride` / `budgetCategories` / `expenses` / `checks` / `notes` / `contacts` / `spaces`）。
-  - `importJson()` 在**单个 `withTransaction`** 内先清空用户表再重插，保证原子性；失败返回 `ImportResult(success=false, error=...)`。
-- CSV 导出：`ui/budget/Csv.kt` 的纯函数 `buildCsv(rows)` 拼 CSV（含表头、金额换算为元、字段转义）；落盘走平台 SAF（`CreateDocument`），不在本层。
+- `exportJson()`：Room v3 完整一致性快照，备份格式 v2，金额为分；包含可变任务模板、完成/日期、报价和规划。
+- `prepareImport()`：识别 v1/v2 并校验，供 UI 预览确认；`restore()`：单事务替换，失败回滚。
+- v1 缺失模块保留，未知版本/空对象/非法引用拒绝；细则见 [全 App 契约](./app-polish-contracts.md)。
+- CSV 仍走 `ui/budget/Csv.kt`，SAF IO 由 `ui/nav/ExportActions.kt` 负责。

@@ -98,8 +98,14 @@ interface ExpenseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(expense: ExpenseEntity)
 
+    @Query("SELECT COALESCE(SUM(amount_cents), 0) FROM expense WHERE id != :exceptId")
+    suspend fun totalExcept(exceptId: String): Long
+
     @Query("SELECT * FROM expense WHERE id = :id LIMIT 1")
     suspend fun getById(id: String): ExpenseEntity?
+
+    @Query("SELECT * FROM expense WHERE id = :id LIMIT 1")
+    fun observeById(id: String): Flow<ExpenseEntity?>
 
     @Query("DELETE FROM expense WHERE id = :id")
     suspend fun deleteById(id: String)

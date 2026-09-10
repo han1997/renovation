@@ -1,4 +1,4 @@
-package com.renovation.guardian.ui.planner.engine
+package com.renovation.guardian.domain.planner
 
 import kotlinx.serialization.Serializable
 
@@ -54,5 +54,5 @@ data class PlannerState(
 data class PlannerLine(
     val roomName: String,
     val itemName: String,
-    val importance: Importance,
+    val importance: Importance?,
 )

@@ -1,5 +1,7 @@
 package com.renovation.guardian.data.db
 
+import kotlinx.serialization.Serializable
+
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -13,6 +15,7 @@ import androidx.room.PrimaryKey
  * - 日期为 `yyyy-MM-dd` 字符串，与全库约定一致。
  */
 @Entity(tableName = "quick_note")
+@Serializable
 data class QuickNoteEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "content") val content: String,

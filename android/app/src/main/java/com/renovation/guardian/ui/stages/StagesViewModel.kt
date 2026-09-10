@@ -20,6 +20,7 @@ data class TemplateTaskUi(
     val text: String,
     val tip: String?,
     val done: Boolean,
+    val dueDate: String? = null,
 )
 
 data class ChecklistGroupUi(
@@ -38,6 +39,7 @@ data class StageDetailUi(
     val checklists: List<ChecklistGroupUi>,
 )
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class StagesViewModel(application: Application) : AppViewModel(application) {
 
     private val today: String get() = container.todayProvider()
@@ -58,7 +60,7 @@ class StagesViewModel(application: Application) : AppViewModel(application) {
                     combine(
                         list.map { t ->
                             container.taskRepo.observeTemplateCompletion(t.id)
-                                .map { c -> TemplateTaskUi(t.id, t.text, t.tip, c?.done ?: false) }
+                                .map { c -> TemplateTaskUi(t.id, t.text, t.tip, c?.done ?: false, c?.dueDate) }
                         },
                     ) { arr -> arr.toList() }
                 }
@@ -71,7 +73,7 @@ class StagesViewModel(application: Application) : AppViewModel(application) {
                 combine(
                     acceptIds.map { id ->
                         container.checklistRepo.observeItems(id).map { items ->
-                            val meta = container.knowledge?.knowledge?.checklists?.firstOrNull { it.id == id }
+                            val meta = container.knowledge.knowledge?.checklists?.firstOrNull { it.id == id }
                             ChecklistGroupUi(id, meta?.name ?: id, meta?.emoji ?: "✅", items)
                         }
                     },
@@ -84,39 +86,42 @@ class StagesViewModel(application: Application) : AppViewModel(application) {
     }
 
     fun toggleTemplate(templateId: String, done: Boolean) {
-        viewModelScope.launch { container.taskRepo.setTemplateDone(templateId, done, today) }
+        perform { container.taskRepo.setTemplateDone(templateId, done, today) }
     }
 
     fun toggleCustom(taskId: String, done: Boolean) {
-        viewModelScope.launch { container.taskRepo.setCustomTaskDone(taskId, done, today) }
+        perform { container.taskRepo.setCustomTaskDone(taskId, done, today) }
     }
 
-    fun addCustom(stageId: String, text: String) {
+    fun addCustom(stageId: String, text: String, onSaved: () -> Unit = {}) {
         if (text.isBlank()) return
-        viewModelScope.launch { container.taskRepo.addTaskToStage(stageId, text) }
+        perform(onSuccess = onSaved, singleFlight = true) { container.taskRepo.addTaskToStage(stageId, text) }
     }
 
     fun deleteCustom(taskId: String) {
-        viewModelScope.launch { container.taskRepo.deleteCustom(taskId) }
+        perform("已删除") { container.taskRepo.deleteCustom(taskId) }
     }
 
     fun deleteTemplate(templateId: String) {
-        viewModelScope.launch { container.taskRepo.deleteTask(templateId, isTemplate = true) }
+        perform("已删除") { container.taskRepo.deleteTask(templateId, isTemplate = true) }
     }
 
     fun updateTemplateText(templateId: String, text: String, note: String?) {
-        viewModelScope.launch { container.taskRepo.updateTaskText(templateId, text, note, isTemplate = true) }
+        perform { container.taskRepo.updateTaskText(templateId, text, note, isTemplate = true) }
     }
 
     fun updateCustom(taskId: String, text: String, note: String?) {
-        viewModelScope.launch { container.taskRepo.updateTaskText(taskId, text, note, isTemplate = false) }
+        perform { container.taskRepo.updateTaskText(taskId, text, note, isTemplate = false) }
     }
+
+    fun saveTask(id: String, text: String, note: String?, date: String?, template: Boolean, onSaved: () -> Unit) =
+        perform(onSuccess = onSaved, singleFlight = true) { container.taskRepo.saveTask(id, text, note, date, template) }
 
     /** 恢复指定阶段的默认任务清单（从 assets/knowledge.json 重新写入）。 */
     fun restoreDefaultTasks(stageId: String) {
-        viewModelScope.launch {
-            val knowledge = container.knowledge.knowledge ?: return@launch
-            val stage = knowledge.stages.firstOrNull { it.id == stageId } ?: return@launch
+        perform("已恢复默认清单", singleFlight = true) {
+            val knowledge = container.knowledge.knowledge ?: return@perform
+            val stage = knowledge.stages.firstOrNull { it.id == stageId } ?: return@perform
             val templates = stage.tasks.mapIndexed { idx, t ->
                 TaskTemplateEntity(
                     id = t.id,
@@ -135,6 +140,6 @@ class StagesViewModel(application: Application) : AppViewModel(application) {
         container.knowledge.knowledge?.stages?.firstOrNull { it.id == stageId }?.tasks?.size ?: 0
 
     fun toggleChecklistItem(itemId: String, done: Boolean) {
-        viewModelScope.launch { container.checklistRepo.setChecked(itemId, done, today) }
+        perform { container.checklistRepo.setChecked(itemId, done, today) }
     }
 }

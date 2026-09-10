@@ -1,0 +1,50 @@
+{
+  "id": "android-app-polish",
+  "name": "android-app-polish",
+  "title": "Android 全 App UI、功能与逻辑完善",
+  "description": "Android 全 App 原生 UI 精修、完整报价/需求规划、金额与备份安全、导航及执行反馈完善。",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": "android",
+  "package": null,
+  "priority": "P2",
+  "creator": "han1997",
+  "assignee": "han1997",
+  "createdAt": "2026-09-10",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "android/app/src/main/java/com/renovation/guardian/domain",
+    "android/app/src/main/java/com/renovation/guardian/ui",
+    "android/app/src/main/java/com/renovation/guardian/data",
+    "android/app/src/test",
+    "android/app/src/androidTest",
+    ".trellis/spec/android/app-polish-contracts.md"
+  ],
+  "notes": "实现完成；75 项 JVM/Compose 测试与 API 36 隔离包 5 项仪器测试通过，Lint/构建通过。API 24/31/34/35 和完整人工验收待补，未提交/归档。",
+  "meta": {
+    "verification": {
+      "jvm_tests": 75,
+      "jvm_failures": 0,
+      "device_api": 36,
+      "device_tests": 5,
+      "lint_errors": 0,
+      "lint_warnings": 61,
+      "remaining_device_apis": [
+        24,
+        31,
+        34,
+        35
+      ],
+      "temporary_packages_removed": true,
+      "normal_apk_sha256": "9eef3e92aa334cbaedfe08ee25d285ba39b09d02a9035a043774e16400c55947"
+    }
+  }
+}

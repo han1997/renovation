@@ -1,296 +1,97 @@
 package com.renovation.guardian.ui.onboarding
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.renovation.guardian.R
-import com.renovation.guardian.ui.components.DatePickerField
-import com.renovation.guardian.ui.components.PrimaryButton
-import com.renovation.guardian.ui.components.SectionCard
+import com.renovation.guardian.ui.components.*
+import com.renovation.guardian.util.MoneyUtil
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
+/** 三步设置，共享表单校验，底部操作始终在可见安全区。 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(onFinished: () -> Unit) {
     val vm: OnboardingViewModel = viewModel()
-    var step by remember { mutableStateOf(1) }
-
-    var areaText by remember { mutableStateOf("") }
-    var tierId by remember { mutableStateOf("") }
-    var startDate by remember { mutableStateOf<String?>(null) }
-
-    var modeId by remember { mutableStateOf("") }
-    var gradeId by remember { mutableStateOf("") }
-    var totalText by remember { mutableStateOf("") }
-
-    val scope = rememberCoroutineScope()
+    var step by rememberSaveable { mutableIntStateOf(1) }
+    var area by rememberSaveable { mutableStateOf<Double?>(null) }
+    var tier by rememberSaveable { mutableStateOf("") }
+    var mode by rememberSaveable { mutableStateOf("") }
+    var grade by rememberSaveable { mutableStateOf("") }
+    var date by rememberSaveable { mutableStateOf<String?>(null) }
+    var budget by rememberSaveable { mutableLongStateOf(0L) }
+    var budgetRevision by rememberSaveable { mutableIntStateOf(0) }
     var busy by remember { mutableStateOf(false) }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.wizard_step_label, step, 3)) },
-            )
-        },
-    ) { inner ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(inner).padding(16.dp),
-        ) {
-            when (step) {
-                1 -> Step1(
-                    areaText = areaText,
-                    onArea = { areaText = it },
-                    tierId = tierId,
-                    onTier = { tierId = it },
-                    startDate = startDate,
-                    onDate = { startDate = it },
-                    tiers = vm.tiers,
-                )
-                2 -> Step2(
-                    modeId = modeId,
-                    onMode = { modeId = it },
-                    modes = vm.modes,
-                )
-                3 -> Step3(
-                    gradeId = gradeId,
-                    onGrade = { gradeId = it },
-                    grades = vm.grades,
-                    totalText = totalText,
-                    onTotal = { totalText = it },
-                    suggested = if (modeId.isNotBlank() && gradeId.isNotBlank() && areaText.toDoubleOrNull() != null) {
-                        vm.suggestTotalYuan(areaText.toDouble(), tierId, modeId, gradeId).let { "%.0f".format(it) }
-                    } else null,
-                )
-            }
-
-            Spacer(Modifier.weight(1f))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (step > 1) {
-                    TextButton(onClick = { step-- }) { Text(stringResource(R.string.wizard_back)) }
-                } else {
-                    TextButton(
-                        onClick = {
-                            scope.launch {
-                                busy = true
-                                vm.finish(90.0, "t2", "clear", "mid", null, vm.suggestTotalYuan(90.0, "t2", "clear", "mid"))
-                                busy = false
-                                onFinished()
-                            }
-                        },
-                    ) { Text(stringResource(R.string.wizard_skip)) }
-                }
-
-                PrimaryButton(
-                    text = if (step < 3) stringResource(R.string.wizard_next) else stringResource(R.string.wizard_finish),
-                    onClick = {
+    val form = remember(step) { FormState() }
+    val host = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    fun save(defaults: Boolean) {
+        if (busy) return
+        busy = true
+        scope.launch {
+            try {
+                if (defaults) vm.finishCents(90.0, "t2", "clear", "mid", null, MoneyUtil.fromYuan(vm.suggestTotalYuan(90.0, "t2", "clear", "mid")))
+                else vm.finishCents(requireNotNull(area), tier, mode, grade, date, budget)
+                onFinished()
+            } catch (e: CancellationException) { throw e }
+            catch (_: Exception) { host.showSnackbar("保存失败，输入已保留，请重试") }
+            finally { busy = false }
+        }
+    }
+    val valid = form.valid && when (step) {
+        1 -> area != null && tier.isNotBlank()
+        2 -> mode.isNotBlank()
+        else -> grade.isNotBlank()
+    }
+    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.wizard_step_label, step, 3)) }) },
+        snackbarHost = { SnackbarHost(host) }) { padding ->
+        Column(Modifier.fillMaxSize().padding(padding).imePadding()) {
+            key(step) {
+                CompositionLocalProvider(LocalFormState provides form) {
+                    Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         when (step) {
-                            1 -> if (areaText.toDoubleOrNull() != null && tierId.isNotBlank()) step = 2
-                            2 -> if (modeId.isNotBlank()) step = 3
-                            3 -> {
-                                val area = areaText.toDoubleOrNull() ?: 0.0
-                                val total = totalText.toDoubleOrNull() ?: 0.0
-                                if (area > 0 && gradeId.isNotBlank() && total >= 0) {
-                                    scope.launch {
-                                        busy = true
-                                        vm.finish(area, tierId, modeId, gradeId, startDate, total)
-                                        busy = false
-                                        onFinished()
-                                    }
+                            1 -> {
+                                Text("你家的基本情况", style = MaterialTheme.typography.titleLarge)
+                                Text("用于预算参考和装修计划，所有数据保存在本机。")
+                                NumberField("建筑面积（㎡）", area) { area = it }
+                                ChoiceField("城市能级", tier, vm.tiers.map { it.id to it.name }) { tier = it }
+                                DatePickerField(date, { date = it }, "计划开工日期（可选）", onClear = { date = null })
+                            }
+                            2 -> {
+                                Text("装修方式", style = MaterialTheme.typography.titleLarge)
+                                ChoiceField("选择装修方式", mode, vm.modes.map { it.id to it.name }) { mode = it }
+                                vm.modes.firstOrNull { it.id == mode }?.let { Text(it.short) }
+                                Text("用于生成初始预算分类；已有支出不会因后续设置变化而被删除。", style = MaterialTheme.typography.bodySmall)
+                            }
+                            else -> {
+                                Text("档次与预算上限", style = MaterialTheme.typography.titleLarge)
+                                ChoiceField("装修档次", grade, vm.grades.map { it.id to it.name }) { grade = it }
+                                if (grade.isNotBlank()) {
+                                    val recommended = MoneyUtil.fromYuan(vm.suggestTotalYuan(area!!, tier, mode, grade))
+                                    Text("参考预算 ¥${MoneyUtil.formatFull(recommended)}")
+                                    OutlinedButton(onClick = { budget = recommended; budgetRevision++ }) { Text("采用参考预算") }
                                 }
+                                key(budgetRevision) { MoneyField("总预算上限（元）", budget) { budget = it } }
+                                Text("这是你的支出上限，不会因应用报价而自动改动，可在房屋设置中修改。", style = MaterialTheme.typography.bodySmall)
                             }
                         }
-                    },
-                    modifier = Modifier.weight(1f).padding(start = 12.dp),
-                    enabled = !busy,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun Step1(
-    areaText: String,
-    onArea: (String) -> Unit,
-    tierId: String,
-    onTier: (String) -> Unit,
-    startDate: String?,
-    onDate: (String) -> Unit,
-    tiers: List<com.renovation.guardian.data.knowledge.TierJson>,
-) {
-    Column {
-        Text("你家的基本情况", style = MaterialTheme.typography.titleLarge)
-        Text("用来推算装修周期与预算范围。", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.size(12.dp))
-        OutlinedTextField(
-            value = areaText,
-            onValueChange = onArea,
-            label = { Text("建筑面积（㎡）") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.size(12.dp))
-        Text("所在城市能级", style = MaterialTheme.typography.titleSmall)
-        LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, fill = false)) {
-            items(tiers) { t ->
-                SelectableCard(
-                    selected = tierId == t.id,
-                    title = t.name,
-                    subtitle = null,
-                    emoji = "🏙️",
-                    onClick = { onTier(t.id) },
-                )
-            }
-        }
-        Spacer(Modifier.size(12.dp))
-        DatePickerField(value = startDate, onDateSelected = onDate, label = "计划开工日期（可选）")
-    }
-}
-
-@Composable
-private fun Step2(
-    modeId: String,
-    onMode: (String) -> Unit,
-    modes: List<com.renovation.guardian.data.knowledge.ModeJson>,
-) {
-    Column {
-        Text("装修方式", style = MaterialTheme.typography.titleLarge)
-        Text("决定预算模板如何切分。", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.size(12.dp))
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            modes.forEach { m ->
-                SelectableCard(
-                    selected = modeId == m.id,
-                    title = "${m.emoji} ${m.name}",
-                    subtitle = m.short,
-                    emoji = null,
-                    onClick = { onMode(m.id) },
-                )
-                Spacer(Modifier.size(8.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun Step3(
-    gradeId: String,
-    onGrade: (String) -> Unit,
-    grades: List<com.renovation.guardian.data.knowledge.GradeJson>,
-    totalText: String,
-    onTotal: (String) -> Unit,
-    suggested: String?,
-) {
-    Column {
-        Text("装修档次与总预算", style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.size(12.dp))
-        grades.forEach { g ->
-            SelectableCard(
-                selected = gradeId == g.id,
-                title = "${g.emoji} ${g.name}",
-                subtitle = g.desc,
-                emoji = null,
-                onClick = { onGrade(g.id) },
-            )
-            Spacer(Modifier.size(8.dp))
-        }
-        Spacer(Modifier.size(12.dp))
-        OutlinedTextField(
-            value = totalText,
-            onValueChange = onTotal,
-            label = { Text("总预算（元）") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        if (suggested != null) {
-            Text(
-                "参考推荐总预算：约 ¥$suggested（可在我的页修改）",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun SelectableCard(
-    selected: Boolean,
-    title: String,
-    subtitle: String?,
-    emoji: String?,
-    onClick: () -> Unit,
-) {
-    val shape = RoundedCornerShape(14.dp)
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        shape = shape,
-        colors = CardDefaults.cardColors(
-            containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (selected) 2.dp else 1.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (emoji != null) {
-                Text(emoji, style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.size(8.dp))
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.bodyLarge)
-                if (subtitle != null) {
-                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
-            if (selected) {
-                androidx.compose.material3.Icon(
-                    Icons.Filled.CheckCircle,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
+            Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                if (step > 1) OutlinedButton(enabled = !busy, onClick = { step-- }) { Text("上一步") }
+                else TextButton(enabled = !busy, onClick = { save(true) }) { Text("使用默认设置") }
+                Button(enabled = valid && !busy, onClick = { if (step < 3) step++ else save(false) }) {
+                    Text(if (busy) "正在保存…" else if (step < 3) "下一步" else "完成设置")
+                }
             }
         }
     }

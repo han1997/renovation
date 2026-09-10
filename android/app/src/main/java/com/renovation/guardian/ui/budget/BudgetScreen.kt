@@ -1,5 +1,7 @@
 package com.renovation.guardian.ui.budget
 
+import com.renovation.guardian.util.MoneyUtil
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,6 +33,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,14 +68,19 @@ fun BudgetScreen(onOpenQuote: () -> Unit = {}) {
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    var expandedId by remember { mutableStateOf<String?>(null) }
-    var showAddCat by remember { mutableStateOf(false) }
-    var editCat by remember { mutableStateOf<CategoryWithSpent?>(null) }
-    var addExpenseFor by remember { mutableStateOf<String?>(null) }
-    var editExpense by remember { mutableStateOf<ExpenseEntity?>(null) }
+    var expandedId by rememberSaveable { mutableStateOf<String?>(null) }
+    var showAddCat by rememberSaveable { mutableStateOf(false) }
+    var editCatId by rememberSaveable { mutableStateOf<String?>(null) }
+    val editCat = categories.firstOrNull { it.id == editCatId }
+    var addExpenseFor by rememberSaveable { mutableStateOf<String?>(null) }
+    var editExpenseId by rememberSaveable { mutableStateOf<String?>(null) }
+    val expenseFlow = remember(editExpenseId) { editExpenseId?.let(vm::observeExpense) ?: kotlinx.coroutines.flow.flowOf(null) }
+    val editExpense by expenseFlow.collectAsState(initial = null)
     var deleteCatId by remember { mutableStateOf<String?>(null) }
     var deleteExpense by remember { mutableStateOf<ExpenseEntity?>(null) }
 
+    val profile by vm.profile.collectAsState(initial = null)
+    com.renovation.guardian.ui.components.OperationFeedback(vm, snackbar)
     val totalPlanned = categories.sumOf { it.plannedCents }
     val totalSpent = categories.sumOf { it.spentCents }
     val totalOver = categories.sumOf { it.overCents }
@@ -84,7 +92,7 @@ fun BudgetScreen(onOpenQuote: () -> Unit = {}) {
                 actions = {
                     IconButton(onClick = {
                         exportActions.exportCsv("renovation-budget.csv", buildCsv(csvRows))
-                        scope.launch { snackbar.showSnackbar("已开始导出 CSV") }
+
                     }) {
                         Icon(Icons.Filled.Upload, contentDescription = "导出 CSV")
                     }
@@ -126,28 +134,19 @@ fun BudgetScreen(onOpenQuote: () -> Unit = {}) {
             item {
                 SectionCard {
                     Column {
-                        Text("总览", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Column {
-                                Text("预算", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                MoneyText(totalPlanned, style = MaterialTheme.typography.bodyLarge)
-                            }
-                            Column {
-                                Text("已支出", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                MoneyText(totalSpent, style = MaterialTheme.typography.bodyLarge)
-                            }
-                            Column {
-                                Text("超支", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                MoneyText(totalOver, color = if (totalOver > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
-                            }
-                        }
+                        Text("总预算上限 ¥${MoneyUtil.formatFull(profile?.totalBudgetCents ?: 0L)}", style = MaterialTheme.typography.titleMedium)
+                        if (totalSpent > (profile?.totalBudgetCents ?: 0L)) Text("实际支出已超过总预算上限", color = MaterialTheme.colorScheme.error)
+                        if (totalPlanned > (profile?.totalBudgetCents ?: 0L)) Text("分类计划合计超过上限，请检查分配", color = MaterialTheme.colorScheme.error)
+                        com.renovation.guardian.ui.components.MoneyLine("分类计划", totalPlanned)
+                        com.renovation.guardian.ui.components.MoneyLine("实际支出", totalSpent)
                         if (totalOver > 0) {
-                            Text("⚠️ 已超出预算 ¥${com.renovation.guardian.util.MoneyUtil.formatFull(totalOver)}", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 6.dp))
+                            Text("分类超支合计 ¥${com.renovation.guardian.util.MoneyUtil.formatFull(totalOver)}", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 6.dp))
                         }
                     }
                 }
             }
 
+            if (categories.isEmpty()) item { Text("暂无预算分类，点击右下角添加分类，或先生成报价。") }
             items(categories, key = { it.id }) { cat ->
                 val expanded = expandedId == cat.id
                 SectionCard(onClick = { expandedId = if (expanded) null else cat.id }) {
@@ -165,7 +164,7 @@ fun BudgetScreen(onOpenQuote: () -> Unit = {}) {
                         BudgetProgressBar(cat.pct, cat.overCents, modifier = Modifier.padding(top = 8.dp))
                         Row(modifier = Modifier.padding(top = 4.dp)) {
                             TextButton(onClick = { addExpenseFor = cat.id }) { Text("+ 支出") }
-                            TextButton(onClick = { editCat = cat }) { Text("编辑") }
+                            TextButton(onClick = { editCatId = cat.id }) { Text("编辑") }
                             TextButton(onClick = { deleteCatId = cat.id }) { Text("删除") }
                         }
                     }
@@ -184,7 +183,7 @@ fun BudgetScreen(onOpenQuote: () -> Unit = {}) {
                                         Text(ex.name, style = MaterialTheme.typography.bodyMedium)
                                         Text("${DateUtil.formatCN(ex.date)}  ·  ¥${com.renovation.guardian.util.MoneyUtil.formatFull(ex.amountCents)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
-                                    IconButton(onClick = { editExpense = ex }) { Icon(Icons.Filled.Edit, contentDescription = "编辑", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                                    IconButton(onClick = { editExpenseId = ex.id }) { Icon(Icons.Filled.Edit, contentDescription = "编辑", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                                     IconButton(onClick = { deleteExpense = ex }) { Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error) }
                                 }
                             }
@@ -197,30 +196,26 @@ fun BudgetScreen(onOpenQuote: () -> Unit = {}) {
 
     if (showAddCat) {
         CategoryDialog(initial = null, onDismiss = { showAddCat = false }) { name, emoji, planned ->
-            vm.addCategory(name, emoji, planned)
-            showAddCat = false
-            scope.launch { snackbar.showSnackbar("已保存") }
+            vm.addCategoryCents(name, emoji, planned) { showAddCat = false }
+
         }
     }
     editCat?.let { c ->
-        CategoryDialog(initial = c, onDismiss = { editCat = null }) { name, emoji, planned ->
-            vm.updateCategory(c.id, name, planned)
-            editCat = null
-            scope.launch { snackbar.showSnackbar("已保存") }
+        CategoryDialog(initial = c, onDismiss = { editCatId = null }) { name, emoji, planned ->
+            vm.updateCategoryCents(c.id, name, planned) { editCatId = null }
+
         }
     }
     addExpenseFor?.let { cid ->
-        ExpenseDialog(initial = null, categoryId = cid, onDismiss = { addExpenseFor = null }) { name, amount, catId, date, note ->
-            vm.addExpense(name, amount, catId, date, note)
-            addExpenseFor = null
-            scope.launch { snackbar.showSnackbar("已记录 ¥${com.renovation.guardian.util.MoneyUtil.formatFull(com.renovation.guardian.util.MoneyUtil.fromYuan(amount))}") }
+        ExpenseDialog(initial = null, categoryId = cid, today = vm.today(), onDismiss = { addExpenseFor = null }) { name, amount, catId, date, note ->
+            vm.addExpenseCents(name, amount, catId, date, note) { addExpenseFor = null }
+
         }
     }
     editExpense?.let { ex ->
-        ExpenseDialog(initial = ex, categoryId = ex.categoryId, onDismiss = { editExpense = null }) { name, amount, catId, date, note ->
-            vm.updateExpense(ex.id, name, amount, catId, date, note)
-            editExpense = null
-            scope.launch { snackbar.showSnackbar("已保存") }
+        ExpenseDialog(initial = ex, categoryId = ex.categoryId, today = vm.today(), onDismiss = { editExpenseId = null }) { name, amount, catId, date, note ->
+            vm.updateExpenseCents(ex.id, name, amount, catId, date, note) { editExpenseId = null }
+
         }
     }
     deleteCatId?.let { cid ->
@@ -244,7 +239,7 @@ fun BudgetScreen(onOpenQuote: () -> Unit = {}) {
             onConfirm = {
                 vm.deleteExpense(ex.id)
                 deleteExpense = null
-                scope.launch { snackbar.showSnackbar("已删除") }
+
             },
             onDismiss = { deleteExpense = null },
         )
@@ -255,23 +250,23 @@ fun BudgetScreen(onOpenQuote: () -> Unit = {}) {
 private fun CategoryDialog(
     initial: CategoryWithSpent?,
     onDismiss: () -> Unit,
-    onSave: (name: String, emoji: String, plannedYuan: Double) -> Unit,
+    onSave: (name: String, emoji: String, plannedCents: Long) -> Unit,
 ) {
-    var name by remember { mutableStateOf(initial?.name ?: "") }
-    var emoji by remember { mutableStateOf(initial?.emoji ?: "💰") }
-    var planned by remember { mutableStateOf(initial?.plannedCents?.let { (it / 100.0).toString() } ?: "") }
+    var name by rememberSaveable { mutableStateOf(initial?.name ?: "") }
+    var emoji by rememberSaveable { mutableStateOf(initial?.emoji ?: "💰") }
+    var planned by rememberSaveable { mutableStateOf(initial?.plannedCents?.let { MoneyUtil.input(it) } ?: "") }
 
     // 必填校验：名称为空 / 预算非法时给可见错误提示，不静默失败
     val nameError = name.isBlank()
-    val plannedValue = planned.toDoubleOrNull()
-    val plannedError = planned.isNotBlank() && (plannedValue == null || plannedValue < 0)
+    val plannedValue = MoneyUtil.parseYuan(planned)
+    val plannedError = plannedValue == null || plannedValue < 0
     val canSave = name.isNotBlank() && !plannedError
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
-                onClick = { onSave(name.trim(), emoji.ifBlank { "💰" }, plannedValue ?: 0.0) },
+                onClick = { onSave(name.trim(), emoji.ifBlank { "💰" }, plannedValue ?: 0L) },
                 enabled = canSave,
             ) { Text("保存") }
         },
@@ -309,25 +304,26 @@ private fun CategoryDialog(
 private fun ExpenseDialog(
     initial: ExpenseEntity?,
     categoryId: String,
+    today: String,
     onDismiss: () -> Unit,
-    onSave: (name: String, amountYuan: Double, categoryId: String, date: String, note: String?) -> Unit,
+    onSave: (name: String, amountCents: Long, categoryId: String, date: String, note: String?) -> Unit,
 ) {
-    var name by remember { mutableStateOf(initial?.name ?: "") }
-    var amount by remember { mutableStateOf(initial?.amountCents?.let { java.lang.String.format(java.util.Locale.ROOT, "%.2f", it / 100.0) } ?: "") }
-    var note by remember { mutableStateOf(initial?.note ?: "") }
-    var date by remember { mutableStateOf(initial?.date ?: DateUtil.today()) }
+    var name by rememberSaveable { mutableStateOf(initial?.name ?: "") }
+    var amount by rememberSaveable { mutableStateOf(initial?.amountCents?.let { MoneyUtil.input(it) } ?: "") }
+    var note by rememberSaveable { mutableStateOf(initial?.note ?: "") }
+    var date by rememberSaveable { mutableStateOf(initial?.date ?: today) }
 
     // 必填校验：项目名 / 金额（> 0）非法时给可见错误提示，不静默失败
     val nameError = name.isBlank()
-    val amountValue = amount.toDoubleOrNull()
-    val amountError = amount.isNotBlank() && (amountValue == null || amountValue <= 0)
+    val amountValue = MoneyUtil.parseYuan(amount)
+    val amountError = amountValue == null || amountValue <= 0
     val canSave = name.isNotBlank() && amountValue != null && amountValue > 0
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
-                onClick = { onSave(name.trim(), amountValue ?: 0.0, categoryId, date, note.ifBlank { null }) },
+                onClick = { onSave(name.trim(), amountValue ?: 0L, categoryId, date, note.ifBlank { null }) },
                 enabled = canSave,
             ) { Text("保存") }
         },

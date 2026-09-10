@@ -44,7 +44,7 @@ class DefaultAppContainer(
     override val noteRepo: NoteRepository by lazy { NoteRepository(db) }
     override val contactRepo: ContactRepository by lazy { ContactRepository(db) }
     override val quickNoteRepo: QuickNoteRepository by lazy { QuickNoteRepository(db) }
-    override val importExportRepo: ImportExportRepository by lazy { ImportExportRepository(db) }
+    override val importExportRepo: ImportExportRepository by lazy { ImportExportRepository(db, knowledge) }
 
     override val todayProvider: () -> String = ::today
 
@@ -62,6 +62,7 @@ class DefaultAppContainer(
             db.quickNoteDao().clearAll()
             db.quotePlanDao().clearAll()
             db.plannerStateDao().clearAll()
+            seeder.restoreTaskTemplates()
         }
     }
 

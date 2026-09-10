@@ -1,171 +1,89 @@
 package com.renovation.guardian.ui.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.renovation.guardian.data.db.StageTaskView
-import com.renovation.guardian.ui.components.MoneyText
-import com.renovation.guardian.ui.components.SectionCard
+import com.renovation.guardian.ui.components.*
 import com.renovation.guardian.util.DateUtil
+import com.renovation.guardian.util.MoneyUtil
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onOpenStage: (String) -> Unit = {}, onOpenBudget: () -> Unit = {}) {
     val vm: HomeViewModel = viewModel()
     val ui by vm.uiState.collectAsState()
     val overdue by vm.overdueTasks.collectAsState(emptyList())
     val today by vm.todayTasks.collectAsState(emptyList())
     val upcoming by vm.upcomingTasks.collectAsState(emptyList())
-
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("装修进行时") }) },
-    ) { inner ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(inner).padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+    val host = remember { SnackbarHostState() }
+    OperationFeedback(vm, host)
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(lifecycle, vm) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { while (true) { vm.refreshDate(); delay(30_000) } }
+    }
+    Scaffold(topBar = { TopAppBar(title = { Text("装修进行时") }) }, snackbarHost = { SnackbarHost(host) }) { padding ->
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding),
+            contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {
-                SectionCard {
-                    Column {
-                        Text("当前阶段", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        // totalTasks == 0 说明种子还没写入（或写入失败），此时不能误报「全部完成 🎉」，
-                        // 给中性占位文案，等 Flow 刷新后自动变为正常展示。
-                        val headline = when {
-                            ui.totalTasks > 0 && ui.currentStageName != null -> "${ui.currentStageEmoji ?: ""} ${ui.currentStageName}"
-                            ui.totalTasks > 0 -> "全部完成 🎉"
-                            else -> "正在准备你的装修计划…"
-                        }
-                        Text(
-                            text = headline,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            LinearProgressIndicator(
-                                progress = { (ui.overallPct / 100f).coerceIn(0f, 1f) },
-                                modifier = Modifier.weight(1f),
-                            )
-                            Text(" ${ui.overallPct}%", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(start = 8.dp))
-                        }
-                        Text(
-                            text = if (ui.totalTasks > 0) "已完成 ${ui.doneTasks} / ${ui.totalTasks} 项任务" else "任务数据加载中，稍等片刻…",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                SectionCard(onClick = { onOpenStage(ui.currentStageId.orEmpty()) }) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("当前阶段", style = MaterialTheme.typography.labelMedium)
+                        Text(when {
+                            ui.currentStageName != null -> "${ui.currentStageEmoji.orEmpty()} ${ui.currentStageName}"
+                            ui.totalTasks > 0 -> "全部完成"
+                            else -> "暂无任务，可添加或恢复默认清单"
+                        }, style = MaterialTheme.typography.titleLarge)
+                        LinearProgressIndicator(progress = { (ui.overallPct / 100f).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
+                        Text("已完成 ${ui.doneTasks} / ${ui.totalTasks} 项任务", style = MaterialTheme.typography.bodySmall)
                     }
                 }
+            }
+            taskGroup("逾期", overdue, vm, onOpenStage)
+            taskGroup("今天", today, vm, onOpenStage)
+            if (overdue.isEmpty() && today.isEmpty()) item {
+                Text("今天没有待办", style = MaterialTheme.typography.titleMedium)
+                TextButton(onClick = { onOpenStage(ui.currentStageId.orEmpty()) }) { Text("到流程页安排任务日期") }
             }
             item {
-                SectionCard {
-                    Column {
-                        Text("预算概览", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Column {
-                                Text("总预算", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                MoneyText(ui.totalPlannedCents, style = MaterialTheme.typography.bodyLarge)
-                            }
-                            Column {
-                                Text("已支出", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                MoneyText(ui.totalSpentCents, style = MaterialTheme.typography.bodyLarge)
-                            }
-                            Column {
-                                Text("超支", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                MoneyText(ui.totalOverCents, color = if (ui.totalOverCents > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
-                            }
-                        }
-                        if (ui.overspentCount > 0) {
-                            Text(
-                                "⚠️ 有 ${ui.overspentCount} 个分类超出预算",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(top = 6.dp),
-                            )
-                        }
+                SectionCard(onClick = onOpenBudget) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("预算概览", style = MaterialTheme.typography.titleMedium)
+                        MoneyLine("总预算上限", ui.totalPlannedCents)
+                        MoneyLine("分类计划", ui.categoryPlannedCents)
+                        MoneyLine("实际支出", ui.totalSpentCents)
+                        if (ui.totalOverCents > 0) Text("总预算超支 ¥${MoneyUtil.formatFull(ui.totalOverCents)}", color = MaterialTheme.colorScheme.error)
+                        if (ui.overspentCount > 0) Text("${ui.overspentCount} 个分类超出计划", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
-
-            // 三组任务全空时给一条聚合引导，避免三行「暂无任务」堆叠
-            val hasAnyTask = overdue.isNotEmpty() || today.isNotEmpty() || upcoming.isNotEmpty()
-            if (hasAnyTask) {
-                actionGroup("逾期", overdue, vm) { MaterialTheme.colorScheme.error }
-                actionGroup("今天", today, vm) { MaterialTheme.colorScheme.primary }
-                actionGroup("未来 7 天", upcoming, vm) { MaterialTheme.colorScheme.onSurfaceVariant }
-            } else {
-                item {
-                    SectionCard {
-                        Text(
-                            "近 7 天暂无安排，去流程页看看接下来的任务吧",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
+            taskGroup("未来 7 天", upcoming, vm, onOpenStage)
         }
     }
 }
 
-private fun LazyListScope.actionGroup(
-    title: String,
-    tasks: List<StageTaskView>,
-    vm: HomeViewModel,
-    color: @Composable () -> androidx.compose.ui.graphics.Color,
-) {
-    item {
-        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 4.dp))
-    }
-    if (tasks.isEmpty()) {
-        item {
-            Text("暂无任务", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    } else {
-        items(tasks, key = { it.id }) { task ->
-            SectionCard(modifier = Modifier.fillMaxWidth()) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = task.done, onCheckedChange = { vm.toggleDone(task) })
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(task.text, style = MaterialTheme.typography.bodyLarge)
-                        val due = task.dueDate?.let { DateUtil.formatCN(it) }
-                        if (due != null) {
-                            Text(due, style = MaterialTheme.typography.bodySmall, color = color())
-                        }
-                    }
-                }
+private fun LazyListScope.taskGroup(title: String, tasks: List<StageTaskView>, vm: HomeViewModel, onOpenStage: (String) -> Unit) {
+    if (tasks.isEmpty()) return
+    item { Text("$title · ${tasks.size} 项", style = MaterialTheme.typography.titleMedium) }
+    items(tasks, key = { "$title-${it.source}-${it.id}" }) { task ->
+        Row(modifier = Modifier.fillMaxWidth().clickable { onOpenStage(task.stageId) }, verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = task.done, onCheckedChange = { vm.toggleDone(task) })
+            Column(modifier = Modifier.weight(1f).padding(vertical = 8.dp)) {
+                Text(task.text, style = MaterialTheme.typography.bodyLarge)
+                task.dueDate?.let { Text(DateUtil.formatCN(it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
-
-

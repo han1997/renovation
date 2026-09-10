@@ -1,139 +1,71 @@
 package com.renovation.guardian.util
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Typeface
+import android.graphics.*
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 
-/**
- * 长图样式:由 Compose 层从 MaterialTheme 取值折算 px 后传入(颜色禁硬编码进本文件)。
- */
-data class LongImageStyle(
-    val contentWidthPx: Int,
-    val bgColor: Int,
-    val cardBgColor: Int,
-    val dividerColor: Int,
-    val titleColor: Int,
-    val bodyColor: Int,
-    val mutedColor: Int,
-    val titleSizePx: Float,
-    val bodySizePx: Float,
-)
+/** 颜色由 Compose 主题传入，位图不依赖 UI 树。 */
+data class LongImageStyle(val contentWidthPx: Int, val bgColor: Int, val cardBgColor: Int,
+    val dividerColor: Int, val titleColor: Int, val bodyColor: Int, val mutedColor: Int,
+    val titleSizePx: Float, val bodySizePx: Float)
+data class LongImageRow(val label: String, val value: String, val note: String? = null)
 
-/** 长图行(label 左,value 右;note 作为次级说明)。 */
-data class LongImageRow(
-    val label: String,
-    val value: String,
-    val note: String? = null,
-)
-
-/**
- * Canvas + StaticLayout 手绘长图渲染器(纯软件渲染,可 Robolectric 单测)。
- *
- * - 输入 = 标题 + 副标题 + 行数据 + 样式,输出 Bitmap,无 UI / 平台耦合;
- * - 两遍布局:先逐段测量总高,再建位图绘制;
- * - OOM 时降半倍分辨率重试一次。
- */
+/** 按真实行高分页，每页最多 4096px，调用方逐张写入、释放，避免巨型位图。 */
 object LongImageRenderer {
-
-    fun render(title: String, subtitle: String, rows: List<LongImageRow>, style: LongImageStyle): Bitmap =
-        try {
-            renderInternal(title, subtitle, rows, style)
-        } catch (_: OutOfMemoryError) {
-            val half = style.copy(
-                contentWidthPx = style.contentWidthPx / 2,
-                titleSizePx = style.titleSizePx / 2,
-                bodySizePx = style.bodySizePx / 2,
-            )
-            renderInternal(title, subtitle, rows, half)
-        }
-
-    private fun renderInternal(
-        title: String,
-        subtitle: String,
-        rows: List<LongImageRow>,
-        s: LongImageStyle,
-    ): Bitmap {
-        val margin = (s.contentWidthPx * 0.05f).toInt().coerceAtLeast(24)
-        val contentW = s.contentWidthPx - margin * 2
-
-        val titlePaint = textPaint(s.titleColor, s.titleSizePx, Typeface.create("sans-serif-medium", Typeface.BOLD))
-        val bodyPaint = textPaint(s.bodyColor, s.bodySizePx, Typeface.create("sans-serif", Typeface.NORMAL))
-        val valuePaint = textPaint(s.bodyColor, s.bodySizePx, Typeface.create("sans-serif-medium", Typeface.NORMAL))
-        val mutedPaint = textPaint(s.mutedColor, s.bodySizePx * 0.85f, Typeface.create("sans-serif", Typeface.NORMAL))
-
-        val titleLayout = staticLayout(title, titlePaint, contentW)
-        val subtitleLayout = staticLayout(subtitle, mutedPaint, contentW)
-        val rowLayouts = rows.map { row ->
-            Triple(
-                staticLayout(row.label, bodyPaint, (contentW * 0.52f).toInt()),
-                staticLayout(row.value, valuePaint, (contentW * 0.46f).toInt()),
-                row.note?.let { staticLayout(it, mutedPaint, contentW) },
-            )
-        }
-        val lineHeight = (s.bodySizePx * 1.5f).toInt()
-        val rowHeight = lineHeight + (mutedPaint.fontMetrics.let { -it.ascent + it.descent } * 1.3f).toInt()
-
-        // 预排版,累加总高
-        val cardTop = margin + titleLayout.height + subtitleLayout.height + (s.bodySizePx * 0.8f).toInt()
-        val cardRowsH = rows.size * rowHeight
-        val footerH = (s.bodySizePx * 1.6f).toInt()
-        val totalH = cardTop + cardRowsH + (s.bodySizePx).toInt() + footerH + margin
-
-        val bitmap = Bitmap.createBitmap(s.contentWidthPx, totalH, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        val dividerPaint = Paint().apply { color = s.dividerColor; strokeWidth = 1f }
-        val cardPaint = Paint().apply { color = s.cardBgColor }
-        canvas.drawColor(s.bgColor)
-
-        var y = margin
-        titleLayout.draw(canvas, margin, y)
-        y += titleLayout.height
-        subtitleLayout.draw(canvas, margin, y)
-        y += subtitleLayout.height + (s.bodySizePx * 0.8f).toInt()
-
-        // 卡片背景
-        canvas.drawRoundRect(
-            margin.toFloat(), y.toFloat(),
-            (s.contentWidthPx - margin).toFloat(), (y + cardRowsH).toFloat(),
-            20f, 20f, cardPaint,
-        )
-
-        rowLayouts.forEachIndexed { i, (label, value, note) ->
-            val rowTop = y + i * rowHeight
-            if (i > 0) {
-                canvas.drawLine(margin.toFloat(), rowTop.toFloat(),
-                    (s.contentWidthPx - margin).toFloat(), rowTop.toFloat(), dividerPaint)
+    const val MAX_PAGE_HEIGHT = 4096
+    private data class RowLayout(val left: StaticLayout, val right: StaticLayout, val note: StaticLayout?, val height: Int)
+    fun renderPages(title: String, subtitle: String, rows: List<LongImageRow>, style: LongImageStyle): Sequence<Bitmap> = sequence {
+        val width = style.contentWidthPx.coerceIn(480, 1080)
+        val margin = 40
+        val usable = width - margin * 2
+        fun paint(color: Int, size: Float) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color; textSize = size }
+        val titlePaint = paint(style.titleColor, style.titleSizePx)
+        val bodyPaint = paint(style.bodyColor, style.bodySizePx)
+        val mutedPaint = paint(style.mutedColor, style.bodySizePx * .85f)
+        fun layout(text: String, p: TextPaint, w: Int) = StaticLayout.Builder.obtain(text, 0, text.length, p, w)
+            .setAlignment(Layout.Alignment.ALIGN_NORMAL).setIncludePad(false).setLineSpacing(6f, 1f).build()
+        val titleLayout = layout(title, titlePaint, usable)
+        val subtitleLayout = layout(subtitle, mutedPaint, usable)
+        val header = margin + titleLayout.height + subtitleLayout.height + 36
+        var page = mutableListOf<RowLayout>()
+        var height = header + margin + 48
+        var number = 1
+        fun draw(): Bitmap {
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            canvas.drawColor(style.bgColor)
+            fun at(l: StaticLayout, x: Int, y: Int) { canvas.save(); canvas.translate(x.toFloat(), y.toFloat()); l.draw(canvas); canvas.restore() }
+            at(titleLayout, margin, margin)
+            at(subtitleLayout, margin, margin + titleLayout.height + 12)
+            var y = header
+            val divider = Paint().apply { color = style.dividerColor; strokeWidth = 1f }
+            page.forEach { row ->
+                at(row.left, margin, y + 12); at(row.right, margin + (usable * .57f).toInt(), y + 12)
+                row.note?.let { at(it, margin, y + 20 + maxOf(row.left.height, row.right.height)) }
+                y += row.height
+                canvas.drawLine(margin.toFloat(), y.toFloat(), (width - margin).toFloat(), y.toFloat(), divider)
             }
-            label.draw(canvas, margin + 16, rowTop + 8)
-            value.draw(canvas, s.contentWidthPx - margin - (contentW * 0.46f).toInt() - 16, rowTop + 8)
-            if (note != null) {
-                note.draw(canvas, margin + 16, rowTop + label.height + 4)
+            canvas.drawText("第 ${number++} 页 · 装修管家", margin.toFloat(), (height - 20).toFloat(), mutedPaint)
+            return bitmap
+        }
+        rows.forEach { row ->
+            // 超长备注分块保留全部内容；避免单个文本条目高过一页。
+            val labels = row.label.chunked(200)
+            val values = row.value.chunked(200)
+            val notes = row.note.orEmpty().chunked(200)
+            repeat(maxOf(labels.size, values.size, notes.size, 1)) { index ->
+                val left = layout(labels.getOrElse(index) { "" }, bodyPaint, (usable * .54f).toInt())
+                val right = layout(values.getOrElse(index) { "" }, bodyPaint, (usable * .43f).toInt())
+                val note = notes.getOrNull(index)?.let { layout(it, mutedPaint, usable) }
+                val rowHeight = maxOf(left.height, right.height) + (note?.height ?: 0) + 36
+                if (page.isNotEmpty() && height + rowHeight > MAX_PAGE_HEIGHT) {
+                    yield(draw()); page = mutableListOf(); height = header + margin + 48
+                }
+                require(height + rowHeight <= MAX_PAGE_HEIGHT) { "图片文字过大，请调整导出字号" }
+                page.add(RowLayout(left, right, note, rowHeight)); height += rowHeight
             }
         }
-        return bitmap
-    }
-
-    private fun staticLayout(text: String, paint: TextPaint, width: Int): StaticLayout =
-        StaticLayout.Builder.obtain(text, 0, text.length, paint, width.coerceAtLeast(1))
-            .setAlignment(Layout.Alignment.ALIGN_NORMAL)
-            .setLineSpacing(0f, 1.1f)
-            .setIncludePad(true)
-            .build()
-
-    private fun textPaint(color: Int, size: Float, tf: Typeface) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-        this.color = color
-        textSize = size
-        typeface = tf
-    }
-
-    private fun StaticLayout.draw(canvas: Canvas, x: Int, y: Int) {
-        canvas.save()
-        canvas.translate(x.toFloat(), y.toFloat())
-        draw(canvas)
-        canvas.restore()
+        yield(draw())
     }
 }

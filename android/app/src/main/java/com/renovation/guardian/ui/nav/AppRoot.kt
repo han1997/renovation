@@ -17,6 +17,13 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.Column
+import com.renovation.guardian.RenovationApp
+import com.renovation.guardian.InitializationState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -66,84 +73,6 @@ sealed class TopLevelRoute(val route: String, val label: String, val icon: Image
     }
 }
 
-/** SAF 导出 / 导入动作，由 [AppRoot] 用 ActivityResultLauncher 实现并向下提供。 */
-interface ExportActions {
-    fun exportCsv(fileName: String, content: String)
-    fun exportJson(fileName: String, content: String)
-    fun importJson(onImported: (String) -> Unit)
-}
-
-val LocalExportActions = staticCompositionLocalOf<ExportActions> {
-    error("ExportActions not provided")
-}
-
-@Composable
-fun rememberExportActions(): ExportActions {
-    val ctx = LocalContext.current
-    var pendingCsv by remember { mutableStateOf<String?>(null) }
-    var pendingJson by remember { mutableStateOf<String?>(null) }
-    var pendingImport by remember { mutableStateOf<((String) -> Unit)?>(null) }
-
-    val csvLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("text/csv"),
-    ) { uri: Uri? ->
-        uri?.let { pendingCsv?.let { content -> writeText(ctx, it, content) } }
-        pendingCsv = null
-    }
-    val jsonExportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("application/json"),
-    ) { uri: Uri? ->
-        uri?.let { pendingJson?.let { content -> writeText(ctx, it, content) } }
-        pendingJson = null
-    }
-    val importLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument(),
-    ) { uri: Uri? ->
-        uri?.let {
-            val text = readText(ctx, it)
-            if (text != null) pendingImport?.invoke(text)
-        }
-        pendingImport = null
-    }
-
-    return remember(csvLauncher, jsonExportLauncher, importLauncher) {
-        object : ExportActions {
-            override fun exportCsv(fileName: String, content: String) {
-                pendingCsv = content
-                csvLauncher.launch(fileName)
-            }
-
-            override fun exportJson(fileName: String, content: String) {
-                pendingJson = content
-                jsonExportLauncher.launch(fileName)
-            }
-
-            override fun importJson(onImported: (String) -> Unit) {
-                pendingImport = onImported
-                importLauncher.launch(arrayOf("application/json"))
-            }
-        }
-    }
-}
-
-private fun writeText(ctx: Context, uri: Uri, text: String) {
-    try {
-        ctx.contentResolver.openOutputStream(uri)?.use { os ->
-            os.write(text.toByteArray(Charsets.UTF_8))
-        }
-    } catch (_: Throwable) {
-        // 用户取消或写入失败：静默忽略（UI 已有 toast/状态反馈）
-    }
-}
-
-private fun readText(ctx: Context, uri: Uri): String? {
-    return try {
-        ctx.contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
-    } catch (_: Throwable) {
-        null
-    }
-}
-
 class RootViewModel(application: android.app.Application) : AppViewModel(application) {
     val hasProfile: Flow<Boolean> = container.houseProfileRepo.observe().map { it != null }
 }
@@ -152,13 +81,34 @@ class RootViewModel(application: android.app.Application) : AppViewModel(applica
 fun AppRoot() {
     val rootVm: RootViewModel = viewModel()
     val hasProfile by rootVm.hasProfile.collectAsState(initial = null)
-    val exportActions = rememberExportActions()
-
+    val app = LocalContext.current.applicationContext as RenovationApp
+    val initialization by app.initialization.collectAsState()
+    val files: FileActionsViewModel = viewModel()
+    val exportActions = rememberExportActions(files)
+    val snackbar = remember { SnackbarHostState() }
+    LaunchedEffect(files) {
+        files.results.collect { result -> when (result) {
+            is FileActionResult.Success -> snackbar.showSnackbar(result.message)
+            is FileActionResult.Failure -> snackbar.showSnackbar(result.message)
+            FileActionResult.Cancelled -> Unit
+        } }
+    }
     CompositionLocalProvider(LocalExportActions provides exportActions) {
-        when (hasProfile) {
-            null -> LoadingState()
-            false -> OnboardingScreen(onFinished = {})
-            true -> MainTabs()
+        Scaffold(snackbarHost = { SnackbarHost(snackbar) }, contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)) { padding ->
+            androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().padding(padding)) {
+                when (val state = initialization) {
+                    InitializationState.Loading -> LoadingState()
+                    is InitializationState.Failed -> Column {
+                        Text(state.message)
+                        Button(onClick = app::retryInitialization) { Text("重试") }
+                    }
+                    InitializationState.Ready -> when (hasProfile) {
+                        null -> LoadingState()
+                        false -> OnboardingScreen(onFinished = {})
+                        true -> MainTabs()
+                    }
+                }
+            }
         }
     }
 }
@@ -166,16 +116,22 @@ fun AppRoot() {
 @Composable
 private fun MainTabs() {
     val navController = rememberNavController()
+    val entry by navController.currentBackStackEntryAsState()
     Scaffold(
-        bottomBar = { BottomNavBar(navController) },
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
+        bottomBar = { if (entry?.destination?.route?.substringBefore("?") in TopLevelRoute.entries.map { it.route }) BottomNavBar(navController) },
     ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = TopLevelRoute.Home.route,
             modifier = Modifier.fillMaxSize().padding(innerPadding),
         ) {
-            composable(TopLevelRoute.Home.route) { HomeScreen() }
-            composable(TopLevelRoute.Stages.route) { StagesScreen() }
+            composable(TopLevelRoute.Home.route) { HomeScreen(onOpenStage = { id ->
+                navController.navigate("stages?stage=$id") { launchSingleTop = true }
+            }, onOpenBudget = { navController.navigate("budget") { launchSingleTop = true } }) }
+            composable("stages?stage={stage}", arguments = listOf(androidx.navigation.navArgument("stage") { defaultValue = "" })) { entry ->
+                StagesScreen(initialStageId = entry.arguments?.getString("stage")?.takeIf { it.isNotBlank() })
+            }
             composable(TopLevelRoute.Budget.route) { BudgetScreen(onOpenQuote = { navController.navigate(QuoteRoute) }) }
             composable(TopLevelRoute.Guide.route) { GuideScreen() }
             composable(TopLevelRoute.More.route) { MoreScreen(onOpenPlanner = { navController.navigate(PlannerRoute) }) }
@@ -191,7 +147,7 @@ private fun BottomNavBar(navController: NavHostController) {
     val currentDestination = navBackStackEntry?.destination
     NavigationBar {
         TopLevelRoute.entries.forEach { route ->
-            val selected = currentDestination?.hierarchy?.any { it.route == route.route } == true
+            val selected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == route.route } == true
             NavigationBarItem(
                 selected = selected,
                 onClick = {

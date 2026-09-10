@@ -123,7 +123,7 @@ abstract class AppDatabase : RoomDatabase() {
                         }
                     })
                     .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
-                    .fallbackToDestructiveMigration() // 兜底:仅对未定义 Migration 的版本跳变生效;v1→v3 由显式迁移串联
+ // 兜底:仅对未定义 Migration 的版本跳变生效;v1→v3 由显式迁移串联
                     .build()
                     .also { instance = it }
             }

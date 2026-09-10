@@ -11,6 +11,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Application 类。负责初始化 Room 数据库与只读知识缓存。
@@ -20,7 +24,16 @@ import kotlinx.coroutines.launch
  * - 仓库层 [AppContainer] 由 [DefaultAppContainer] 提供；
  * - 启动时异步执行种子写入，保证流程页（阶段 / 模板任务 / 验收清单）有数据可渲染。
  */
+sealed interface InitializationState {
+    data object Loading : InitializationState
+    data object Ready : InitializationState
+    data class Failed(val message: String) : InitializationState
+}
+
 class RenovationApp : Application() {
+    private val initializationState = MutableStateFlow<InitializationState>(InitializationState.Loading)
+    val initialization = initializationState.asStateFlow()
+    private var initializationJob: Job? = null
 
     lateinit var container: AppContainer
         private set
@@ -31,17 +44,22 @@ class RenovationApp : Application() {
     override fun onCreate() {
         super.onCreate()
         val db = AppDatabase.getInstance(this)
-        val knowledge = KnowledgeCache(this).also { it.load() }
+        val knowledge = KnowledgeCache(this)
         container = DefaultAppContainer(db, knowledge)
-        // 种子写入必须在启动链路被调用（幂等：种子表非空时内部自动跳过）。
-        // 若遗漏此调用，stage / task_template / checklist 三张种子表永远为空，
-        // 流程页完全空白且无任何报错——勿在重构启动链路时删除。
-        appScope.launch {
+        retryInitialization()
+    }
+
+    fun retryInitialization() {
+        if (initializationJob?.isActive == true) return
+        initializationState.value = InitializationState.Loading
+        initializationJob = appScope.launch {
             try {
                 container.seeder.seedIfEmpty(DateUtil.today())
-            } catch (e: Exception) {
-                // 种子失败不应崩溃启动流程；下次启动会因表空自动重试。
-                Log.w(TAG, "seedIfEmpty failed", e)
+                initializationState.value = InitializationState.Ready
+            } catch (e: CancellationException) { throw e }
+            catch (e: Exception) {
+                Log.w(TAG, "初始化失败", e)
+                initializationState.value = InitializationState.Failed("本地资料加载失败，请重试")
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.renovation.guardian.ui.quote.engine
 
+import com.renovation.guardian.domain.quote.*
+
 import com.renovation.guardian.data.knowledge.CraftStep
 import com.renovation.guardian.data.knowledge.DecoboxCatalogJson
 import com.renovation.guardian.data.knowledge.MaterialSpec

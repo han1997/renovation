@@ -13,6 +13,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,8 +33,9 @@ fun DatePickerField(
     onDateSelected: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
+    onClear: (() -> Unit)? = null,
 ) {
-    var show by remember { mutableStateOf(false) }
+    var show by rememberSaveable { mutableStateOf(false) }
     val initialMillis = remember(value) {
         value?.let {
             try {
@@ -48,7 +50,14 @@ fun DatePickerField(
         onValueChange = {},
         readOnly = true,
         label = { Text(label) },
-        trailingIcon = { Icon(Icons.Filled.DateRange, contentDescription = null) },
+        trailingIcon = {
+            androidx.compose.foundation.layout.Row {
+                if (value != null && onClear != null) TextButton(onClick = onClear) { Text("清除") }
+                androidx.compose.material3.IconButton(onClick = { show = true }) {
+                    Icon(Icons.Filled.DateRange, contentDescription = "选择日期")
+                }
+            }
+        },
         modifier = modifier.fillMaxWidth().clickable { show = true },
         textStyle = MaterialTheme.typography.bodyLarge,
     )

@@ -47,4 +47,8 @@ class OnboardingViewModel(application: Application) : AppViewModel(application) 
             customSpaces = emptyList(),
         )
     }
+    suspend fun finishCents(area: Double, tier: String, mode: String, grade: String, date: String?, budget: Long) {
+        container.houseProfileRepo.finishOnboardingCents(area, tier, mode, grade, date, budget, emptyList(), emptyList())
+    }
+
 }

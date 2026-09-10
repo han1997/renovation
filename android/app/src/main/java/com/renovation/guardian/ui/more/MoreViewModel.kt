@@ -1,6 +1,8 @@
 package com.renovation.guardian.ui.more
 
 import android.app.Application
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.renovation.guardian.data.repo.ImportResult
 import com.renovation.guardian.ui.AppViewModel
@@ -24,55 +26,41 @@ class MoreViewModel(application: Application) : AppViewModel(application) {
     val grades = container.knowledge.prices?.grades ?: emptyList()
     val styles = container.knowledge.knowledge?.styles ?: emptyList()
 
-    fun updateProfile(areaM2: Double, tierId: String, modeId: String, gradeId: String, startDate: String?) {
-        viewModelScope.launch { container.houseProfileRepo.updateProfile(areaM2, tierId, modeId, gradeId, startDate) }
+    var preparedImport by androidx.compose.runtime.mutableStateOf<com.renovation.guardian.data.repo.PreparedImport?>(null)
+        private set
+    fun prepareBackupImport(text: String) = perform(success = null) {
+        preparedImport = container.importExportRepo.prepareImport(text)
     }
-
-    fun setTotalBudgetCents(cents: Long) {
-        viewModelScope.launch { container.houseProfileRepo.setTotalBudgetCents(cents) }
+    fun dismissImport() { preparedImport = null }
+    fun confirmImport() = perform("导入成功", singleFlight = true) {
+        val prepared = requireNotNull(preparedImport)
+        val result = container.importExportRepo.restore(prepared)
+        check(result.success) { result.error ?: "导入失败" }
+        preparedImport = null
     }
-
-    fun updateStyle(styleId: String) {
-        viewModelScope.launch { container.houseProfileRepo.updateStyle(styleId) }
+    fun saveHouse(area: Double, tier: String, mode: String, grade: String, date: String?, budget: Long, onSaved: () -> Unit) =
+        perform(onSuccess = onSaved, singleFlight = true) { container.houseProfileRepo.saveSettings(area, tier, mode, grade, date, budget) }
+    fun updateProfile(areaM2: Double, tierId: String, modeId: String, gradeId: String, startDate: String?) =
+        perform { container.houseProfileRepo.updateProfile(areaM2, tierId, modeId, gradeId, startDate) }
+    fun setTotalBudgetCents(cents: Long) = perform { require(cents >= 0); container.houseProfileRepo.setTotalBudgetCents(cents) }
+    fun updateStyle(styleId: String, onSaved: () -> Unit = {}) = perform(onSuccess = onSaved, singleFlight = true) { container.houseProfileRepo.updateStyle(styleId) }
+    fun upsertContact(name: String, role: String?, phone: String?, note: String?, existingId: String?, onSaved: () -> Unit = {}) = perform(onSuccess = onSaved, singleFlight = true) {
+        require(name.isNotBlank()) { "请填写联系人姓名" }
+        container.contactRepo.upsert(name.trim(), role, phone, note, existingId, today)
     }
-
-    fun upsertContact(name: String, role: String?, phone: String?, note: String?, existingId: String?) {
-        viewModelScope.launch { container.contactRepo.upsert(name, role, phone, note, existingId, today) }
+    fun deleteContact(id: String) = perform("已删除") { container.contactRepo.delete(id) }
+    fun upsertNote(title: String, body: String, existingId: String?, onSaved: () -> Unit = {}) = perform(onSuccess = onSaved, singleFlight = true) {
+        require(title.isNotBlank() || body.isNotBlank()) { "请填写笔记内容" }
+        container.noteRepo.upsert(title, body, today, existingId)
     }
-
-    fun deleteContact(id: String) {
-        viewModelScope.launch { container.contactRepo.delete(id) }
+    fun deleteNote(id: String) = perform("已删除") { container.noteRepo.delete(id) }
+    fun upsertQuickNote(content: String, type: String, category: String?, stageId: String?, existingId: String?, onSaved: () -> Unit = {}) = perform(onSuccess = onSaved, singleFlight = true) {
+        require(content.isNotBlank()) { "请填写内容" }
+        container.quickNoteRepo.upsert(content, type, category, stageId, existingId, today)
     }
-
-    fun upsertNote(title: String, body: String, existingId: String?) {
-        viewModelScope.launch { container.noteRepo.upsert(title, body, today, existingId) }
-    }
-
-    fun deleteNote(id: String) {
-        viewModelScope.launch { container.noteRepo.delete(id) }
-    }
-
-    /** 新增 / 编辑随手记（type: wish|memo；category 仅 wish；stageId 仅 memo）。 */
-    fun upsertQuickNote(content: String, type: String, category: String?, stageId: String?, existingId: String?) {
-        viewModelScope.launch {
-            container.quickNoteRepo.upsert(content, type, category, stageId, existingId, today)
-        }
-    }
-
-    /** 勾选 / 取消随手记完成。 */
-    fun setQuickNoteDone(id: String, done: Boolean) {
-        viewModelScope.launch { container.quickNoteRepo.setDone(id, done, today) }
-    }
-
-    fun deleteQuickNote(id: String) {
-        viewModelScope.launch { container.quickNoteRepo.delete(id) }
-    }
-
+    fun setQuickNoteDone(id: String, done: Boolean) = perform(success = null) { container.quickNoteRepo.setDone(id, done, today) }
+    fun deleteQuickNote(id: String) = perform("已删除") { container.quickNoteRepo.delete(id) }
     suspend fun exportJsonString(): String = container.importExportRepo.exportJson()
-
     suspend fun importJson(text: String): ImportResult = container.importExportRepo.importJson(text)
-
-    fun resetAll() {
-        viewModelScope.launch { container.clearAllData() }
-    }
+    fun resetAll() = perform("已清空用户数据", singleFlight = true) { container.clearAllData() }
 }

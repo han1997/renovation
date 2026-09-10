@@ -71,7 +71,7 @@ String.format(Locale.ROOT, "%.2f", cents / 100.0)
 
 ## Theme（Material You）
 
-- 入口：`ui/theme/Theme.kt` 的 `AppTheme(darkTheme = isSystemInDarkTheme(), dynamicColor = ...)`。
+- 入口：`ui/theme/Theme.kt` 的 `RenovationTheme(darkTheme = isSystemInDarkTheme(), dynamicColor = ...)`。
 - Android 12+：`dynamicLightColorScheme` / `dynamicDarkColorScheme` 取系统壁纸色。
 - Android 7–11：回退静态色板（陶土橙 `cf6b45` 系 + 米色 `#f6f3ee`，与 Web 品牌一致），见 `ui/theme/Color.kt`。
 - Shape / Type 见 `ui/theme/Shape.kt` / `Type.kt`。
@@ -80,3 +80,15 @@ String.format(Locale.ROOT, "%.2f", cents / 100.0)
 ## 边界与 edge-to-edge
 
 targetSdk 35 强制 edge-to-edge，所有 Screen 需按 `WindowInsets` 处理安全区，避免内容被状态栏 / 手势条遮挡。
+## 全 App 完善契约（09-10）
+
+- 统一行为与测试入口见 [全 App 数据与交互契约](./app-polish-contracts.md)。
+- `FormState` / `NumberField` / `MoneyField` 校验当前步骤草稿，错误不能被上一次有效数值掩盖。
+- `OperationFeedback` 消费 ViewModel 真正完成后的消息；新增/编辑用 onSuccess 关闭，不在点击时假报成功。
+- `ChoiceField` 为窄屏下拉选择；复选行整体可点击并提供 Checkbox 语义。普通 `SectionCard` 不设置空点击。
+- `surfaceContainer*` 静态色阶与暖色回退一致，Android 12+ 继续用系统动态色。
+- 报价/规划子路由隐藏底部 Tab；只由最内层 Screen 处理系统安全区，避免嵌套 Scaffold 双重顶边距。
+
+- 向导把固定操作放在内容区时，Scaffold 不知道按钮高度，默认 Snackbar 会覆盖按钮。报价/规划用 `onSizeChanged` 实测底栏高度并给 SnackbarHost 对应 bottom padding；不能写死高度（大字体会换行），也不能只让测试等待提示消失。`WorkflowComposeTest` 保存后立即切模式并继续操作覆盖此回归。
+
+- 已完成动作的 Snackbar 不跨向导步骤/方案列表与编辑页停留。报价切换内部页面时 dismiss 旧提示；`OperationFeedback` 用 collectLatest 展示最新事件，避免消息排队遮挡后续操作。结果页“修改配置”位于工具栏，主要保存/应用动作位于固定底部，均不依赖被提示条覆盖的内容区。

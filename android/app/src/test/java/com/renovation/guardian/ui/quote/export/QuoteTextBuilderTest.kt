@@ -1,9 +1,9 @@
 package com.renovation.guardian.ui.quote.export
 
-import com.renovation.guardian.ui.quote.engine.QuoteLine
-import com.renovation.guardian.ui.quote.engine.QuoteResult
-import com.renovation.guardian.ui.quote.engine.QuoteSummary
-import com.renovation.guardian.ui.quote.engine.Sourcing
+import com.renovation.guardian.domain.quote.QuoteLine
+import com.renovation.guardian.domain.quote.QuoteResult
+import com.renovation.guardian.domain.quote.QuoteSummary
+import com.renovation.guardian.domain.quote.Sourcing
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -32,15 +32,16 @@ class QuoteTextBuilderTest {
                 selfMainCents = 200_00L, managementCents = 400_00L),
             totalCents = 874_00L,
             budgetCents = 1000_00L,
-            budgetRemainCents = 126_00L,
-            overBudgetCents = 0,
+            budgetRemainCents = 0L,
+            overBudgetCents = 74_00L,
             top3 = emptyList(),
         )
         val text = QuoteTextBuilder.build(result, "整装全包", 90.0, 2.4)
         assertTrue(text.contains("装修宝典(整装全包)"))
         assertTrue(text.contains("【客厅】"))
         assertTrue(text.contains("(自购)"))
-        assertTrue(text.contains("预计总价:¥874"))
-        assertTrue(text.contains("预算剩余:¥126"))
+        assertTrue(text.contains("施工方报价:¥874"))
+        assertTrue(text.contains("超出预算:¥74"))
+        assertTrue(text.contains("本方案合计:¥1,074"))
     }
 }

@@ -1,5 +1,7 @@
 package com.renovation.guardian.data.db
 
+import kotlinx.serialization.Serializable
+
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
@@ -7,6 +9,7 @@ import androidx.room.PrimaryKey
 
 /** 验收清单目录。 */
 @Entity(tableName = "checklist")
+@Serializable
 data class ChecklistEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "emoji") val emoji: String,
@@ -20,6 +23,7 @@ data class ChecklistEntity(
     primaryKeys = ["id"],
     indices = [Index("checklist_id")],
 )
+@Serializable
 data class ChecklistItemEntity(
     @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "checklist_id") val checklistId: String,
@@ -29,6 +33,7 @@ data class ChecklistItemEntity(
 
 /** 验收条目勾选。 */
 @Entity(tableName = "checklist_item_check")
+@Serializable
 data class ChecklistItemCheckEntity(
     @PrimaryKey @ColumnInfo(name = "item_id") val itemId: String,
     @ColumnInfo(name = "done") val done: Boolean = false,

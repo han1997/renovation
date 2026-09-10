@@ -21,6 +21,9 @@ interface QuotePlanDao {
     @Query("SELECT * FROM quote_plan ORDER BY updated_at DESC")
     fun observeAll(): Flow<List<QuotePlanEntity>>
 
+    @Query("SELECT * FROM quote_plan ORDER BY updated_at DESC, id")
+    suspend fun listAll(): List<QuotePlanEntity>
+
     @Query("DELETE FROM quote_plan WHERE id = :id")
     suspend fun deleteById(id: String)
 

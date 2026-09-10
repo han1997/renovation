@@ -6,6 +6,7 @@ import com.renovation.guardian.data.repo.AppContainer
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -21,7 +22,7 @@ class HomeViewModelTest {
         every { container.budgetRepo.observeCategoriesWithSpent() } returns flowOf(emptyList())
         every { container.taskRepo.observeAllProgress() } returns flowOf(emptyList())
         every { container.stageRepo.observeAll() } returns flowOf(emptyList())
-        every { container.taskRepo.observeBetween("1970-01-01", "2026-08-31") } returns flowOf(
+        every { container.taskRepo.observeBetween("0001-01-01", "2026-08-31") } returns flowOf(
             listOf(StageTaskView("t1", "s1", "TEMPLATE", "逾期任务", null, null, "2020-01-01", false)),
         )
         every { container.taskRepo.observeBetween("2026-09-01", "2026-09-01") } returns flowOf(
@@ -34,7 +35,7 @@ class HomeViewModelTest {
     @Test
     fun overdue_grouping_containsPastDue() = runTest {
         val vm = makeVm()
-        vm.overdueTasks.collect { list ->
+        vm.overdueTasks.take(1).collect { list ->
             assertEquals(1, list.size)
             assertEquals("t1", list.first().id)
         }
@@ -43,7 +44,7 @@ class HomeViewModelTest {
     @Test
     fun today_grouping_containsTodayDue() = runTest {
         val vm = makeVm()
-        vm.todayTasks.collect { list ->
+        vm.todayTasks.take(1).collect { list ->
             assertEquals(1, list.size)
             assertEquals("t2", list.first().id)
         }

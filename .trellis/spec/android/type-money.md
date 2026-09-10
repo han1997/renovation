@@ -12,7 +12,9 @@
   ```kotlin
   object MoneyUtil {
       fun fromYuan(yuan: Double): Long   // 元 → 分（roundToLong）
-      fun fromYuan(yuan: String): Long   // 容错：非数字按 0
+      fun parseYuan(text: String): Long? // 精确解析，非法输入返回 null
+      fun fromYuan(yuan: String): Long   // 严格入口，非法输入抛异常
+      fun input(cents: Long): String    // 无分组、Locale.ROOT 的可回解析文本
       fun toYuan(cents: Long): Double    // 分 → 元
       fun format(cents: Long): String    // "12,345" 整数显示
       fun formatFull(cents: Long): String // "12,345.67" 带小数
@@ -24,7 +26,7 @@
 ## JSON 反序列化容错
 
 - 知识数据 `Json { ignoreUnknownKeys = true; isLenient = true }`，字段有默认值兜底（见 `KnowledgeCache.kt`）。
-- REST/备份 JSON 同款宽松策略（`ImportExportRepository` 的 `Json` 配置）。
+- 用户备份必须校验版本、完整结构、金额和引用，不能采用知识数据的宽松兜底；见 [全 App 契约](./app-polish-contracts.md)。
 - `@SerialName` 用于与 Web 字段对齐的驼峰 / 下划线映射（如 `schema_version`、`when`）。
 
 ## 日期 / id

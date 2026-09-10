@@ -41,6 +41,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.renovation.guardian.ui.components.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,13 +87,17 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
     val exportActions = LocalExportActions.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    OperationFeedback(vm, snackbar)
 
-    var showHouseEdit by remember { mutableStateOf(false) }
-    var showStylePick by remember { mutableStateOf(false) }
-    var showContact by remember { mutableStateOf<ContactEntity?>(null) }
-    var showNote by remember { mutableStateOf<NoteEntity?>(null) }
-    var showQuickNote by remember { mutableStateOf<QuickNoteEntity?>(null) }
-    var showReset by remember { mutableStateOf(false) }
+    var showHouseEdit by rememberSaveable { mutableStateOf(false) }
+    var showStylePick by rememberSaveable { mutableStateOf(false) }
+    var showContactId by rememberSaveable { mutableStateOf<String?>(null) }
+    val showContact = when (showContactId) { null -> null; "" -> ContactEntity("", "", null, null, null, ""); else -> contacts.firstOrNull { it.id == showContactId } }
+    var showNoteId by rememberSaveable { mutableStateOf<String?>(null) }
+    val showNote = when (showNoteId) { null -> null; "" -> NoteEntity("", "", "", DateUtil.today(), DateUtil.today()); else -> notes.firstOrNull { it.id == showNoteId } }
+    var showQuickNoteId by rememberSaveable { mutableStateOf<String?>(null) }
+    val showQuickNote = when (showQuickNoteId) { null -> null; "" -> QuickNoteEntity("", "", QuickNoteEntity.TYPE_WISH, null, null, false, DateUtil.today(), DateUtil.today()); else -> quickNotes.firstOrNull { it.id == showQuickNoteId } }
+    var showReset by rememberSaveable { mutableStateOf(false) }
 
     // 待确认删除的对象(统一走 ConfirmDeleteDialog)
     var deleteContactTarget by remember { mutableStateOf<ContactEntity?>(null) }
@@ -129,10 +136,32 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
                 }
             }
 
+            item { SectionTitle("规划工具") }
+            item {
+                SectionCard {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth().clickable { onOpenPlanner() }.padding(vertical = 4.dp),
+                    ) {
+                        Text("📋", style = MaterialTheme.typography.titleLarge)
+                        Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
+                            Text("需求规划", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                "逐空间规划功能需求,标注重要度并生成装修需求清单",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Text("进入 ›", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+
+            item { SectionTitle("装修记录") }
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SectionTitle("联系人", modifier = Modifier.weight(1f))
-                    IconButton(onClick = { showContact = ContactEntity("", "", null, null, null, "") }) {
+                    IconButton(onClick = { showContactId = "" }) {
                         Icon(Icons.Filled.Add, contentDescription = "新增联系人")
                     }
                 }
@@ -155,7 +184,7 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
                             c.role?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                             c.phone?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                         }
-                        IconButton(onClick = { showContact = c }) { Icon(Icons.Filled.Edit, contentDescription = "编辑", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                        IconButton(onClick = { showContactId = c.id }) { Icon(Icons.Filled.Edit, contentDescription = "编辑", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                         IconButton(onClick = { deleteContactTarget = c }) { Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error) }
                     }
                 }
@@ -164,7 +193,7 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SectionTitle("笔记", modifier = Modifier.weight(1f))
-                    IconButton(onClick = { showNote = NoteEntity("", "", "", DateUtil.today(), DateUtil.today()) }) {
+                    IconButton(onClick = { showNoteId = "" }) {
                         Icon(Icons.Filled.Add, contentDescription = "新增笔记")
                     }
                 }
@@ -180,7 +209,7 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
                 }
             }
             items(notes, key = { it.id }) { n ->
-                SectionCard(onClick = { showNote = n }) {
+                SectionCard(onClick = { showNoteId = n.id }) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(n.title.ifBlank { "(无标题)" }, style = MaterialTheme.typography.bodyLarge)
@@ -198,7 +227,7 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SectionTitle("随手记", modifier = Modifier.weight(1f))
-                    IconButton(onClick = { showQuickNote = QuickNoteEntity("", "", QuickNoteEntity.TYPE_WISH, null, null, false, DateUtil.today(), DateUtil.today()) }) {
+                    IconButton(onClick = { showQuickNoteId = "" }) {
                         Icon(Icons.Filled.Add, contentDescription = "新增随手记")
                     }
                 }
@@ -242,7 +271,7 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
                                         QuickNoteRow(
                                             note = q,
                                             onToggleDone = { vm.setQuickNoteDone(q.id, !q.isDone) },
-                                            onEdit = { showQuickNote = q },
+                                            onEdit = { showQuickNoteId = q.id },
                                             onDelete = { deleteQuickNoteId = q.id },
                                         )
                                     }
@@ -278,7 +307,7 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
                                         QuickNoteRow(
                                             note = q,
                                             onToggleDone = { vm.setQuickNoteDone(q.id, !q.isDone) },
-                                            onEdit = { showQuickNote = q },
+                                            onEdit = { showQuickNoteId = q.id },
                                             onDelete = { deleteQuickNoteId = q.id },
                                         )
                                     }
@@ -291,43 +320,20 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
 
             item {
                 SectionCard {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth().clickable { onOpenPlanner() }.padding(vertical = 4.dp),
-                    ) {
-                        Text("📋", style = MaterialTheme.typography.titleLarge)
-                        Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
-                            Text("需求规划", style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                "逐空间规划功能需求,标注重要度并生成装修需求清单",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        Text("进入 ›", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-                    }
-                }
-            }
-
-            item {
-                SectionCard {
                     Column {
                         Text("数据备份与重置", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             androidx.compose.material3.Button(onClick = {
                                 scope.launch {
-                                    val json = vm.exportJsonString()
-                                    exportActions.exportJson("renovation-backup.json", json)
-                                    snackbar.showSnackbar("已开始导出备份")
+                                    try {
+                                        val json = vm.exportJsonString()
+                                        exportActions.exportJson("renovation-backup.json", json)
+                                    } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+                                    catch (_: Exception) { snackbar.showSnackbar("准备备份失败，请重试") }
                                 }
                             }) { Icon(Icons.Filled.Upload, null); Text(" 导出") }
                             androidx.compose.material3.Button(onClick = {
-                                exportActions.importJson { text ->
-                                    scope.launch {
-                                        val res = vm.importJson(text)
-                                        snackbar.showSnackbar(if (res.success) "导入成功" else ("导入失败：${res.error ?: "文件格式不正确"}"))
-                                    }
-                                }
+                                exportActions.importJson { text -> vm.prepareBackupImport(text) }
                             }) { Icon(Icons.Filled.Download, null); Text(" 导入") }
                         }
                         androidx.compose.material3.TextButton(onClick = { showReset = true }) {
@@ -339,6 +345,13 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
         }
     }
 
+    vm.preparedImport?.let { prepared ->
+        val busy by vm.isBusy.collectAsState()
+        AlertDialog(onDismissRequest = vm::dismissImport, title = { Text("确认恢复备份") },
+            text = { Text(prepared.summary) },
+            confirmButton = { TextButton(enabled = !busy, onClick = { vm.confirmImport() }) { Text("确认恢复") } },
+            dismissButton = { TextButton(onClick = vm::dismissImport) { Text("取消") } })
+    }
     if (showHouseEdit) {
         val currentProfile = profile
         if (currentProfile != null) {
@@ -346,43 +359,40 @@ fun MoreScreen(onOpenPlanner: () -> Unit = {}) {
         }
     }
     if (showStylePick) {
-        StylePickDialog(styles = vm.styles, current = profile?.styleId, onPick = { vm.updateStyle(it); showStylePick = false; scope.launch { snackbar.showSnackbar("已保存") } }, onDismiss = { showStylePick = false })
+        StylePickDialog(styles = vm.styles, current = profile?.styleId, onPick = { vm.updateStyle(it) { showStylePick = false } }, onDismiss = { showStylePick = false })
     }
-    showContact?.let { c ->
-        ContactDialog(initial = c, onDismiss = { showContact = null }) { name, role, phone, note ->
-            vm.upsertContact(name, role, phone, note, if (c.id.isBlank()) null else c.id)
-            showContact = null
-            scope.launch { snackbar.showSnackbar("已保存") }
+    showContact?.let { c -> androidx.compose.runtime.key("showContact:${c.id}") {
+        ContactDialog(initial = c, onDismiss = { showContactId = null }) { name, role, phone, note ->
+            vm.upsertContact(name, role, phone, note, if (c.id.isBlank()) null else c.id) { showContactId = null }
+
         }
-    }
-    showNote?.let { n ->
-        NoteDialog(initial = n, onDismiss = { showNote = null }) { title, body ->
-            vm.upsertNote(title, body, if (n.id.isBlank()) null else n.id)
-            showNote = null
-            scope.launch { snackbar.showSnackbar("已保存") }
+    } }
+    showNote?.let { n -> androidx.compose.runtime.key("showNote:${n.id}") {
+        NoteDialog(initial = n, onDismiss = { showNoteId = null }) { title, body ->
+            vm.upsertNote(title, body, if (n.id.isBlank()) null else n.id) { showNoteId = null }
+
         }
-    }
-    showQuickNote?.let { q ->
+    } }
+    showQuickNote?.let { q -> androidx.compose.runtime.key("showQuickNote:${q.id}") {
         QuickNoteDialog(
             initial = q,
             stages = stages,
-            onDismiss = { showQuickNote = null },
+            onDismiss = { showQuickNoteId = null },
         ) { content, type, category, stageId ->
-            vm.upsertQuickNote(content, type, category, stageId, if (q.id.isBlank()) null else q.id)
-            showQuickNote = null
-            scope.launch { snackbar.showSnackbar("已保存") }
+            vm.upsertQuickNote(content, type, category, stageId, if (q.id.isBlank()) null else q.id) { showQuickNoteId = null }
+
         }
-    }
+    } }
     if (showReset) {
         AlertDialog(
             onDismissRequest = { showReset = false },
             title = { Text("清空全部数据") },
-            text = { Text("将删除所有任务、预算、联系人、笔记与备份，且不可恢复。建议先导出备份。确定继续？") },
+            text = { Text("将清空房屋、预算、报价、需求规划和全部记录，并恢复默认任务。外部备份文件不会删除。建议先导出备份，确定继续？") },
             confirmButton = {
                 TextButton(onClick = {
                     vm.resetAll()
                     showReset = false
-                    scope.launch { snackbar.showSnackbar("已清空全部数据") }
+
                 }) { Text("清除", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { showReset = false }) { Text("取消") } },
@@ -443,38 +453,29 @@ private fun LabeledDropdown(
 
 @Composable
 private fun HouseEditDialog(profile: HouseProfileEntity, vm: MoreViewModel, onDismiss: () -> Unit) {
-    var area by remember { mutableStateOf("%.0f".format(profile.areaM2)) }
-    var tier by remember { mutableStateOf(profile.tierId) }
-    var mode by remember { mutableStateOf(profile.modeId) }
-    var grade by remember { mutableStateOf(profile.gradeId) }
-    var startDate by remember { mutableStateOf(profile.startDate) }
-    var total by remember { mutableStateOf(java.lang.String.format(java.util.Locale.ROOT, "%.2f", profile.totalBudgetCents / 100.0)) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                vm.updateProfile(area.toDoubleOrNull() ?: profile.areaM2, tier, mode, grade, startDate)
-                vm.setTotalBudgetCents(MoneyUtil.fromYuan(total.toDoubleOrNull() ?: 0.0))
-                onDismiss()
-            }) { Text("保存") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
-        title = { Text("编辑房屋信息") },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()).imePadding(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                OutlinedTextField(value = area, onValueChange = { area = it }, label = { Text("面积（㎡）") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
-                LabeledDropdown("城市能级", vm.tiers.map { it.id to it.name }, tier) { tier = it }
-                LabeledDropdown("装修方式", vm.modes.map { it.id to it.name }, mode) { mode = it }
-                LabeledDropdown("档次", vm.grades.map { it.id to it.name }, grade) { grade = it }
-                DatePickerField(value = startDate, onDateSelected = { startDate = it }, label = "开工日期")
-                OutlinedTextField(value = total, onValueChange = { total = it }, label = { Text("总预算（元）") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
+    var area by rememberSaveable { mutableStateOf(profile.areaM2) }
+    var tier by rememberSaveable { mutableStateOf(profile.tierId) }
+    var mode by rememberSaveable { mutableStateOf(profile.modeId) }
+    var grade by rememberSaveable { mutableStateOf(profile.gradeId) }
+    var date by rememberSaveable { mutableStateOf(profile.startDate) }
+    var budget by rememberSaveable { mutableStateOf(profile.totalBudgetCents) }
+    val form = remember { FormState() }
+    val busy by vm.isBusy.collectAsState()
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("房屋与预算设置") },
+        text = { CompositionLocalProvider(LocalFormState provides form) {
+            Column(Modifier.verticalScroll(rememberScrollState()).imePadding(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                NumberField("建筑面积（㎡）", area) { area = it ?: area }
+                ChoiceField("城市能级", tier, vm.tiers.map { it.id to it.name }) { tier = it }
+                ChoiceField("装修方式", mode, vm.modes.map { it.id to it.name }) { mode = it }
+                ChoiceField("档次", grade, vm.grades.map { it.id to it.name }) { grade = it }
+                DatePickerField(date, { date = it }, "开工日期", onClear = { date = null })
+                MoneyField("总预算上限（元）", budget) { budget = it }
+                Text("修改开工日期不会重排已有任务日期。", style = MaterialTheme.typography.bodySmall)
             }
-        },
-    )
+        } },
+        confirmButton = { TextButton(enabled = form.valid && !busy, onClick = {
+            vm.saveHouse(area, tier, mode, grade, date, budget, onDismiss)
+        }) { Text("保存") } }, dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } })
 }
 
 @Composable
@@ -516,10 +517,10 @@ private fun ContactDialog(
     onDismiss: () -> Unit,
     onSave: (name: String, role: String?, phone: String?, note: String?) -> Unit,
 ) {
-    var name by remember { mutableStateOf(initial.name) }
-    var role by remember { mutableStateOf(initial.role ?: "") }
-    var phone by remember { mutableStateOf(initial.phone ?: "") }
-    var note by remember { mutableStateOf(initial.note ?: "") }
+    var name by rememberSaveable { mutableStateOf(initial.name) }
+    var role by rememberSaveable { mutableStateOf(initial.role ?: "") }
+    var phone by rememberSaveable { mutableStateOf(initial.phone ?: "") }
+    var note by rememberSaveable { mutableStateOf(initial.note ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -564,8 +565,8 @@ private fun NoteDialog(
     onDismiss: () -> Unit,
     onSave: (title: String, body: String) -> Unit,
 ) {
-    var title by remember { mutableStateOf(initial.title) }
-    var body by remember { mutableStateOf(initial.body) }
+    var title by rememberSaveable { mutableStateOf(initial.title) }
+    var body by rememberSaveable { mutableStateOf(initial.body) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -644,10 +645,10 @@ private fun QuickNoteDialog(
     onDismiss: () -> Unit,
     onSave: (content: String, type: String, category: String?, stageId: String?) -> Unit,
 ) {
-    var content by remember { mutableStateOf(initial.content) }
-    var type by remember { mutableStateOf(initial.type) }
-    var category by remember { mutableStateOf(initial.category ?: QuickNoteEntity.CATEGORY_FURNITURE) }
-    var stageId by remember { mutableStateOf(initial.stageId ?: stages.firstOrNull()?.id ?: "") }
+    var content by rememberSaveable { mutableStateOf(initial.content) }
+    var type by rememberSaveable { mutableStateOf(initial.type) }
+    var category by rememberSaveable { mutableStateOf(initial.category ?: QuickNoteEntity.CATEGORY_FURNITURE) }
+    var stageId by rememberSaveable { mutableStateOf(initial.stageId ?: stages.firstOrNull()?.id ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,

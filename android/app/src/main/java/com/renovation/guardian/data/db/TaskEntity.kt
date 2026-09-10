@@ -1,5 +1,7 @@
 package com.renovation.guardian.data.db
 
+import kotlinx.serialization.Serializable
+
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -12,6 +14,7 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "task",
 )
+@Serializable
 data class TaskEntity(
     @PrimaryKey @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "stage_id", index = true) val stageId: String,

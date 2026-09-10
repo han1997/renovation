@@ -1,5 +1,6 @@
 package com.renovation.guardian.data.knowledge
 
+import androidx.room.withTransaction
 import com.renovation.guardian.data.db.AppDatabase
 import com.renovation.guardian.data.db.BudgetCategoryEntity
 import com.renovation.guardian.data.db.ChecklistEntity
@@ -25,12 +26,14 @@ class KnowledgeSeeder(
     suspend fun seedIfEmpty(today: String) {
         cache.load()
         val knowledge = cache.knowledge ?: return
-        seedStages(knowledge)
-        seedChecklists(knowledge)
+        db.withTransaction {
+            seedStages(knowledge)
+            seedChecklists(knowledge)
+        }
     }
 
     private suspend fun seedStages(knowledge: KnowledgeJson) {
-        if (db.stageDao().count() > 0 && db.taskTemplateDao().count() > 0) return
+        if (db.stageDao().count() > 0) return // 用户主动删空任务不能触发重新播种。
         val stages = knowledge.stages.mapIndexed { idx, st ->
             StageEntity(
                 id = st.id,
@@ -61,6 +64,15 @@ class KnowledgeSeeder(
         }
         db.stageDao().seedAll(stages)
         db.taskTemplateDao().seedAll(templates)
+    }
+
+    suspend fun restoreTaskTemplates() {
+        cache.load()
+        val knowledge = requireNotNull(cache.knowledge)
+        db.taskTemplateDao().clear()
+        db.taskTemplateDao().seedAll(knowledge.stages.flatMap { stage ->
+            stage.tasks.mapIndexed { index, task -> TaskTemplateEntity(task.id, stage.id, index, task.text, task.tip) }
+        })
     }
 
     private suspend fun seedChecklists(knowledge: KnowledgeJson) {

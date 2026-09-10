@@ -1,330 +1,223 @@
 package com.renovation.guardian.ui.quote
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.renovation.guardian.data.knowledge.MaterialVariant
-import com.renovation.guardian.data.knowledge.SurfaceCategory
-import com.renovation.guardian.ui.components.SectionCard
-import com.renovation.guardian.ui.quote.engine.CeilingPlan
-import com.renovation.guardian.ui.quote.engine.QuoteMode
-import com.renovation.guardian.ui.quote.engine.QuoteRoomState
-import com.renovation.guardian.ui.quote.engine.Sourcing
-import com.renovation.guardian.ui.quote.engine.SurfaceSelection
+import com.renovation.guardian.data.db.QuotePlanEntity
+import com.renovation.guardian.data.db.BudgetCategoryEntity
+import com.renovation.guardian.ui.components.*
+import com.renovation.guardian.ui.quote.engine.*
+import com.renovation.guardian.domain.quote.*
+import com.renovation.guardian.ui.quote.export.QuoteTextBuilder
 import com.renovation.guardian.util.MoneyUtil
-import kotlinx.coroutines.launch
+import com.renovation.guardian.util.LongImageRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuoteScreen(onBack: () -> Unit = {}) {
-    val vm: QuoteViewModel = viewModel()
-    val clipboard = LocalClipboardManager.current
-    val catalog = vm.catalog
+fun QuoteScreen(onBack: () -> Unit = {}, vm: QuoteViewModel = viewModel()) {
+    val plans by vm.plans.collectAsState(emptyList())
+    val busy by vm.isBusy.collectAsState()
     val snackbar = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    var showResult by remember { mutableStateOf(false) }
+    var footerHeight by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+    LaunchedEffect(vm.editing, vm.state.wizardStep) {
+        snackbar.currentSnackbarData?.dismiss()
+        if (!vm.editing) footerHeight = 0
+    }
+    OperationFeedback(vm, snackbar)
+    var discard by remember { mutableStateOf(false) }
+    var rename by remember { mutableStateOf<QuotePlanEntity?>(null) }
+    var deleting by remember { mutableStateOf<QuotePlanEntity?>(null) }
+    fun back() { if (!vm.editing) onBack() else if (vm.dirty) discard = true else vm.closeEditor() }
+    BackHandler(vm.editing) { if (!busy) back() }
+    Scaffold(topBar = { TopAppBar(title = { Text(if (vm.editing) vm.planName else "逐空间报价", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+        actions = { if (vm.editing && vm.state.wizardStep == 4) TextButton(enabled = !busy, onClick = { vm.setStep(3) }) { Text("修改配置") } },
+        navigationIcon = { IconButton(enabled = !busy, onClick = ::back) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") } }) },
+        snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = with(density) { footerHeight.toDp() })) }) { inner ->
+        if (!vm.editing) {
+            LazyColumn(Modifier.fillMaxSize().padding(inner), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                item {
+                    Text("我的报价方案", style = MaterialTheme.typography.titleLarge)
+                    Text("整装、半包和局改均支持独立保存。预算比较包含自购，应用报价不会改变房屋预算上限。", style = MaterialTheme.typography.bodyMedium)
+                    Button(enabled = !busy, onClick = { vm.newPlan() }) { Text("新建报价方案") }
+                }
+                if (plans.isEmpty()) item { Text("还没有保存的方案，从新建报价开始。") }
+                items(plans, key = { it.id }) { plan ->
+                    SectionCard(onClick = { if (!busy) vm.loadPlan(plan.id) }) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(plan.name, style = MaterialTheme.typography.titleMedium)
+                            Text("${QuoteMode.entries.firstOrNull { it.name.lowercase() == plan.mode }?.label ?: plan.mode} · 更新于 ${plan.updatedAt}", style = MaterialTheme.typography.bodySmall)
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                TextButton(enabled = !busy, onClick = { vm.loadPlan(plan.id) }) { Text("打开") }
+                                TextButton(enabled = !busy, onClick = { rename = plan }) { Text("重命名") }
+                                TextButton(enabled = !busy, onClick = { deleting = plan }) { Text("删除") }
+                            }
+                        }
+                    }
+                }
+            }
+        } else QuoteEditor(vm, Modifier.padding(inner)) { footerHeight = it }
+    }
+    if (discard) AlertDialog(onDismissRequest = { discard = false }, title = { Text("放弃未保存的修改？") },
+        text = { Text("当前修改尚未保存，离开后无法恢复。已保存的方案不受影响。") },
+        confirmButton = { TextButton(onClick = { vm.closeEditor(); discard = false }) { Text("放弃修改") } },
+        dismissButton = { TextButton(onClick = { discard = false }) { Text("继续编辑") } })
+    rename?.let { plan -> NameDialog("重命名方案", plan.name, busy, { rename = null }) { vm.renamePlan(plan, it) { rename = null } } }
+    deleting?.let { plan -> ConfirmDeleteDialog(title = "删除报价方案", text = "确定删除「${plan.name}」？已应用的预算和支出不会删除。",
+        onConfirm = { vm.deletePlan(plan.id); deleting = null }, onDismiss = { deleting = null }) }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun QuoteEditor(vm: QuoteViewModel, modifier: Modifier, onFooterMeasured: (Int) -> Unit) {
+    val form = remember(vm.editorRevision, vm.state.wizardStep) { FormState() }
+    val busy by vm.isBusy.collectAsState()
     val result = vm.result
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("逐空间报价") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-                },
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbar) },
-    ) { inner ->
-        if (catalog == null) {
-            Text("目录数据未加载", modifier = Modifier.padding(inner).padding(24.dp))
-            return@Scaffold
+    var incompleteConfirm by remember { mutableStateOf(false) }
+    val step = vm.state.wizardStep
+    val partial = vm.state.mode == QuoteMode.PARTIAL
+    val labels = if (partial) listOf("房屋信息", "局改事项", "附加费用", "清单") else listOf("房屋信息", "划分空间", "逐空间选材", "清单")
+    val nextError = when (step) {
+        1 -> if (vm.state.house.totalArea <= 0 || vm.state.house.ceilingHeight <= 0) "请填写有效房屋信息" else null
+        2 -> if (partial) {
+            if (vm.state.partialWorks.none { it.enabled && it.qtyRows.any { row -> row.area > 0 } }) "请启用局改事项并填写面积" else null
+        } else if (vm.state.rooms.isEmpty() || vm.state.rooms.any { it.name.isBlank() || it.area <= 0 }) "请添加空间并填写名称与面积" else null
+        else -> vm.completionError()
+    }
+    Column(modifier.fillMaxSize().imePadding()) {
+        if (step < 4) {
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            ChoiceField("报价方式", vm.state.mode, QuoteMode.entries.map { it to it.label }, enabled = !busy && form.valid) { vm.setMode(it) }
         }
-        Column(
-            modifier = Modifier.fillMaxSize().padding(inner).padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            // 模式选择
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                QuoteMode.entries.forEach { m ->
-                    FilterChip(
-                        selected = vm.state.mode == m,
-                        onClick = { vm.setMode(m) },
-                        label = { Text(m.label) },
-                    )
-                }
-            }
-            when {
-                showResult && result != null -> ResultStep(vm, result, snackbar, scope, clipboard) { showResult = false }
-                else -> {
-                    HouseStep(vm)
-                    SpacesStep(vm, catalog.wall + catalog.ceiling + catalog.floor)
-                    HouseWorksStep(vm)
-                    Button(
-                        onClick = { showResult = true },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { Icon(Icons.AutoMirrored.Filled.ArrowForward, null); Text("  生成清单") }
+        ScrollableTabRow(selectedTabIndex = step - 1, edgePadding = 8.dp) {
+            labels.forEachIndexed { index, label -> Tab(selected = step == index + 1, enabled = !busy && form.valid && index + 1 <= step,
+                onClick = { vm.setStep(index + 1) }, text = { Text("${index + 1} $label") }) }
+        }
+        }
+        Box(Modifier.weight(1f)) {
+            if (step == 4) QuoteResultContent(vm, onFooterMeasured)
+            else key(vm.editorRevision, step) {
+                CompositionLocalProvider(LocalFormState provides form) {
+                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        when (step) { 1 -> HouseStep(vm); 2 -> if (partial) PartialWorksStep(vm) else RoomsStep(vm); 3 -> if (partial) PartialFeesStep(vm) else MaterialsStep(vm) }
+                    }
                 }
             }
         }
-    }
-}
-
-// ── Step 1: 房屋信息 ──
-@Composable
-private fun HouseStep(vm: QuoteViewModel) {
-    SectionCard {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("房屋信息", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            var area by remember { mutableStateOf(vm.state.house.totalArea.toString()) }
-            var budget by remember { mutableStateOf(MoneyUtil.format(vm.state.house.budgetCents)) }
-            var height by remember { mutableStateOf(vm.state.house.ceilingHeight.toString()) }
-            OutlinedTextField(
-                value = area, onValueChange = { area = it },
-                label = { Text("总建面(m2)") }, singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = budget, onValueChange = { budget = it },
-                label = { Text("预算(元)") }, singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = height, onValueChange = { height = it },
-                label = { Text("完成面层高(m)") }, singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Button(
-                onClick = {
-                    vm.setHouse(
-                        area.toDoubleOrNull() ?: 0.0,
-                        (budget.replace(",", "").toDoubleOrNull() ?: 0.0).let { MoneyUtil.fromYuan(it) },
-                        height.toDoubleOrNull() ?: 2.4,
-                    )
-                },
-                enabled = (area.toDoubleOrNull() ?: 0.0) > 0,
-            ) { Text("应用") }
-        }
-    }
-}
-
-// ── Step 2: 空间划分 + 逐空间选材 ──
-@Composable
-private fun SpacesStep(vm: QuoteViewModel, allCats: List<SurfaceCategory>) {
-    SectionCard {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("空间与选材", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            vm.state.rooms.forEachIndexed { idx, room ->
-                RoomRow(vm, idx, room, allCats)
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { addRecommendedRoom(vm) }) { Text("按面积推荐") }
-                OutlinedButton(onClick = { addEmptyRoom(vm) }) { Text("添加房间") }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RoomRow(vm: QuoteViewModel, idx: Int, room: QuoteRoomState, allCats: List<SurfaceCategory>) {
-    var expanded by remember { mutableStateOf(false) }
-    Column {
-        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(vertical = 6.dp)) {
-            Text(room.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-            Text("${(room.area * 10).toInt() / 10.0}m2", style = MaterialTheme.typography.bodySmall)
-            Text(if (expanded) "▲" else "▼", color = MaterialTheme.colorScheme.primary)
-        }
-        if (expanded) {
-            RoomEditor(vm, idx, room, allCats)
-        }
-    }
-}
-
-@Composable
-private fun RoomEditor(vm: QuoteViewModel, idx: Int, room: QuoteRoomState, allCats: List<SurfaceCategory>) {
-    var name by remember { mutableStateOf(room.name) }
-    var area by remember { mutableStateOf(room.area.toString()) }
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("房间名") }, singleLine = true, modifier = Modifier.weight(1f))
-            OutlinedTextField(value = area, onValueChange = { area = it }, label = { Text("面积") }, singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.weight(1f))
-        }
-        // 墙面
-        SurfacePicker(label = "墙面", sel = room.wall,
-            onChange = { s -> vm.updateRoom(idx) { it.copy(wall = s) } },
-            cats = allCats.filter { it.id.startsWith("wall") },
-        )
-        // 地面
-        SurfacePicker(label = "地面", sel = room.floor,
-            onChange = { s -> vm.updateRoom(idx) { it.copy(floor = s) } },
-            cats = allCats.filter { it.id.startsWith("floor") },
-        )
-        Button(onClick = {
-            vm.updateRoom(idx) {
-                it.copy(name = name.ifBlank { it.name }, area = area.toDoubleOrNull() ?: it.area)
-            }
-        }) { Text("应用房间设置") }
-    }
-}
-
-@Composable
-private fun SurfacePicker(
-    label: String,
-    sel: SurfaceSelection,
-    onChange: (SurfaceSelection) -> Unit,
-    cats: List<SurfaceCategory>,
-) {
-    Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    val category = cats.firstOrNull { it.id == sel.categoryId } ?: cats.firstOrNull()
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            cats.forEach { c ->
-                FilterChip(selected = sel.categoryId == c.id, onClick = {
-                    onChange(sel.copy(categoryId = c.id, variantId = c.variants.firstOrNull()?.id,
-                        specId = c.variants.firstOrNull()?.specs?.firstOrNull()?.id))
-                }, label = { Text(c.label) })
-            }
-        }
-        if (category != null) {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                category.variants.forEach { v ->
-                    FilterChip(selected = sel.variantId == v.id, onClick = {
-                        onChange(sel.copy(variantId = v.id, specId = v.specs.firstOrNull()?.id))
-                    }, label = { Text(variantLabel(v)) })
+        if (step < 4) Surface(modifier = Modifier.onSizeChanged { onFooterMeasured(it.height) }, tonalElevation = 2.dp) {
+            Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (result != null) {
+                    Text("本方案合计 ¥${MoneyUtil.formatFull(result.estimatedTotalCents)}（含自购）", style = MaterialTheme.typography.titleMedium)
+                    if (result.overBudget) Text("超出方案预算 ¥${MoneyUtil.formatFull(result.overBudgetCents)}", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+                if (!form.valid || nextError != null) Text(if (!form.valid) "请修正标红字段" else nextError.orEmpty(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    OutlinedButton(enabled = !busy && form.valid && step > 1, onClick = { vm.setStep(step - 1) }) { Text("上一步") }
+                    Button(enabled = !busy && form.valid && nextError == null, onClick = { if (step == 3 && vm.unconfiguredRooms().isNotEmpty()) incompleteConfirm = true else vm.setStep(step + 1) }) { Text(if (step == 3) "生成完整清单" else "下一步") }
                 }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            FilterChip(selected = sel.sourcing == Sourcing.INCLUDED,
-                onClick = { onChange(sel.copy(sourcing = Sourcing.INCLUDED)) }, label = { Text("施工方代购") })
-            FilterChip(selected = sel.sourcing == Sourcing.SELF,
-                onClick = { onChange(sel.copy(sourcing = Sourcing.SELF)) }, label = { Text("自购") })
-        }
     }
+    if (incompleteConfirm) AlertDialog(onDismissRequest = { incompleteConfirm = false }, title = { Text("部分空间尚未配置") },
+        text = { Text("${vm.unconfiguredRooms().joinToString("、") { it.name }} 未配置选材或工程，将不会计算这些空间的装修费用。") },
+        confirmButton = { TextButton(onClick = { vm.setStep(4); incompleteConfirm = false }) { Text("仅生成已配置项目") } },
+        dismissButton = { TextButton(onClick = { incompleteConfirm = false }) { Text("继续配置") } })
+
 }
 
-private fun variantLabel(v: MaterialVariant): String = v.brand.ifBlank { v.id } + if (v.series.isNotBlank()) "·${v.series}" else ""
-
-private fun addRecommendedRoom(vm: QuoteViewModel) {
-    val rooms = vm.state.rooms.toMutableList()
-    rooms += QuoteRoomState(
-        id = "r${System.currentTimeMillis()}",
-        name = "空间${rooms.size + 1}",
-        area = (vm.state.house.totalArea / 3).let { (it * 10).toInt() / 10.0 },
-    )
-    vm.setRooms(rooms)
-}
-
-private fun addEmptyRoom(vm: QuoteViewModel) {
-    val rooms = vm.state.rooms.toMutableList()
-    rooms += QuoteRoomState(id = "r${System.currentTimeMillis()}", name = "空间${rooms.size + 1}", area = 0.0)
-    vm.setRooms(rooms)
-}
-
-// ── 全屋工程(整装/半包) ──
 @Composable
-private fun HouseWorksStep(vm: QuoteViewModel) {
-    if (vm.state.mode == QuoteMode.PARTIAL) return
-    val names = mapOf("plumbing" to "水电改造", "hauling" to "垃圾清运", "cleaning" to "开荒保洁", "protection" to "成品保护")
-    SectionCard {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("全屋工程", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            names.forEach { (id, label) ->
-                val input = vm.state.houseWorks[id]
-                FilterChip(selected = input?.enabled == true, onClick = { vm.setHouseWorks(id, input?.enabled != true, null) }, label = { Text(label) })
+private fun QuoteResultContent(vm: QuoteViewModel, onFooterMeasured: (Int) -> Unit) {
+    val result = vm.result ?: return
+    val categories by vm.categories.collectAsState(emptyList())
+    val busy by vm.isBusy.collectAsState()
+    val clipboard = LocalClipboardManager.current
+    var save by rememberSaveable { mutableStateOf(false) }
+    var asNew by rememberSaveable { mutableStateOf(false) }
+    var applying by remember { mutableStateOf(false) }
+    var copied by remember { mutableStateOf(false) }
+    Column(Modifier.fillMaxSize()) {
+    LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item {
+            SectionCard { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("报价清单", style = MaterialTheme.typography.titleLarge)
+                MoneyLine("施工方报价", result.totalCents)
+                MoneyLine("自购预计", result.summary.selfMainCents)
+                MoneyLine("本方案合计", result.estimatedTotalCents, emphasized = true)
+                Text(if (result.overBudget) "超出预算 ¥${MoneyUtil.formatFull(result.overBudgetCents)}" else "预算剩余 ¥${MoneyUtil.formatFull(result.budgetRemainCents)}",
+                    color = if (result.overBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
+                if (vm.unconfiguredRooms().isNotEmpty()) Text("未计空间费用：${vm.unconfiguredRooms().joinToString("、") { it.name }}", color = MaterialTheme.colorScheme.error)
+                Text("参考报价不代替施工合同，按实际工程量与采购价核对。", style = MaterialTheme.typography.bodySmall)
+                TextButton(onClick = { clipboard.setText(AnnotatedString(QuoteTextBuilder.build(result, vm.state.mode.label, vm.state.house.totalArea, vm.state.house.ceilingHeight, vm.unconfiguredRooms().map { it.name }))); copied = true }) { Text(if (copied) "已复制" else "复制完整文本") }
+                ImageExportActions("装修报价清单", "${vm.state.mode.label} · 合计 ¥${MoneyUtil.formatFull(result.estimatedTotalCents)}（含自购）",
+                    (if (vm.unconfiguredRooms().isEmpty()) emptyList() else listOf(LongImageRow("未配置空间（未计空间费用）", vm.unconfiguredRooms().joinToString("、") { it.name }))) + listOf(LongImageRow("施工方报价", "¥${MoneyUtil.formatFull(result.totalCents)}"), LongImageRow("自购预计", "¥${MoneyUtil.formatFull(result.summary.selfMainCents)}")) + result.lines.map {
+                        LongImageRow("${it.roomName?.let { name -> "【$name】" }.orEmpty()}${it.label}", "¥${MoneyUtil.formatFull(it.subtotalCents)}",
+                            "${it.quantityText}${it.unit} × ¥${MoneyUtil.formatFull(it.unitPriceCents)} · ${it.sourcing.label}${it.note?.let { note -> " · $note" }.orEmpty()}")
+                    })
+            } }
+        }
+        itemsIndexed(result.lines, key = { index, line -> "${line.key}-$index" }) { index, line ->
+            if (index == 0 || result.lines[index - 1].roomName != line.roomName) Text(line.roomName ?: "全屋及其他费用", style = MaterialTheme.typography.titleMedium)
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(line.label, style = MaterialTheme.typography.bodyLarge)
+                Text("${line.quantityText}${line.unit} × ¥${MoneyUtil.formatFull(line.unitPriceCents)} = ¥${MoneyUtil.formatFull(line.subtotalCents)}", style = MaterialTheme.typography.bodyMedium)
+                Text("${line.partLabel} · ${line.sourcing.label}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                line.note?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
         }
     }
+    Surface(modifier = Modifier.onSizeChanged { onFooterMeasured(it.height) }, tonalElevation = 2.dp) {
+        FlowRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(enabled = !busy, onClick = { asNew = false; save = true }) { Text("保存方案") }
+            OutlinedButton(enabled = !busy && result.estimatedTotalCents > 0, onClick = { applying = true }) { Text("应用预算") }
+            TextButton(enabled = !busy, onClick = { asNew = true; save = true }) { Text("另存为") }
+        }
+    }
+    }
+    if (save) NameDialog(if (asNew) "另存新方案" else "保存方案", vm.planName, busy, { save = false }) { vm.savePlan(it, asNew) { save = false } }
+    if (applying) BudgetApplyDialog(vm, result, categories) { applying = false }
 }
 
-// ── 结果页 ──
 @Composable
-private fun ResultStep(
-    vm: QuoteViewModel,
-    result: com.renovation.guardian.ui.quote.engine.QuoteResult,
-    snackbar: SnackbarHostState,
-    scope: kotlinx.coroutines.CoroutineScope,
-    clipboard: androidx.compose.ui.platform.ClipboardManager,
-    onBackEdit: () -> Unit,
-) {
-    SectionCard {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("报价清单", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            val total = result.totalCents
-            Text("预计总价:¥${MoneyUtil.format(total)}", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-            if (result.overBudget) {
-                Text("⚠ 超出预算:¥${MoneyUtil.format(result.overBudgetCents)}", color = MaterialTheme.colorScheme.error)
-            } else {
-                Text("预算剩余:¥${MoneyUtil.format(result.budgetRemainCents)}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            result.lines.take(30).forEach { l ->
-                Text("${l.label}  ${l.quantityText}${l.unit} × ¥${MoneyUtil.format(l.unitPriceCents)} = ¥${MoneyUtil.format(l.subtotalCents)}${if (l.sourcing == Sourcing.SELF) " (自购)" else ""}",
-                    style = MaterialTheme.typography.bodySmall)
-            }
-            if (result.lines.size > 30) {
-                Text("…共 ${result.lines.size} 行", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { onBackEdit() }) { Text("返回修改") }
-                Button(onClick = {
-                    val text = com.renovation.guardian.ui.quote.export.QuoteTextBuilder.build(
-                        result, vm.state.mode.label, vm.state.house.totalArea, vm.state.house.ceilingHeight,
-                    )
-                    clipboard.setText(AnnotatedString(text))
-                    scope.launch { snackbar.showSnackbar("清单已复制") }
-                }) { Text("复制文本") }
-                Button(onClick = { vm.savePlan("方案 ${vm.state.mode.label}", { ok -> scope.launch { snackbar.showSnackbar(if (ok) "已保存" else "保存失败") } }) }) { Text("保存方案") }
-                Button(onClick = {
-                    vm.writeToBudget { ok -> scope.launch { snackbar.showSnackbar(if (ok) "已写入预算" else "写入失败") } }
-                }) { Text("写入预算") }
-            }
-        }
-    }
+private fun BudgetApplyDialog(vm: QuoteViewModel, result: QuoteResult, categories: List<BudgetCategoryEntity>, onDismiss: () -> Unit) {
+    val buckets = remember(result, categories) { QuoteBudgetMapping.buckets(result, categories) }
+    val targets = remember(buckets) { mutableStateMapOf<String, String>().apply { buckets.forEach { b -> b.suggestedCategory?.let { put(b.key, it) } } } }
+    val preview = runCatching { QuoteBudgetMapping.preview(result, categories, targets) }.getOrNull()
+    val busy by vm.isBusy.collectAsState()
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("预览分类计划变更") },
+        text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("覆盖以下分类的计划金额；其他分类、房屋总预算上限和历史支出不变。")
+            if (categories.isEmpty()) Text("请先在预算页添加分类。")
+            buckets.forEach { bucket -> ChoiceField("${bucket.label} ¥${MoneyUtil.formatFull(bucket.cents)}", targets[bucket.key], categories.map { it.id as String? to it.name }) { id -> if (id != null) targets[bucket.key] = id } }
+            if (preview == null) Text("请为每个费用大项选择目标分类。", color = MaterialTheme.colorScheme.error)
+            preview?.changes?.forEach { Text("${it.name}：¥${MoneyUtil.formatFull(it.beforeCents)} → ¥${MoneyUtil.formatFull(it.afterCents)}") }
+        } },
+        confirmButton = { TextButton(enabled = !busy && preview != null, onClick = { preview?.let { vm.applyBudget(it, onDismiss) } }) { Text("确认应用") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } })
+}
+
+@Composable
+private fun NameDialog(title: String, initial: String, busy: Boolean, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+    var name by rememberSaveable { mutableStateOf(initial) }
+    AlertDialog(onDismissRequest = onDismiss, title = { Text(title) },
+        text = { OutlinedTextField(name, { name = it }, label = { Text("方案名称") }, singleLine = true,
+            isError = name.isBlank(), supportingText = { if (name.isBlank()) Text("请输入名称") }, modifier = Modifier.imePadding()) },
+        confirmButton = { TextButton(enabled = name.isNotBlank() && !busy, onClick = { onSave(name.trim()) }) { Text("保存") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } })
 }

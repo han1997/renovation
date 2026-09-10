@@ -1,281 +1,191 @@
 package com.renovation.guardian.ui.planner
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.renovation.guardian.data.knowledge.RequirementItemJson
-import com.renovation.guardian.ui.components.SectionCard
-import com.renovation.guardian.ui.planner.engine.DemandPick
-import com.renovation.guardian.ui.planner.engine.Importance
+import com.renovation.guardian.ui.components.*
+import com.renovation.guardian.ui.planner.engine.*
+import com.renovation.guardian.domain.planner.*
+import com.renovation.guardian.util.LongImageRow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlannerScreen(onBack: () -> Unit = {}) {
-    val vm: PlannerViewModel = viewModel()
-    val catalog = vm.catalog
+fun PlannerScreen(onBack: () -> Unit = {}, vm: PlannerViewModel = viewModel()) {
     val snackbar = remember { SnackbarHostState() }
+    var footerHeight by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+    val stepStates = rememberSaveableStateHolder()
     val scope = rememberCoroutineScope()
-    val clipboard = LocalClipboardManager.current
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("需求规划") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回") }
-                },
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbar) },
-    ) { inner ->
-        if (catalog == null) {
-            Text("目录数据未加载", modifier = Modifier.padding(inner).padding(24.dp))
+    var clear by remember { mutableStateOf(false) }
+    OperationFeedback(vm, snackbar)
+    BackHandler(vm.saving || vm.saveError != null) { scope.launch { snackbar.showSnackbar("请等待保存完成，失败时请先重试") } }
+    Scaffold(topBar = { TopAppBar(title = { Text("需求规划") },
+        navigationIcon = { IconButton(enabled = !vm.saving && vm.saveError == null, onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回") } },
+        actions = { TextButton(enabled = !vm.loading && vm.state.picked.isNotEmpty(), onClick = { clear = true }) { Text("清空已选") } }) },
+        snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = with(density) { footerHeight.toDp() })) }) { inner ->
+        if (vm.loading) { LoadingState(); return@Scaffold }
+        if (vm.loadError != null || vm.catalog == null) {
+            Column(Modifier.padding(inner).padding(16.dp)) { Text(vm.loadError ?: "目录数据不可用"); Button(onClick = vm::reload) { Text("重试") } }
             return@Scaffold
         }
-        Column(modifier = Modifier.fillMaxSize().padding(inner)) {
-            // 步骤条
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                listOf("选需求", "空间", "分配", "清单").forEachIndexed { i, label ->
-                    FilterChip(
-                        selected = vm.state.step == i + 1,
-                        onClick = { vm.setStep(i + 1) },
-                        label = { Text("${i + 1}.$label") },
-                    )
+        Column(Modifier.fillMaxSize().padding(inner).imePadding()) {
+            ScrollableTabRow(selectedTabIndex = vm.state.step - 1, edgePadding = 8.dp) {
+                listOf("选择需求", "添加空间", "分配需求", "生成清单").forEachIndexed { index, label ->
+                    Tab(selected = vm.state.step == index + 1, onClick = { vm.setStep(index + 1) }, text = { Text("${index + 1} $label") })
                 }
             }
-            when (vm.state.step) {
-                1 -> PickStep(vm, catalog)
-                2 -> RoomsStep(vm, catalog)
-                3 -> AssignStep(vm)
-                else -> ResultStep(vm, snackbar, scope, clipboard)
+            if (vm.saveError != null) Row(Modifier.padding(horizontal = 16.dp)) {
+                Text(vm.saveError.orEmpty(), modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.error)
+                TextButton(onClick = vm::persist) { Text("重试保存") }
+            } else Text(if (vm.saving) "正在保存…" else "已自动保存", modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Box(Modifier.weight(1f)) {
+                stepStates.SaveableStateProvider(vm.state.step) { when (vm.state.step) { 1 -> PickStep(vm); 2 -> RoomsStep(vm); 3 -> AssignStep(vm); else -> ResultStep(vm) } }
+            }
+            Row(Modifier.fillMaxWidth().onSizeChanged { footerHeight = it.height }.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                OutlinedButton(enabled = vm.state.step > 1, onClick = { vm.setStep(vm.state.step - 1) }) { Text("上一步") }
+                if (vm.state.step < 4) Button(onClick = { vm.setStep(vm.state.step + 1) }) { Text("下一步") }
+                else TextButton(onClick = { vm.setStep(1) }) { Text("返回选择") }
             }
         }
     }
+    if (clear) ConfirmDeleteDialog(title = "清空已选需求", text = "所有已选需求和分配将清空，空间列表保留。",
+        onConfirm = { vm.clearPicks(); clear = false }, onDismiss = { clear = false })
 }
 
-// ── Step 1: 选择需求(按空间分组浏览 + 搜索) ──
 @Composable
-private fun PickStep(vm: PlannerViewModel, catalog: com.renovation.guardian.data.knowledge.DecoboxRequirementsJson) {
-    var query by remember { mutableStateOf("") }
-    var spaceKey by remember { mutableStateOf(catalog.spaceList.firstOrNull()?.key ?: "") }
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-        OutlinedTextField(
-            value = query, onValueChange = { query = it }, label = { Text("搜索需求") },
-            singleLine = true, modifier = Modifier.fillMaxWidth(),
-        )
-        // 空间 chips
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            catalog.spaceList.take(5).forEach { sp ->
-                FilterChip(selected = spaceKey == sp.key, onClick = { spaceKey = sp.key }, label = { Text(sp.name) })
-            }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            catalog.spaceList.drop(5).forEach { sp ->
-                FilterChip(selected = spaceKey == sp.key, onClick = { spaceKey = sp.key }, label = { Text(sp.name) })
-            }
-        }
-        Text("已选 ${vm.state.picked.size} 项 · 去分配 →", color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.clickable { vm.setStep(3) }.padding(vertical = 4.dp))
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxSize()) {
-            val space = catalog.spaceList.firstOrNull { it.key == spaceKey } ?: return@LazyColumn
-            val typeList = catalog.typeListBySpace[spaceKey] ?: emptyList()
-            val types = if (query.isBlank()) typeList else typeList.filter { t -> t.name.contains(query, ignoreCase = true) }
-            types.forEach { type ->
-                val typeName = type.name.removePrefix("(功能)").removePrefix("(收纳)").removePrefix("(设备)")
-                item(key = type.key) {
-                    Text(typeName, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                }
-                val items = catalog.functionsByType[type.key] ?: emptyList()
-                val filtered = if (query.isBlank()) items else items.filter { it.name.contains(query, ignoreCase = true) }
-                item(key = "${type.key}-head") {
-                    SectionCard {
-                        Column {
-                            filtered.forEachIndexed { i, item ->
-                                if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { vm.togglePick(pickOf(space.name, spaceKey, type, item)) }) {
-                                    Checkbox(checked = vm.state.picked.any { p -> p.itemKey == item.key },
-                                        onCheckedChange = { vm.togglePick(pickOf(space.name, spaceKey, type, item)) })
-                                    Text(item.name, style = MaterialTheme.typography.bodyMedium)
-                                }
-                            }
-                        }
-                    }
+private fun PickStep(vm: PlannerViewModel) {
+    val catalog = vm.catalog ?: return
+    var query by rememberSaveable { mutableStateOf("") }
+    var space by rememberSaveable { mutableStateOf("") }
+    val result = remember(query, space, catalog) { PlannerRules.search(catalog, query, space) }
+    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(query, { query = it }, label = { Text("搜索需求名称或类型") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        ChoiceField("空间目录", space, listOf("" to "全部空间") + catalog.spaceList.map { it.key to it.name }) { space = it }
+        Text("已选 ${vm.state.picked.size} 项 · 搜索结果 ${result.size} 项", style = MaterialTheme.typography.bodySmall)
+        LazyColumn(Modifier.weight(1f)) {
+            if (result.isEmpty()) item { Text("没有匹配项，试试其他关键词或全部空间。") }
+            items(result, key = { it.itemKey }) { pick ->
+                Column {
+                    ToggleRow(pick.itemName, vm.state.picked.any { it.itemKey == pick.itemKey }) { vm.togglePick(pick) }
+                    Text("${pick.spaceName} / ${pick.typeName}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 }
             }
         }
     }
 }
 
-private fun pickOf(spaceName: String, spaceKey: String, type: com.renovation.guardian.data.knowledge.RequirementTypeJson, it: RequirementItemJson): DemandPick =
-    DemandPick(it.key, it.name, type.key, type.name, spaceKey, spaceName)
-
-// ── Step 2: 空间 ──
 @Composable
-private fun RoomsStep(vm: PlannerViewModel, catalog: com.renovation.guardian.data.knowledge.DecoboxRequirementsJson) {
-    var custom by remember { mutableStateOf("") }
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("空间列表", style = MaterialTheme.typography.titleMedium)
-        // 预设空间一键添加
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            catalog.spaceList.forEach { sp ->
-                FilterChip(
-                    selected = vm.state.rooms.any { it.presetKey == sp.key },
-                    onClick = {
-                        if (vm.state.rooms.any { it.presetKey == sp.key }) {
-                            vm.removeRoom(vm.state.rooms.first { it.presetKey == sp.key }.id)
-                        } else {
-                            vm.addRoom(sp.name, sp.key)
-                        }
-                    },
-                    label = { Text(sp.name) },
-                )
-            }
+private fun RoomsStep(vm: PlannerViewModel) {
+    val catalog = vm.catalog ?: return
+    var preset by rememberSaveable { mutableStateOf(catalog.spaceList.firstOrNull()?.key.orEmpty()) }
+    var custom by rememberSaveable { mutableStateOf("") }
+    var removing by remember { mutableStateOf<PlannerRoom?>(null) }
+    var editingId by rememberSaveable { mutableStateOf<String?>(null) }
+    val editing = vm.state.rooms.firstOrNull { it.id == editingId }
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item {
+            ChoiceField("预设空间", preset, catalog.spaceList.map { it.key to it.name }) { preset = it }
+            Button(onClick = { catalog.spaceList.firstOrNull { it.key == preset }?.let { vm.addPreset(it.key, it.name) } }) { Text("添加预设空间") }
+            Text("同类型空间可重复添加，例如多个卧室。", style = MaterialTheme.typography.bodySmall)
         }
-        vm.state.rooms.forEach { room ->
+        items(vm.state.rooms, key = { it.id }) { room ->
             SectionCard {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(room.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                    if (room.presetKey == null) {
-                        IconButton(onClick = { vm.removeRoom(room.id) }) { Text("✕", color = MaterialTheme.colorScheme.error) }
-                    } else {
-                        IconButton(onClick = { vm.removeRoom(room.id) }) { Text("✕", color = MaterialTheme.colorScheme.error) }
-                    }
+                Column {
+                    Text(room.name, style = MaterialTheme.typography.titleMedium)
+                    Text(catalog.spaceList.firstOrNull { it.key == room.presetKey }?.name ?: "自定义空间 · 手动分配", style = MaterialTheme.typography.bodySmall)
+                    Row { TextButton(onClick = { editingId = room.id }) { Text("重命名") }; TextButton(onClick = { removing = room }) { Text("删除") } }
                 }
             }
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(value = custom, onValueChange = { custom = it }, label = { Text("自定义空间名") }, singleLine = true, modifier = Modifier.weight(1f))
-            Button(onClick = {
-                val name = custom.trim()
-                if (name.isNotBlank() && vm.state.rooms.none { it.name == name }) {
-                    vm.addRoom(name, null)
-                    custom = ""
-                }
-            }, enabled = custom.isNotBlank()) { Text("添加") }
+        item {
+            OutlinedTextField(custom, { custom = it }, label = { Text("自定义空间名") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            Button(enabled = custom.isNotBlank() && vm.state.rooms.none { it.name == custom.trim() }, onClick = { vm.addRoom(custom, null); custom = "" }) { Text("添加自定义空间") }
         }
-        Text("共 ${vm.state.rooms.size} 个空间 · 已选需求 ${vm.state.picked.size} 项",
-            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    removing?.let { room -> ConfirmDeleteDialog(title = "删除空间", text = "删除「${room.name}」及其需求分配，已选需求仍保留。",
+        onConfirm = { vm.removeRoom(room.id); removing = null }, onDismiss = { removing = null }) }
+    editing?.let { room ->
+        var name by rememberSaveable(room.id) { mutableStateOf(room.name) }
+        AlertDialog(onDismissRequest = { editingId = null }, title = { Text("重命名空间") },
+            text = { OutlinedTextField(name, { name = it }, label = { Text("空间名") }) },
+            confirmButton = { TextButton(enabled = name.isNotBlank() && vm.state.rooms.none { it.id != room.id && it.name == name.trim() },
+                onClick = { vm.renameRoom(room.id, name); editingId = null }) { Text("保存") } },
+            dismissButton = { TextButton(onClick = { editingId = null }) { Text("取消") } })
     }
 }
 
-// ── Step 3: 分配需求到空间 ──
 @Composable
 private fun AssignStep(vm: PlannerViewModel) {
-    val rooms = vm.state.rooms
-    val picked = vm.state.picked
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (rooms.isEmpty()) {
-            Text("请先添加空间(第 2 步)", style = MaterialTheme.typography.bodyMedium)
-        } else if (picked.isEmpty()) {
-            Text("需求车为空,请先选择需求(第 1 步)", style = MaterialTheme.typography.bodyMedium)
-        } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { vm.autoAssign() }) { Text("按面积推荐分配") }
-                OutlinedButton(onClick = { vm.setStep(4) }) { Text("跳过分配 →") }
-            }
-            Text("已选需求 ${picked.size} 项;勾选分配空间后可在第 4 步导出。", style = MaterialTheme.typography.bodySmall)
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                items(picked, key = { it.itemKey }) { pick ->
-                    SectionCard {
-                        Column {
-                            Text(pick.itemName, style = MaterialTheme.typography.bodyMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
-                            val assignedRooms = vm.state.assignments.filter { it.itemKey == pick.itemKey }
-                            rooms.forEach { room ->
-                                val a = assignedRooms.firstOrNull { it.roomId == room.id }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Checkbox(
-                                        checked = a != null,
-                                        onCheckedChange = { checked -> vm.toggleAssignment(pick, room.id, checked) },
-                                    )
-                                    Text(room.name, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-                                    if (a != null) {
-                                        Importance.entries.forEach { imp ->
-                                            FilterChip(
-                                                selected = a.importance == imp,
-                                                onClick = { vm.setImportance(pick.itemKey, room.id, imp) },
-                                                label = { Text(imp.label) },
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+    var preview by remember { mutableStateOf<List<Assignment>?>(null) }
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item {
+            Button(enabled = vm.recommendations().isNotEmpty(), onClick = { preview = vm.recommendations() }) { Text("按空间类型推荐") }
+            Text("只推荐尚未分配的需求，不覆盖手工分配。可跳到清单查看未分配项。", style = MaterialTheme.typography.bodySmall)
+        }
+        if (vm.state.rooms.isEmpty() || vm.state.picked.isEmpty()) item { Text("请先选择需求并添加空间。") }
+        items(vm.state.picked, key = { it.itemKey }) { pick ->
+            SectionCard {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(pick.itemName, style = MaterialTheme.typography.titleMedium)
+                    vm.state.rooms.forEach { room ->
+                        val assignment = vm.state.assignments.firstOrNull { it.itemKey == pick.itemKey && it.roomId == room.id }
+                        ToggleRow(room.name, assignment != null) { vm.toggleAssignment(pick, room.id, it) }
+                        if (assignment != null) ChoiceField("${room.name}的重要度", assignment.importance, Importance.entries.map { it to it.label }) {
+                            vm.setImportance(pick.itemKey, room.id, it)
                         }
                     }
                 }
             }
         }
     }
+    preview?.let { proposal ->
+        val selected = remember(proposal) { mutableStateListOf<Assignment>().apply { addAll(proposal) } }
+        AlertDialog(onDismissRequest = { preview = null }, title = { Text("预览推荐分配") },
+            text = { LazyColumn(Modifier.heightIn(max = 360.dp)) { items(proposal, key = { it.itemKey + ":" + it.roomId }) { item ->
+                ToggleRow("${item.itemName} → ${item.roomName}", item in selected) { if (it) selected.add(item) else selected.remove(item) }
+            } } },
+            confirmButton = { TextButton(enabled = selected.isNotEmpty(), onClick = { vm.applyRecommendations(selected.toList()); preview = null }) { Text("应用 ${selected.size} 项") } },
+            dismissButton = { TextButton(onClick = { preview = null }) { Text("取消") } })
+    }
 }
 
-// ── Step 4: 清单 ──
 @Composable
-private fun ResultStep(
-    vm: PlannerViewModel,
-    snackbar: SnackbarHostState,
-    scope: kotlinx.coroutines.CoroutineScope,
-    clipboard: androidx.compose.ui.platform.ClipboardManager,
-) {
+private fun ResultStep(vm: PlannerViewModel) {
     val lines = vm.lines()
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("装修需求清单", style = MaterialTheme.typography.titleLarge)
-        Text("按空间分组,共 ${lines.size} 行", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        SectionCard {
-            Column {
-                lines.forEachIndexed { i, l ->
-                    if (i > 0 && l.roomName != lines[i - 1].roomName) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                    Text("【${l.roomName}】${l.itemName}(${l.importance.label})", style = MaterialTheme.typography.bodySmall)
-                }
-            }
+    val clipboard = LocalClipboardManager.current
+    var copied by remember { mutableStateOf(false) }
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        item {
+            Text("装修需求清单", style = MaterialTheme.typography.titleLarge)
+            Text("共 ${lines.size} 项，未分配 ${lines.count { it.roomName == "未分配" }} 项")
+            Button(enabled = lines.isNotEmpty(), onClick = { clipboard.setText(AnnotatedString(PlannerTextBuilder.build(lines))); copied = true }) { Text(if (copied) "已复制" else "复制文本") }
+            ImageExportActions("装修需求清单", "按空间分组 · 共 ${lines.size} 项", lines.map {
+                LongImageRow("【${it.roomName}】${it.itemName}", it.importance?.label ?: "未分配")
+            }, enabled = lines.isNotEmpty())
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = {
-                clipboard.setText(AnnotatedString(com.renovation.guardian.ui.planner.engine.PlannerTextBuilder.build(lines)))
-                scope.launch { snackbar.showSnackbar("清单已复制") }
-            }) { Text("复制文本") }
-            OutlinedButton(onClick = { vm.setStep(1) }) { Icon(Icons.AutoMirrored.Filled.ArrowForward, null); Text(" 重新规划") }
+        lines.groupBy { it.roomName }.forEach { (room, group) ->
+            item { Text(room, style = MaterialTheme.typography.titleMedium) }
+            items(group) { line ->
+                Text(line.itemName + line.importance?.let { "（${it.label}）" }.orEmpty())
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
         }
     }
 }

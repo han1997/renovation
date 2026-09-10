@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.renovation.guardian.data.db.StageTaskView
 import com.renovation.guardian.ui.AppViewModel
 import com.renovation.guardian.util.DateUtil
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -18,23 +21,22 @@ data class HomeUiState(
     val currentStageName: String? = null,
     val currentStageEmoji: String? = null,
     val overallPct: Int = 0,
+    val currentStageId: String? = null,
+    val categoryPlannedCents: Long = 0L,
     val totalTasks: Int = 0,
     val doneTasks: Int = 0,
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(application: Application) : AppViewModel(application) {
 
     private val today: String get() = container.todayProvider()
 
-    val overdueTasks = container.taskRepo.observeBetween(
-        "1970-01-01",
-        DateUtil.minusDays(today, 1),
-    )
-    val todayTasks = container.taskRepo.observeBetween(today, today)
-    val upcomingTasks = container.taskRepo.observeBetween(
-        DateUtil.plusDays(today, 1),
-        DateUtil.plusDays(today, 7),
-    )
+    private val date = MutableStateFlow(today)
+    fun refreshDate() { date.value = today }
+    val overdueTasks = date.flatMapLatest { container.taskRepo.observeBetween("0001-01-01", DateUtil.minusDays(it, 1)) }
+    val todayTasks = date.flatMapLatest { container.taskRepo.observeBetween(it, it) }
+    val upcomingTasks = date.flatMapLatest { container.taskRepo.observeBetween(DateUtil.plusDays(it, 1), DateUtil.plusDays(it, 7)) }
 
     private val profileFlow = container.houseProfileRepo.observe()
     private val categoriesFlow = container.budgetRepo.observeCategoriesWithSpent()
@@ -49,15 +51,17 @@ class HomeViewModel(application: Application) : AppViewModel(application) {
     ) { profile, cats, progress, stages ->
         val totalPlanned = profile?.totalBudgetCents ?: 0L
         val totalSpent = cats.sumOf { it.spentCents }
-        val totalOver = cats.sumOf { it.overCents }
+        val totalOver = (totalSpent - totalPlanned).coerceAtLeast(0L)
         val overspentCount = cats.count { it.overCents > 0 }
         val totalTasks = progress.sumOf { it.total }
         val doneTasks = progress.sumOf { it.done }
         val overallPct = if (totalTasks == 0) 0 else (doneTasks * 100 / totalTasks)
-        val current = progress.firstOrNull { !it.isDone }
+        val current = progress.firstOrNull { it.total > 0 && !it.isDone }
         val currentStage = current?.let { st -> stages.firstOrNull { it.id == st.stageId } }
         HomeUiState(
             totalPlannedCents = totalPlanned,
+            currentStageId = currentStage?.id,
+            categoryPlannedCents = cats.sumOf { it.plannedCents },
             totalSpentCents = totalSpent,
             totalOverCents = totalOver,
             overspentCount = overspentCount,
@@ -74,7 +78,7 @@ class HomeViewModel(application: Application) : AppViewModel(application) {
     )
 
     fun toggleDone(v: StageTaskView) {
-        viewModelScope.launch {
+        perform(success = null) {
             val t = today
             if (v.source == "TEMPLATE") {
                 container.taskRepo.setTemplateDone(v.id, !v.done, t)

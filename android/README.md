@@ -9,6 +9,16 @@
 - MVP 覆盖五 Tab（首页 / 流程 / 预算 / 指南 / 我的）+ 首次设置向导 + JSON 备份/恢复 + CSV 导出。
 - **decobox 集成(2026-09-08)**:预算 Tab「逐空间报价」= 装修宝典预算计算器(整装 / 半包 / 局改三模式,面积估算、工艺联动、主材矩阵、实时预算对比、清单导出);「我的」Tab「需求规划」= 逐空间功能需求规划(150 类型 / 819 需求项,四档重要度)。数据离线内置(`assets/decobox_catalog.json` / `decobox_requirements.json`),计算引擎纯 Kotlin,方案以 JSON blob 存 Room(`quote_plan` / `planner_state`)。
 
+## 全 App 完善（2026-09-10）
+
+- 首页支持任务日期、跨日分组与阶段定位；预算明确区分上限、分类计划和实际支出。
+- 报价提供完整向导、局改配置、工艺/主材选项、方案列表/保存/另存/重命名/删除，以及完整文本和分图导出。
+- 施工方报价与自购分列，按合计比较预算。应用预算先预览映射，**只更新确认的分类计划，不改房屋上限或已有支出**。
+- 需求规划支持跨空间搜索、同类型多房间、按类型推荐和确认分配；未分配独立显示，编辑自动保存。
+- 指南验收与流程共享勾选状态；房屋设置、记录、初始化及文件操作具备明确错误反馈。
+- **Android JSON 备份 v2**：整数分，包含任务模板修改、完成/日期、报价及规划。兼容 v1；恢复先预览确认，失败保留原数据。旧格式缺失的模块保留，不支持 Web 迁移。
+- 重置恢复默认任务并清空用户数据，已导出的外部备份文件不会删除。
+
 ## 技术栈版本
 
 | 组件 | 版本 | 说明 |
@@ -83,9 +93,10 @@ android/
 │     │  │  ├─ knowledge.json   # 只读知识数据（流程/避坑/风格/百科/空间需求）
 │     │  │  └─ prices.json      # 只读价格数据（档位/档次/参考价）
 │     │  ├─ java/com/renovation/guardian/
-│     │  │  ├─ data/db/         # Room 实体 / DAO（12 张表）
+│     │  │  ├─ data/db/         # Room 实体 / DAO（Room v3，含报价与规划）
 │     │  │  ├─ data/knowledge/  # 知识数据 JSON 反序列化 + 内存缓存 + 种子写入
 │     │  │  ├─ data/repo/       # 仓库层（业务聚合、导入导出）
+│     │  │  ├─ domain/          # 报价/规划状态、纯计算和校验（不依赖 UI）
 │     │  │  ├─ ui/              # Compose 界面（home/stages/budget/guide/more/onboarding）
 │     │  │  ├─ ui/theme/        # Material You 主题（动态取色 + 静态回退色板）
 │     │  │  └─ util/            # MoneyUtil / DateUtil / IdGen
@@ -115,3 +126,10 @@ android/
 
 - **单元测试**：`gradlew.bat :app:testDebugUnitTest`。覆盖 Room DAO 关键聚合（首页三段分组 / 阶段完成度 / 分类超支 / CSV 扁平视图）、ViewModel 逻辑（首次设置 / 首页 / 预算）、纯函数（CSV 拼装、JSON 导入导出）。
 - **Instrumented / Compose UI**：`gradlew.bat :app:connectedDebugAndroidTest`，覆盖首次设置、首页三段分组、阶段勾选、预算录入、CSV 导出、JSON 导入/导出关键交互。
+### 完善任务的回归与验收
+
+新增 JVM 回归覆盖精确金额、全量备份/v1兼容/事务回滚、预算应用幂等、真实目录计价、方案与规划持久化、跨日分组和分图渲染。JVM Compose 测试实际执行表单校验、报价保存重开、需求搜索与分配，截图输出到 `app/build/reports/ui-polish/`。
+
+`gradlew.bat :app:assembleDebugAndroidTest` 仅验证仪器测试 APK 能打包，**不等于设备测试通过**。仍需在 API 24/31/34/35 设备检查 SAF、相册/分享、窄屏/键盘/字体放大、深色与动态取色。当前会话的实测状态记录在 Trellis 任务中。
+
+> 注意：仪器测试会重置 **debug 应用** 的测试数据。运行 `connectedDebugAndroidTest` 前请导出该应用内需要保留的数据；不要把开发测试当作对个人正式数据的无损检查。

@@ -44,6 +44,7 @@ android/
 |----|-----|------|--------|
 | Entity/DAO | `data/db/` | Room 表结构、SQL 聚合、持久化 | 读写 |
 | Knowledge | `data/knowledge/` | assets JSON 反序列化 + 内存缓存 + 种子写入 | 只读（除 Seeder） |
+| Domain | `domain/quote/`、`domain/planner/` | 可序列化状态、纯计算、校验、规划规则 | 纯数据/纯函数 |
 | Repository | `data/repo/` | 业务聚合、金额换算、导入导出、事务 | 读写 |
 | ViewModel | `ui/*/` | 持有状态、暴露 Flow、发起业务调用 | 状态 |
 | Screen | `ui/*/` | 纯 Compose 渲染 + 事件回调 | 无业务状态 |
@@ -52,7 +53,8 @@ android/
 
 ## 依赖方向
 
-- `ui/` 依赖 `data/repo/` → `data/db/`，不反向。
+- `ui/` 依赖 `domain/` 与 `data/repo/` → `data/db/`，数据层不得导入 UI。
+- `domain/` 的状态/计算/校验仅依赖 Kotlin 与只读 knowledge DTO，不依赖 Compose、Room Repository；Repository 可调用 domain 校验。预算映射到分类的 UI 适配器仍位于 `ui/quote/engine/QuoteBudgetMapping.kt`。
 - `data/repo/` 与 `ui/` 只能通过 `AppContainer` 拿到仓库实例，不直接 new `AppDatabase` / `KnowledgeCache`（见 `AppContainer.kt` 契约）。
 - `data/knowledge/` 的 JSON 模型仅被 `KnowledgeCache` 与 `KnowledgeSeeder` 消费。
 - `util/` 不依赖任何业务层，纯函数可被任意层引用。

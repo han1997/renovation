@@ -1,4 +1,4 @@
-package com.renovation.guardian.ui.quote.engine
+package com.renovation.guardian.domain.quote
 
 import com.renovation.guardian.data.knowledge.DecoboxCatalogJson
 import com.renovation.guardian.data.knowledge.MaterialSpec
@@ -49,6 +49,7 @@ data class QuoteResult(
     val overBudgetCents: Long,
     val top3: List<QuoteLine>,
 ) {
+    val estimatedTotalCents: Long get() = Math.addExact(totalCents, summary.selfMainCents)
     val overBudget: Boolean get() = overBudgetCents > 0L
 }
 
@@ -72,7 +73,7 @@ object QuoteCalculator {
 
     // ── 数学 ──
     private fun z(v: Double): Double = round(v * 10) / 10.0
-    private fun centsOf(yuan: Double): Long = round(yuan * 100).toLong()
+    private fun centsOf(yuan: Double): Long = java.math.BigDecimal.valueOf(round(yuan * 100)).longValueExact()
     private fun qtyText(q: Double): String {
         val r = round(q * 100) / 100
         return if (r == r.roundToInt().toDouble()) r.roundToInt().toString()
@@ -129,9 +130,10 @@ object QuoteCalculator {
                 }
                 CeilingPlan.PARTIAL, CeilingPlan.FULL -> {
                     if (room.ceiling.categoryId.isNotBlank() && ceilingCat.id.isNotBlank()) {
-                        val planArea = if (room.ceilingPlan == CeilingPlan.FULL) areas.ceiling
+                        val planArea = room.ceiling.areaOverride ?: if (room.ceilingPlan == CeilingPlan.FULL) areas.ceiling
                         else room.partialCeilingArea.coerceIn(0.0, areas.ceiling)
                             .coerceAtMost(suggestPartialCeiling(room.area))
+
                         if (planArea > 0) {
                             addMaterialRow(lines, ceilingCat, room.ceiling, planArea, room, "顶面")
                             addCraftRow(lines, ceilingCat, room.ceiling, planArea, room, "顶面安装工艺")
@@ -179,7 +181,7 @@ object QuoteCalculator {
         if (state.mode == QuoteMode.FULL) {
             val rate = (state.managementRateOverride ?: catalog.managementFeeRate) / 100.0
             val labor = lines.filter { it.partLabel == PART_LABOR && it.sourcing == Sourcing.INCLUDED }
-                .sumOf { it.subtotalCents } / 100.0
+                .fold(0L) { sum, line -> Math.addExact(sum, line.subtotalCents) } / 100.0
             val incl = materialBaseYuan(lines)
             val base = labor + incl
             if (base > 0) {
@@ -219,7 +221,7 @@ object QuoteCalculator {
                     val floorCat = catalog.floor.firstOrNull { it.id == tier.catalogCategoryId } ?: return@forEach
                     w.qtyRows.forEach { row ->
                         if (row.area <= 0) return@forEach
-                        val sel = SurfaceSelection(
+                        val sel = w.floorSelection?.copy(categoryId = floorCat.id, areaOverride = row.area) ?: SurfaceSelection(
                             categoryId = floorCat.id,
                             variantId = floorCat.variants.firstOrNull()?.id,
                             specId = floorCat.variants.firstOrNull()?.specs?.firstOrNull()?.id,
@@ -276,26 +278,26 @@ object QuoteCalculator {
 
     private fun materialBaseYuan(lines: List<QuoteLine>): Double =
         lines.filter { it.sourcing == Sourcing.INCLUDED && isMaterialLine(it) }
-            .sumOf { it.subtotalCents } / 100.0
+            .fold(0L) { sum, line -> Math.addExact(sum, line.subtotalCents) } / 100.0
 
     private fun finish(lines: List<QuoteLine>, budgetCents: Long): QuoteResult {
         fun partSum(p: String, includedOnly: Boolean = false): Long =
             lines.filter {
                 it.partLabel == p && (!includedOnly || it.sourcing == Sourcing.INCLUDED)
-            }.sumOf { it.subtotalCents }
+            }.fold(0L) { sum, line -> Math.addExact(sum, line.subtotalCents) }
 
         val labor = partSum(PART_LABOR, includedOnly = true)
         val included = lines.filter { it.sourcing == Sourcing.INCLUDED && isMaterialLine(it) }
-            .sumOf { it.subtotalCents }
-        val self = lines.filter { it.sourcing == Sourcing.SELF && isMaterialLine(it) }
-            .sumOf { it.subtotalCents }
+            .fold(0L) { sum, line -> Math.addExact(sum, line.subtotalCents) }
+        val self = lines.filter { it.sourcing == Sourcing.SELF }
+            .fold(0L) { sum, line -> Math.addExact(sum, line.subtotalCents) }
         val house = partSum(PART_HOUSE)
         val mgmt = partSum(PART_MGMT)
         val items = lines.filter { it.partLabel.startsWith(PART_ITEM) && it.sourcing == Sourcing.INCLUDED }
-            .sumOf { it.subtotalCents }
+            .fold(0L) { sum, line -> Math.addExact(sum, line.subtotalCents) }
         val fees = partSum(PART_FEE)
-        val total = lines.filter { it.sourcing != Sourcing.SELF }.sumOf { it.subtotalCents }
-        val remain = budgetCents - total
+        val total = lines.filter { it.sourcing != Sourcing.SELF }.fold(0L) { sum, line -> Math.addExact(sum, line.subtotalCents) }
+        val remain = budgetCents - Math.addExact(total, self)
         val over = (-remain).coerceAtLeast(0L)
         val top3 = lines.filter { it.sourcing != Sourcing.SELF }
             .sortedByDescending { it.subtotalCents }
@@ -385,8 +387,8 @@ object QuoteCalculator {
 
     private fun extraQty(id: String, ex: ExtraInput, floorArea: Double, ceilingHeight: Double): Double = when (id) {
         "waterproof" -> {
-            val floor = if (ex.waterproofFloorArea > 0) ex.waterproofFloorArea else floorArea
-            val wall = if (ex.waterproofWallArea > 0) ex.waterproofWallArea
+            val floor = if (!ex.waterproofUseEstimate || ex.waterproofFloorArea > 0) ex.waterproofFloorArea else floorArea
+            val wall = if (!ex.waterproofUseEstimate || ex.waterproofWallArea > 0) ex.waterproofWallArea
             else estimateAreas(floor, ceilingHeight).wall
             z(floor + wall)
         }
@@ -409,12 +411,16 @@ object QuoteCalculator {
     private fun mainItem(catalog: DecoboxCatalogJson, sel: MainSelection): MainCalc? {
         val main = catalog.otherMains.firstOrNull { it.id == sel.mainId } ?: return null
         val type = main.types.firstOrNull { it.id == sel.typeId } ?: return null
-        return when (main.id) {
+        val base = when (main.id) {
             "door" -> doorCalc(catalog, sel, type)
             "windowsill" -> windowsillCalc(catalog, sel, type)
             "sanitary" -> sanitaryCalc(catalog, sel)
             else -> plainSpec(catalog, sel, type, main.defaultQty)
-        }
+        } ?: return null
+        if (sel.qtyOverride == null && sel.priceOverride == null) return base
+        val quantity = sel.qtyOverride ?: base.qty
+        val price = sel.priceOverride ?: base.unitPriceYuan
+        return base.copy(qty = quantity, unitPriceYuan = price, cents = quantity * price)
     }
 
     private fun unitLabelOf(spec: MaterialSpec): String = spec.unitLabel.ifBlank { "个" }
