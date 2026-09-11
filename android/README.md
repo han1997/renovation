@@ -73,10 +73,10 @@ adb devices
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 # 启动主界面
-adb shell am start -n com.renovation.guardian/.MainActivity
+adb shell am start -n fun.han1997.renovation/.MainActivity
 
 # 清空应用数据（回到首次设置向导）
-adb shell pm clear com.renovation.guardian
+adb shell pm clear fun.han1997.renovation
 
 # 抓取日志
 adb logcat | findstr renovation
@@ -92,7 +92,7 @@ android/
 │     │  ├─ assets/
 │     │  │  ├─ knowledge.json   # 只读知识数据（流程/避坑/风格/百科/空间需求）
 │     │  │  └─ prices.json      # 只读价格数据（档位/档次/参考价）
-│     │  ├─ java/com/renovation/guardian/
+│     │  ├─ java/fun/han1997/renovation/
 │     │  │  ├─ data/db/         # Room 实体 / DAO（Room v3，含报价与规划）
 │     │  │  ├─ data/knowledge/  # 知识数据 JSON 反序列化 + 内存缓存 + 种子写入
 │     │  │  ├─ data/repo/       # 仓库层（业务聚合、导入导出）
