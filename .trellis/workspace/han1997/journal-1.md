@@ -671,3 +671,37 @@ Android 流程页（StagesScreen）展开详情由单卡连排改为分区块 Se
 ### Next Steps
 
 - None - task complete
+
+
+## Session 21: 包名迁移 fun.han1997.renovation 与版本号管理
+
+**Date**: 2026-09-11
+**Task**: 包名迁移 fun.han1997.renovation 与版本号管理
+**Branch**: `main`
+
+### Summary
+
+applicationId 迁移至 fun.han1997.renovation（fun 为 Kotlin 硬关键字，代码包用 han1997.renovation），versionCode=2/versionName=0.1.1，Room schema 目录与 MigrationTest 路径同步，备份导入兼容新旧 appId；testDebugUnitTest/lintDebug/assembleDebug 全绿。教训：PowerShell 控制台乱码≠文件损坏，验证内容用 Read 工具；确定性命令重复输出相同立即停止换方法。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `36bbe39` | (see git log) |
+| `d09e640` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 20
-- **Last Active**: 2026-09-08
+- **Total Sessions**: 21
+- **Last Active**: 2026-09-11
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~673 | Active |
+| `journal-1.md` | ~707 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 21 | 2026-09-11 | 包名迁移 fun.han1997.renovation 与版本号管理 | `36bbe39`, `d09e640` | `main` |
 | 20 | 2026-09-08 | decobox 集成:逐空间报价 + 需求规划 | `36ea8c4` | `main` |
 | 19 | 2026-09-05 | 封存网页版并聚焦 Android 开发 | `20d89f0` | `main` |
 | 18 | 2026-09-05 | 创建 .gitignore 并推送到远程仓库 | `7019a56` | `main` |
