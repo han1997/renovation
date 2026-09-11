@@ -19,7 +19,7 @@
 用户输入最多两位小数，精确转换到 Long 分；非法值返回 null，不再按零保存。展示和可回解析字符串固定 Locale.ROOT；不要用浮点拆整数/小数。报价仍按既有逐行整元估算规则取整，记账与备份保留分精度。
 
 ### Android 备份 v2
-顶层必须包含：`schema_version=2`、`appId=com.renovation.guardian`、`profile`、`taskTemplates`、`taskCompletions`、`customTasks`、`stageOverrides`、`budgetCategories`、`expenses`、`checks`、`notes`、`contacts`、`quickNotes`、`quotePlans`、`plannerState`。
+顶层必须包含：`schema_version=2`、`appId`（导出写 `fun.han1997.renovation`；导入兼容旧包名 `com.renovation.guardian`）、`profile`、`taskTemplates`、`taskCompletions`、`customTasks`、`stageOverrides`、`budgetCategories`、`expenses`、`checks`、`notes`、`contacts`、`quickNotes`、`quotePlans`、`plannerState`。
 值为对应实体快照，所有金额字段均是 `*Cents: Long`。导出使用一致性读事务；恢复校验后在一个事务中执行。空对象不是合法空备份。
 
 v1 只作读取兼容：元金额转为分，原格式缺少的报价、规划及模板修改保留；确认恢复时重新读取应保留的模块，避免预览期间的新数据被旧快照覆盖。旧格式未记录的完成时间不能推造。恢复不支持 Web 迁移或复活废弃的 space_need。

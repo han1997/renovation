@@ -2,7 +2,7 @@
 
 ## Overview
 
-Android 版是单 module（`:app`）原生工程，入口 `MainActivity.kt`，无后端、无多 module 拆分。包根为 `com.renovation.guardian`。
+Android 版是单 module（`:app`）原生工程，入口 `MainActivity.kt`，无后端、无多 module 拆分。包根为 `fun.han1997.renovation`（applicationId 同名；2026-09-11 由 `com.renovation.guardian` 迁移，旧备份 appId 仍兼容导入）。
 
 ## Directory Layout
 
@@ -24,7 +24,7 @@ android/
       │  ├─ assets/
       │  │  ├─ knowledge.json   # 只读知识数据
       │  │  └─ prices.json      # 只读价格数据
-      │  ├─ java/com/renovation/guardian/
+      │  ├─ java/fun/han1997/renovation/
       │  │  ├─ MainActivity.kt  # 唯一 Activity，装 Compose 内容
       │  │  ├─ RenovationApp.kt # Application，持有 AppContainer / KnowledgeCache
       │  │  ├─ data/db/         # Room 实体 / DAO
